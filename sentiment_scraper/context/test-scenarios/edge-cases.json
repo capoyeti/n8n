@@ -1,0 +1,136 @@
+{
+  "name": "Edge Cases Test Scenario",
+  "description": "Testing system behavior with unusual or problematic data",
+  "test_cases": [
+    {
+      "case": "empty_review_text",
+      "input": {
+        "company": "Google",
+        "source": "glassdoor",
+        "review": {
+          "review_title": "Quick review",
+          "overall_rating": 5,
+          "review_text": "",
+          "pros": "",
+          "cons": "",
+          "job_title": "Engineer",
+          "location": "Mountain View, CA",
+          "review_date": "2024-01-20",
+          "employment_status": "Current Employee"
+        }
+      },
+      "expected_behavior": "Should be filtered out before analysis",
+      "fallback_action": "Skip processing, log warning"
+    },
+    {
+      "case": "very_long_review",
+      "input": {
+        "company": "Amazon",
+        "source": "glassdoor",
+        "review": {
+          "review_title": "Comprehensive review of my 5-year experience",
+          "overall_rating": 3,
+          "review_text": "This is an extremely long review that exceeds typical token limits for AI analysis. " + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(200),
+          "pros": "Good learning opportunities",
+          "cons": "High stress environment",
+          "job_title": "Software Development Engineer",
+          "location": "Seattle, WA",
+          "review_date": "2024-01-18",
+          "employment_status": "Former Employee"
+        }
+      },
+      "expected_behavior": "Should truncate text while preserving key information",
+      "fallback_action": "Use first 3000 characters, maintain context"
+    },
+    {
+      "case": "special_characters_and_emojis",
+      "input": {
+        "company": "Meta",
+        "source": "glassdoor",
+        "review": {
+          "review_title": "Mixed feelings 😕 about the company culture",
+          "overall_rating": 2,
+          "review_text": "The work environment is... complicated 🤔. Some teams are great 😊, others are toxic 😤. Pay is good 💰 but work-life balance is terrible ⚖️. Management varies wildly from team to team. Some managers are supportive 👍, others are micromanagers 👎. The company says it values diversity but I've seen evidence to the contrary 🤷‍♀️.",
+          "pros": "Good pay 💰, some great teams",
+          "cons": "Poor work-life balance, inconsistent management",
+          "job_title": "Data Scientist",
+          "location": "Menlo Park, CA",
+          "review_date": "2024-01-16",
+          "employment_status": "Current Employee"
+        }
+      },
+      "expected_behavior": "Should handle emojis gracefully and extract meaningful sentiment",
+      "fallback_action": "Strip emojis if they cause parsing issues"
+    },
+    {
+      "case": "non_english_content",
+      "input": {
+        "company": "Apple",
+        "source": "glassdoor",
+        "review": {
+          "review_title": "Excelente empresa para trabajar",
+          "overall_rating": 4,
+          "review_text": "He trabajado en Apple durante 3 años y ha sido una experiencia increíble. La cultura de la empresa es muy innovadora y el equipo es muy colaborativo. Los beneficios son excelentes y hay muchas oportunidades de crecimiento.",
+          "pros": "Cultura innovadora, equipo colaborativo",
+          "cons": "Puede ser muy exigente",
+          "job_title": "Software Engineer",
+          "location": "Cupertino, CA",
+          "review_date": "2024-01-12",
+          "employment_status": "Current Employee"
+        }
+      },
+      "expected_behavior": "Should detect non-English and either translate or skip",
+      "fallback_action": "Skip analysis, flag for manual review"
+    },
+    {
+      "case": "duplicate_reviews",
+      "input": {
+        "company": "Tesla",
+        "source": "glassdoor",
+        "reviews": [
+          {
+            "review_title": "Great place to work",
+            "review_text": "I love working at Tesla. The mission is inspiring and the work is challenging.",
+            "job_title": "Engineer",
+            "review_date": "2024-01-15"
+          },
+          {
+            "review_title": "Great place to work",
+            "review_text": "I love working at Tesla. The mission is inspiring and the work is challenging.",
+            "job_title": "Engineer",
+            "review_date": "2024-01-15"
+          }
+        ]
+      },
+      "expected_behavior": "Should detect and eliminate duplicates",
+      "fallback_action": "Keep first occurrence, log duplicate detection"
+    },
+    {
+      "case": "missing_required_fields",
+      "input": {
+        "company": "Netflix",
+        "source": "glassdoor",
+        "review": {
+          "review_title": null,
+          "overall_rating": null,
+          "review_text": "The work environment is pretty good overall.",
+          "pros": "Good culture",
+          "cons": "Long hours",
+          "job_title": null,
+          "location": null,
+          "review_date": null,
+          "employment_status": null
+        }
+      },
+      "expected_behavior": "Should handle missing fields gracefully",
+      "fallback_action": "Use default values, proceed with analysis if review_text exists"
+    }
+  ],
+  "validation_rules": [
+    "System should never crash on edge cases",
+    "All edge cases should be logged for monitoring",
+    "Fallback actions should maintain data integrity",
+    "Error handling should be graceful and informative",
+    "Performance should not degrade significantly with edge cases"
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "name": "Clover Era Daily Scraper",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Daily Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "target-companies",
+              "name": "target_companies",
+              "value": "Microsoft,Google,Apple,Amazon,Meta,Tesla,Netflix,Uber,Airbnb,Salesforce,Zoom,Slack,HubSpot,Stripe,Shopify,Atlassian,Canva,Figma,Notion,Airtable,Monday.com,Asana,Trello,GitHub,GitLab,Vercel,Netlify,Twilio,SendGrid,Mailchimp",
+              "type": "string"
+            },
+            {
+              "id": "base-glassdoor-url",
+              "name": "base_glassdoor_url",
+              "value": "https://www.glassdoor.com/Reviews/",
+              "type": "string"
+            },
+            {
+              "id": "base-indeed-url",
+              "name": "base_indeed_url",
+              "value": "https://www.indeed.com/cmp/",
+              "type": "string"
+            },
+            {
+              "id": "user-agent",
+              "name": "user_agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+              "type": "string"
+            },
+            {
+              "id": "scraped-at",
+              "name": "scraped_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "set-configuration",
+      "name": "Set Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Split target companies into array and create individual items\nconst companies = items[0].json.target_companies.split(',');\nconst results = [];\n\nfor (const company of companies) {\n  results.push({\n    json: {\n      company: company.trim(),\n      base_glassdoor_url: items[0].json.base_glassdoor_url,\n      base_indeed_url: items[0].json.base_indeed_url,\n      user_agent: items[0].json.user_agent,\n      scraped_at: items[0].json.scraped_at\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "split-companies",
+      "name": "Split Companies",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Build URLs for different sources\nconst companyName = items[0].json.company.replace(/\\s+/g, '-').toLowerCase();\nconst glassdoorUrl = items[0].json.base_glassdoor_url + companyName + '-reviews';\nconst indeedUrl = items[0].json.base_indeed_url + companyName + '/reviews';\n\nreturn [{\n  json: {\n    ...items[0].json,\n    glassdoor_url: glassdoorUrl,\n    indeed_url: indeedUrl,\n    current_source: 'glassdoor',\n    current_url: glassdoorUrl\n  }\n}];"
+      },
+      "id": "prepare-urls",
+      "name": "Prepare URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.current_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "={{ $json.user_agent }}"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "DNT",
+              "value": "1"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Upgrade-Insecure-Requests",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetweenTries": 2000
+          }
+        }
+      },
+      "id": "fetch-reviews",
+      "name": "Fetch Reviews",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Parse HTML to extract review data using basic regex patterns\nconst html = items[0].json.body || items[0].json.data || '';\n\nif (!html) {\n  return [{\n    json: {\n      company: items[0].json.company,\n      source: items[0].json.current_source,\n      scraped_at: items[0].json.scraped_at,\n      error: 'No HTML content received',\n      reviews: []\n    }\n  }];\n}\n\nconst reviews = [];\n\n// Basic regex-based parsing for Glassdoor (will need refinement)\nif (items[0].json.current_source === 'glassdoor') {\n  // Look for common review patterns in HTML\n  const reviewBlocks = html.match(/<div[^>]*class=\"[^\"]*review[^\"]*\"[^>]*>[\\s\\S]*?<\\/div>/gi) || [];\n  \n  for (const block of reviewBlocks.slice(0, 10)) { // Limit to first 10 matches\n    // Extract text content from HTML tags\n    const textContent = block.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();\n    \n    if (textContent && textContent.length > 100) {\n      // Try to extract rating (look for numbers followed by star indicators)\n      const ratingMatch = textContent.match(/(\\d+(?:\\.\\d+)?)\\s*(?:star|out of|rating)/i);\n      const rating = ratingMatch ? parseFloat(ratingMatch[1]) : null;\n      \n      // For now, use the entire text block as review content\n      // This is a simplified approach - real implementation would need better parsing\n      reviews.push({\n        review_title: 'Review', // Placeholder\n        overall_rating: rating,\n        review_text: textContent.substring(0, 500), // Limit length\n        pros: '', // Would need better extraction\n        cons: '', // Would need better extraction\n        job_title: '',\n        location: '',\n        review_date: '',\n        employment_status: 'Unknown',\n        url: items[0].json.current_url,\n        review_length: textContent.length,\n        has_pros_cons: false\n      });\n    }\n  }\n}\n\n// Similar basic approach for Indeed\nif (items[0].json.current_source === 'indeed') {\n  const reviewBlocks = html.match(/<div[^>]*class=\"[^\"]*review[^\"]*\"[^>]*>[\\s\\S]*?<\\/div>/gi) || [];\n  \n  for (const block of reviewBlocks.slice(0, 10)) {\n    const textContent = block.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();\n    \n    if (textContent && textContent.length > 100) {\n      reviews.push({\n        review_title: 'Review',\n        overall_rating: null,\n        review_text: textContent.substring(0, 500),\n        pros: '',\n        cons: '',\n        job_title: '',\n        location: '',\n        review_date: '',\n        employment_status: 'Unknown',\n        url: items[0].json.current_url,\n        review_length: textContent.length,\n        has_pros_cons: false\n      });\n    }\n  }\n}\n\nreturn [{\n  json: {\n    company: items[0].json.company,\n    source: items[0].json.current_source,\n    scraped_at: items[0].json.scraped_at,\n    reviews_found: reviews.length,\n    reviews: reviews,\n    note: 'Basic regex parsing - may need refinement based on actual HTML structure'\n  }\n}];"
+      },
+      "id": "parse-reviews",
+      "name": "Parse Reviews",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Convert reviews array to individual items for further processing\nconst reviews = items[0].json.reviews || [];\nconst results = [];\n\nfor (const review of reviews) {\n  results.push({\n    json: {\n      company: items[0].json.company,\n      source: items[0].json.source,\n      date_scraped: items[0].json.scraped_at,\n      review_title: review.review_title,\n      overall_rating: review.overall_rating,\n      review_text: review.review_text,\n      pros: review.pros,\n      cons: review.cons,\n      job_title: review.job_title,\n      location: review.location,\n      review_date: review.review_date,\n      employment_status: review.employment_status,\n      url: review.url,\n      review_length: review.review_length,\n      has_pros_cons: review.has_pros_cons\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "split-reviews",
+      "name": "Split Reviews",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.review_text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "rightType": "any"
+              }
+            },
+            {
+              "leftValue": "={{ $json.review_text.length }}",
+              "rightValue": 50,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }\n      },\n      "id": "filter-valid-reviews",\n      "name": "Filter Valid Reviews",\n      "type": "n8n-nodes-base.filter",\n      "typeVersion": 2.2,\n      "position": [1780, 300]\n    },\n    {\n      "parameters": {\n        "operation": "append",\n        "documentId": {\n          "__rl": true,\n          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",\n          "mode": "id"\n        },\n        "sheetName": {\n          "__rl": true,\n          "value": "raw_reviews",\n          "mode": "name"\n        },\n        "columns": {\n          "mappingMode": "defineBelow",\n          "value": {\n            "company": "={{ $json.company }}",\n            "source": "={{ $json.source }}",\n            "date_scraped": "={{ $json.date_scraped }}",\n            "review_title": "={{ $json.review_title }}",\n            "overall_rating": "={{ $json.overall_rating }}",\n            "review_text": "={{ $json.review_text }}",\n            "pros": "={{ $json.pros }}",\n            "cons": "={{ $json.cons }}",\n            "job_title": "={{ $json.job_title }}",\n            "location": "={{ $json.location }}",\n            "review_date": "={{ $json.review_date }}",\n            "employment_status": "={{ $json.employment_status }}",\n            "url": "={{ $json.url }}",\n            "review_length": "={{ $json.review_length }}",\n            "has_pros_cons": "={{ $json.has_pros_cons }}"\n          }\n        },\n        "options": {\n          "useAppend": true\n        }\n      },\n      "id": "save-to-sheets",\n      "name": "Save to Google Sheets",\n      "type": "n8n-nodes-base.googleSheets",\n      "typeVersion": 4.6,\n      "position": [2000, 300]\n    },\n    {\n      "parameters": {\n        "mode": "manual",\n        "assignments": {\n          "assignments": [\n            {\n              "id": "delay-seconds",\n              "name": "delay_seconds",\n              "value": "={{ Math.floor(Math.random() * 3) + 3 }}",\n              "type": "number"\n            }\n          ]\n        },\n        "includeOtherFields": true\n      },\n      "id": "random-delay",\n      "name": "Random Delay",\n      "type": "n8n-nodes-base.set",\n      "typeVersion": 3.4,\n      "position": [2220, 300]\n    },\n    {\n      "parameters": {\n        "amount": "={{ $json.delay_seconds }}",\n        "unit": "seconds"\n      },\n      "id": "wait-node",\n      "name": "Wait",\n      "type": "n8n-nodes-base.wait",\n      "typeVersion": 1.1,\n      "position": [2440, 300]\n    }\n  ],\n  "connections": {\n    "Daily Schedule Trigger": {\n      "main": [\n        [\n          {\n            "node": "Set Configuration",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Set Configuration": {\n      "main": [\n        [\n          {\n            "node": "Split Companies",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Split Companies": {\n      "main": [\n        [\n          {\n            "node": "Prepare URLs",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Prepare URLs": {\n      "main": [\n        [\n          {\n            "node": "Fetch Reviews",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Fetch Reviews": {\n      "main": [\n        [\n          {\n            "node": "Parse Reviews",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Parse Reviews": {\n      "main": [\n        [\n          {\n            "node": "Split Reviews",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Split Reviews": {\n      "main": [\n        [\n          {\n            "node": "Filter Valid Reviews",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Filter Valid Reviews": {\n      "main": [\n        [\n          {\n            "node": "Save to Google Sheets",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Save to Google Sheets": {\n      "main": [\n        [\n          {\n            "node": "Random Delay",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Random Delay": {\n      "main": [\n        [\n          {\n            "node": "Wait",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    }\n  },\n  "settings": {\n    "executionOrder": "v1"\n  },\n  "staticData": null,\n  "tags": [\n    {\n      "name": "cloverera-sentiment"\n    },\n    {\n      "name": "scraper"\n    },\n    {\n      "name": "daily"\n    }\n  ],\n  "triggerCount": 1,\n  "updatedAt": "2024-01-20T00:00:00.000Z",\n  "versionId": "1"\n}

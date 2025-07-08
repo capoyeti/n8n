@@ -1,0 +1,172 @@
+{
+  "name": "Error Cases Test Scenario",
+  "description": "Testing system behavior during failures and error conditions",
+  "error_scenarios": [
+    {
+      "error_type": "http_request_timeout",
+      "description": "Website takes too long to respond",
+      "simulation": {
+        "url": "https://www.glassdoor.com/Reviews/slow-company-reviews",
+        "timeout": 30000,
+        "expected_response": "timeout"
+      },
+      "expected_behavior": {
+        "action": "Retry with exponential backoff",
+        "max_retries": 3,
+        "backoff_sequence": [2000, 4000, 8000],
+        "final_action": "Skip company, log error, continue with next"
+      }
+    },
+    {
+      "error_type": "rate_limit_exceeded",
+      "description": "Website returns 429 Too Many Requests",
+      "simulation": {
+        "http_status": 429,
+        "headers": {
+          "Retry-After": "300"
+        }
+      },
+      "expected_behavior": {
+        "action": "Respect Retry-After header",
+        "wait_time": 300,
+        "max_wait": 1800,
+        "fallback": "If max_wait exceeded, skip and continue"
+      }
+    },
+    {
+      "error_type": "openai_api_failure",
+      "description": "OpenAI API returns error or is unavailable",
+      "simulation": {
+        "api_error": {
+          "type": "APIError",
+          "message": "The server had an error while processing your request",
+          "status": 500
+        }
+      },
+      "expected_behavior": {
+        "primary_action": "Retry with exponential backoff",
+        "fallback_action": "Use basic sentiment analysis node",
+        "final_fallback": "Store review without analysis, flag for manual review"
+      }
+    },
+    {
+      "error_type": "google_sheets_write_failure",
+      "description": "Google Sheets API returns error",
+      "simulation": {
+        "sheets_error": {
+          "type": "QuotaExceededError",
+          "message": "Write requests per minute per user exceeded",
+          "status": 429
+        }
+      },
+      "expected_behavior": {
+        "immediate_action": "Implement exponential backoff",
+        "retry_strategy": "3 attempts with 2s, 4s, 8s delays",
+        "fallback": "Queue data locally, retry in next execution cycle",
+        "notification": "Alert admin if persistent failures"
+      }
+    },
+    {
+      "error_type": "invalid_json_response",
+      "description": "AI returns malformed JSON",
+      "simulation": {
+        "ai_response": "This is not valid JSON format and will break parsing",
+        "expected_format": {
+          "sentiment_score": 7,
+          "communication_score": 8,
+          "learning_score": 6
+        }
+      },
+      "expected_behavior": {
+        "parsing_action": "Catch JSON parse error",
+        "retry_action": "Retry with clearer prompt instructions",
+        "fallback": "Use default scores with confidence flag = low",
+        "logging": "Log unparseable responses for prompt improvement"
+      }
+    },
+    {
+      "error_type": "authentication_failure",
+      "description": "API credentials are invalid or expired",
+      "simulation": {
+        "auth_error": {
+          "type": "AuthenticationError",
+          "message": "Invalid API key provided",
+          "status": 401
+        }
+      },
+      "expected_behavior": {
+        "immediate_action": "Stop execution to prevent quota waste",
+        "notification": "Send critical alert to admin",
+        "fallback": "Use cached data if available",
+        "recovery": "Manual intervention required"
+      }
+    },
+    {
+      "error_type": "website_structure_change",
+      "description": "Scraped website changes HTML structure",
+      "simulation": {
+        "old_selector": ".review-details .review-text",
+        "new_structure": "Review text now in .review-content .text",
+        "result": "No reviews found with old selectors"
+      },
+      "expected_behavior": {
+        "detection": "Monitor for zero results from normally active sites",
+        "immediate_action": "Log structural change alert",
+        "fallback": "Try alternative selectors if available",
+        "notification": "Alert admin for manual scraper update"
+      }
+    },
+    {
+      "error_type": "network_connectivity_issue",
+      "description": "Internet connection is unstable",
+      "simulation": {
+        "connection_error": "DNS resolution failed",
+        "intermittent_failures": true
+      },
+      "expected_behavior": {
+        "detection": "Multiple consecutive HTTP failures",
+        "action": "Pause execution for 5 minutes",
+        "retry_strategy": "Test with simple HTTP request before resuming",
+        "escalation": "If failures persist >30 minutes, alert admin"
+      }
+    }
+  ],
+  "monitoring_requirements": [
+    "All errors must be logged with timestamp and context",
+    "Error rates must be tracked and reported daily",
+    "Critical errors must trigger immediate notifications",
+    "Error patterns must be analyzed for system improvements"
+  ],
+  "recovery_procedures": [
+    {
+      "scenario": "Complete workflow failure",
+      "steps": [
+        "Check system logs for error patterns",
+        "Verify API credentials and quotas",
+        "Test individual components manually",
+        "Resume from last successful checkpoint",
+        "Monitor first few executions closely"
+      ]
+    },
+    {
+      "scenario": "Data corruption in Google Sheets",
+      "steps": [
+        "Stop all writing operations immediately",
+        "Backup current sheet state",
+        "Identify extent of corruption",
+        "Restore from previous day's backup if needed",
+        "Implement additional validation checks"
+      ]
+    },
+    {
+      "scenario": "API quota exceeded",
+      "steps": [
+        "Calculate current usage vs limits",
+        "Identify highest usage workflows",
+        "Implement temporary rate limiting",
+        "Consider upgrading API plans if needed",
+        "Optimize API usage patterns"
+      ]
+    }
+  ]
+}

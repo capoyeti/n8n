@@ -1,0 +1,324 @@
+{
+  "name": "Clover Era Sentiment Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "raw_reviews",
+          "mode": "name"
+        },
+        "event": "rowAdded",
+        "authentication": "triggerOAuth2"
+      },
+      "id": "google-sheets-trigger",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.review_text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "rightType": "any"
+              }
+            },
+            {
+              "leftValue": "={{ $json.review_text.length }}",
+              "rightValue": 100,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-unanalyzed",
+      "name": "Filter Unanalyzed Reviews",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Prepare review text for CLOVER analysis\nconst reviewText = items[0].json.review_text || '';\nconst pros = items[0].json.pros || '';\nconst cons = items[0].json.cons || '';\nconst company = items[0].json.company || '';\nconst jobTitle = items[0].json.job_title || '';\n\n// Truncate if too long for API limits (keep under 3000 chars)\nlet fullReviewText = `Review: ${reviewText}`;\nif (pros) fullReviewText += `\\n\\nPros: ${pros}`;\nif (cons) fullReviewText += `\\n\\nCons: ${cons}`;\n\n// Truncate to stay within token limits\nif (fullReviewText.length > 3000) {\n  fullReviewText = fullReviewText.substring(0, 3000) + '...';\n}\n\nreturn [{\n  json: {\n    ...items[0].json,\n    prepared_text: fullReviewText,\n    text_length: fullReviewText.length,\n    analysis_timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "prepare-for-analysis",
+      "name": "Prepare for Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "complete",
+        "prompt": {
+          "messages": {
+            "values": [
+              {
+                "role": "system",
+                "content": "You are an expert HR analyst specializing in employee sentiment analysis using the CLOVER framework. Analyze employee reviews and provide structured JSON output.\n\nCLOVER Framework:\n- Communication (1-10): How well does the company communicate with employees?\n- Learning (1-10): Are growth and development opportunities available?\n- Opportunities (1-10): Career advancement and internal mobility prospects\n- Vulnerability (1-10): Risk of burnout, stress, or employee leaving\n- Enablement (1-10): Do employees have tools/resources to succeed?\n- Recognition (1-10): Are employee contributions recognized and valued?\n\nAlso provide:\n- Overall sentiment score (1-10)\n- Key issues identified\n- Opportunity areas for improvement\n- Risk level (low/medium/high)\n- Specific indicators (burnout, turnover risk, communication issues, growth concerns)\n\nReturn ONLY valid JSON in this exact format:\n{\n  \"sentiment_score\": 7.5,\n  \"communication_score\": 8,\n  \"learning_score\": 6,\n  \"opportunities_score\": 5,\n  \"vulnerability_score\": 7,\n  \"enablement_score\": 8,\n  \"recognition_score\": 6,\n  \"clover_overall\": 6.7,\n  \"key_issues\": [\"limited career growth\", \"work-life balance\"],\n  \"opportunity_areas\": [\"career development programs\", \"recognition initiatives\"],\n  \"risk_level\": \"medium\",\n  \"high_turnover_risk\": false,\n  \"burnout_indicators\": true,\n  \"communication_issues\": false,\n  \"growth_concerns\": true,\n  \"confidence_level\": 0.85\n}"
+              },
+              {
+                "role": "user",
+                "content": "Analyze this employee review using the CLOVER framework:\n\n{{ $json.prepared_text }}\n\nCompany: {{ $json.company }}\nJob Title: {{ $json.job_title }}\n\nProvide your analysis in the JSON format specified."
+              }
+            ]
+          }
+        },
+        "options": {
+          "maxTokens": 500,
+          "temperature": 0.3,
+          "topP": 1
+        }
+      },
+      "id": "clover-analysis",
+      "name": "CLOVER Analysis",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Parse OpenAI response and validate CLOVER scores\nlet analysisResult;\ntry {\n  const aiResponse = items[0].json.message?.content || items[0].json.choices?.[0]?.message?.content || '';\n  analysisResult = JSON.parse(aiResponse);\n} catch (error) {\n  // Fallback if JSON parsing fails\n  console.log('JSON parsing failed, using default scores');\n  analysisResult = {\n    sentiment_score: 5.0,\n    communication_score: 5.0,\n    learning_score: 5.0,\n    opportunities_score: 5.0,\n    vulnerability_score: 5.0,\n    enablement_score: 5.0,\n    recognition_score: 5.0,\n    clover_overall: 5.0,\n    key_issues: ['analysis_failed'],\n    opportunity_areas: ['require_manual_review'],\n    risk_level: 'unknown',\n    high_turnover_risk: false,\n    burnout_indicators: false,\n    communication_issues: false,\n    growth_concerns: false,\n    confidence_level: 0.1\n  };\n}\n\n// Validate and constrain scores to 1-10 range\nconst validateScore = (score) => {\n  if (typeof score !== 'number' || isNaN(score)) return 5.0;\n  return Math.max(1, Math.min(10, score));\n};\n\n// Calculate CloverEra opportunity score\nconst cloverOpportunityScore = (\n  (10 - analysisResult.communication_score) * 0.25 +\n  (10 - analysisResult.learning_score) * 0.20 +\n  (10 - analysisResult.opportunities_score) * 0.20 +\n  (analysisResult.vulnerability_score) * 0.15 +\n  (10 - analysisResult.enablement_score) * 0.15 +\n  (10 - analysisResult.recognition_score) * 0.05\n) * (analysisResult.confidence_level || 0.8);\n\nreturn [{\n  json: {\n    // Original review data\n    company: items[0].json.company,\n    source: items[0].json.source,\n    date_scraped: items[0].json.date_scraped,\n    review_title: items[0].json.review_title,\n    review_text: items[0].json.review_text,\n    \n    // CLOVER Analysis Results\n    sentiment_score: validateScore(analysisResult.sentiment_score),\n    communication_score: validateScore(analysisResult.communication_score),\n    learning_score: validateScore(analysisResult.learning_score),\n    opportunities_score: validateScore(analysisResult.opportunities_score),\n    vulnerability_score: validateScore(analysisResult.vulnerability_score),\n    enablement_score: validateScore(analysisResult.enablement_score),\n    recognition_score: validateScore(analysisResult.recognition_score),\n    clover_overall: validateScore(analysisResult.clover_overall),\n    \n    // Business Intelligence\n    key_issues: Array.isArray(analysisResult.key_issues) ? analysisResult.key_issues.join(', ') : 'none identified',\n    opportunity_areas: Array.isArray(analysisResult.opportunity_areas) ? analysisResult.opportunity_areas.join(', ') : 'none identified',\n    risk_level: analysisResult.risk_level || 'medium',\n    high_turnover_risk: Boolean(analysisResult.high_turnover_risk),\n    burnout_indicators: Boolean(analysisResult.burnout_indicators),\n    communication_issues: Boolean(analysisResult.communication_issues),\n    growth_concerns: Boolean(analysisResult.growth_concerns),\n    \n    // Clover Era Specific\n    cloverera_opportunity_score: Math.round(cloverOpportunityScore * 100) / 100,\n    \n    // Metadata\n    analyzed_at: items[0].json.analysis_timestamp,\n    analysis_version: '1.0',\n    confidence_level: analysisResult.confidence_level || 0.8\n  }\n}];"
+      },
+      "id": "process-analysis",
+      "name": "Process Analysis Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "analyzed_reviews",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "company": "={{ $json.company }}",
+            "source": "={{ $json.source }}",
+            "date_scraped": "={{ $json.date_scraped }}",
+            "review_title": "={{ $json.review_title }}",
+            "review_text": "={{ $json.review_text }}",
+            "sentiment_score": "={{ $json.sentiment_score }}",
+            "communication_score": "={{ $json.communication_score }}",
+            "learning_score": "={{ $json.learning_score }}",
+            "opportunities_score": "={{ $json.opportunities_score }}",
+            "vulnerability_score": "={{ $json.vulnerability_score }}",
+            "enablement_score": "={{ $json.enablement_score }}",
+            "recognition_score": "={{ $json.recognition_score }}",
+            "clover_overall": "={{ $json.clover_overall }}",
+            "key_issues": "={{ $json.key_issues }}",
+            "opportunity_areas": "={{ $json.opportunity_areas }}",
+            "risk_level": "={{ $json.risk_level }}",
+            "high_turnover_risk": "={{ $json.high_turnover_risk }}",
+            "burnout_indicators": "={{ $json.burnout_indicators }}",
+            "communication_issues": "={{ $json.communication_issues }}",
+            "growth_concerns": "={{ $json.growth_concerns }}",
+            "cloverera_opportunity_score": "={{ $json.cloverera_opportunity_score }}",
+            "analyzed_at": "={{ $json.analyzed_at }}",
+            "analysis_version": "={{ $json.analysis_version }}"
+          }
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "save-analysis",
+      "name": "Save Analysis to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.cloverera_opportunity_score }}",
+              "rightValue": 7.0,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-high-opportunity",
+      "name": "Filter High Opportunity",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "high_opportunity_companies",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "company": "={{ $json.company }}",
+            "opportunity_score": "={{ $json.cloverera_opportunity_score }}",
+            "sentiment_score": "={{ $json.sentiment_score }}",
+            "clover_overall": "={{ $json.clover_overall }}",
+            "key_issues": "={{ $json.key_issues }}",
+            "risk_indicators": "={{ $json.high_turnover_risk ? 'High Turnover Risk' : '' }}{{ $json.burnout_indicators ? ', Burnout Indicators' : '' }}{{ $json.communication_issues ? ', Communication Issues' : '' }}{{ $json.growth_concerns ? ', Growth Concerns' : '' }}",
+            "flagged_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "flag-opportunity",
+      "name": "Flag High Opportunity Company",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [1780, 300]
+    }
+  ],
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter Unanalyzed Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Unanalyzed Reviews": {
+      "main": [
+        [
+          {
+            "node": "Prepare for Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare for Analysis": {
+      "main": [
+        [
+          {
+            "node": "CLOVER Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CLOVER Analysis": {
+      "main": [
+        [
+          {
+            "node": "Process Analysis Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Analysis Results": {
+      "main": [
+        [
+          {
+            "node": "Save Analysis to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Analysis to Sheets": {
+      "main": [
+        [
+          {
+            "node": "Filter High Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter High Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Flag High Opportunity Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "cloverera-sentiment"
+    },
+    {
+      "name": "analysis"
+    },
+    {
+      "name": "clover-framework"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-20T00:00:00.000Z",
+  "versionId": "1"
+}

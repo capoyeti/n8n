@@ -1,0 +1,279 @@
+{
+  "name": "Clover Era Daily Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        },
+        "triggerAtTime": {
+          "hour": 18,
+          "minute": 0,
+          "timezone": "America/New_York"
+        }
+      },
+      "id": "daily-monitor-schedule",
+      "name": "Daily Monitor (6 PM EST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "raw_reviews",
+          "mode": "name"
+        },
+        "range": "A:A"
+      },
+      "id": "check-raw-reviews",
+      "name": "Check Raw Reviews Count",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "analyzed_reviews",
+          "mode": "name"
+        },
+        "range": "A:A"
+      },
+      "id": "check-analyzed-reviews",
+      "name": "Check Analyzed Reviews Count",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "high_opportunity_companies",
+          "mode": "name"
+        },
+        "range": "A:A"
+      },
+      "id": "check-opportunities",
+      "name": "Check Opportunities Count",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Aggregate daily system health metrics\nconst rawReviewsData = items[0].json;\nconst analyzedReviewsData = items[1].json;\nconst opportunitiesData = items[2].json;\n\n// Calculate today's metrics\nconst today = new Date().toISOString().split('T')[0];\n\n// Count raw reviews from today\nconst rawReviewsToday = rawReviewsData.filter(item => \n  item.date_scraped && item.date_scraped.startsWith(today)\n).length;\n\n// Count analyzed reviews from today\nconst analyzedReviewsToday = analyzedReviewsData.filter(item => \n  item.analyzed_at && item.analyzed_at.startsWith(today)\n).length;\n\n// Count opportunities flagged today\nconst opportunitiesToday = opportunitiesData.filter(item => \n  item.flagged_at && item.flagged_at.startsWith(today)\n).length;\n\n// Calculate analysis success rate\nconst analysisSuccessRate = rawReviewsToday > 0 ? \n  (analyzedReviewsToday / rawReviewsToday) * 100 : 0;\n\n// Determine system health status\nlet healthStatus = 'healthy';\nlet healthIssues = [];\n\nif (rawReviewsToday < 50) {\n  healthStatus = 'warning';\n  healthIssues.push(`Low review collection: ${rawReviewsToday} reviews (target: 50+)`);\n}\n\nif (analysisSuccessRate < 80) {\n  healthStatus = 'warning';\n  healthIssues.push(`Low analysis success rate: ${analysisSuccessRate.toFixed(1)}% (target: 80%+)`);\n}\n\nif (rawReviewsToday === 0) {\n  healthStatus = 'critical';\n  healthIssues.push('No reviews collected today - system may be down');\n}\n\nif (analyzedReviewsToday === 0 && rawReviewsToday > 0) {\n  healthStatus = 'critical';\n  healthIssues.push('No reviews analyzed today - sentiment analysis may be failing');\n}\n\n// Generate summary\nconst summary = {\n  date: today,\n  execution_time: new Date().toISOString(),\n  health_status: healthStatus,\n  health_issues: healthIssues,\n  metrics: {\n    raw_reviews_today: rawReviewsToday,\n    analyzed_reviews_today: analyzedReviewsToday,\n    opportunities_today: opportunitiesToday,\n    analysis_success_rate: Math.round(analysisSuccessRate * 100) / 100,\n    total_raw_reviews: rawReviewsData.length,\n    total_analyzed_reviews: analyzedReviewsData.length,\n    total_opportunities: opportunitiesData.length\n  }\n};\n\nreturn [{\n  json: summary\n}];"
+      },
+      "id": "calculate-health-metrics",
+      "name": "Calculate Health Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Generate daily health report\nconst healthData = items[0].json;\n\nconst statusEmoji = {\n  'healthy': '✅',\n  'warning': '⚠️',\n  'critical': '🚨'\n};\n\nconst reportHeader = `${statusEmoji[healthData.health_status]} CLOVER ERA DAILY HEALTH REPORT`;\n\nconst metricsSection = `\n📊 TODAY'S METRICS:\n• Reviews Collected: ${healthData.metrics.raw_reviews_today}\n• Reviews Analyzed: ${healthData.metrics.analyzed_reviews_today}\n• Opportunities Identified: ${healthData.metrics.opportunities_today}\n• Analysis Success Rate: ${healthData.metrics.analysis_success_rate}%\n\n📈 CUMULATIVE TOTALS:\n• Total Reviews: ${healthData.metrics.total_raw_reviews}\n• Total Analyzed: ${healthData.metrics.total_analyzed_reviews}\n• Total Opportunities: ${healthData.metrics.total_opportunities}`;\n\nconst healthSection = healthData.health_issues.length > 0 ? \n  `\\n⚠️ HEALTH ISSUES:\\n${healthData.health_issues.map(issue => `• ${issue}`).join('\\n')}` : \n  '\\n✅ All systems operating normally';\n\nconst nextStepsSection = `\n🔄 NEXT STEPS:\n• Tomorrow's scraping scheduled for 9 AM EST\n• Analysis will process new reviews automatically\n• Insights generation at 2 PM EST\n• Outreach strategies at 4 PM EST`;\n\nconst fullReport = `${reportHeader}\\n${metricsSection}${healthSection}${nextStepsSection}\\n\\nGenerated: ${healthData.execution_time}`;\n\nreturn [{\n  json: {\n    ...healthData,\n    report_text: fullReport,\n    report_type: 'daily_health_summary'\n  }\n}];"
+      },
+      "id": "generate-health-report",
+      "name": "Generate Health Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.health_status }}",
+              "rightValue": "healthy",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-health-issues",
+      "name": "Filter Health Issues",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "alert-severity",
+              "name": "alert_severity",
+              "value": "={{ $json.health_status === 'critical' ? 'CRITICAL' : 'WARNING' }}",
+              "type": "string"
+            },
+            {
+              "id": "alert-message",
+              "name": "alert_message",
+              "value": "🚨 CLOVER ERA SYSTEM ALERT\\n\\nSeverity: {{ $json.health_status.toUpperCase() }}\\nTime: {{ $json.execution_time }}\\n\\nIssues Detected:\\n{{ $json.health_issues.map(issue => `• ${issue}`).join('\\n') }}\\n\\nCurrent Metrics:\\n• Reviews Today: {{ $json.metrics.raw_reviews_today }}\\n• Analysis Rate: {{ $json.metrics.analysis_success_rate }}%\\n\\nPlease check the system and take appropriate action.",
+              "type": "string"
+            },
+            {
+              "id": "requires-immediate-action",
+              "name": "requires_immediate_action",
+              "value": "={{ $json.health_status === 'critical' }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true
+      },
+      "id": "prepare-alert",
+      "name": "Prepare Alert Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "Daily Monitor (6 PM EST)": {
+      "main": [
+        [
+          {
+            "node": "Check Raw Reviews Count",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Analyzed Reviews Count",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Opportunities Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Raw Reviews Count": {
+      "main": [
+        [
+          {
+            "node": "Calculate Health Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Analyzed Reviews Count": {
+      "main": [
+        [
+          {
+            "node": "Calculate Health Metrics",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Check Opportunities Count": {
+      "main": [
+        [
+          {
+            "node": "Calculate Health Metrics",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Calculate Health Metrics": {
+      "main": [
+        [
+          {
+            "node": "Generate Health Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Health Report": {
+      "main": [
+        [
+          {
+            "node": "Filter Health Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Health Issues": {
+      "main": [
+        [
+          {
+            "node": "Prepare Alert Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "cloverera-sentiment"
+    },
+    {
+      "name": "monitoring"
+    },
+    {
+      "name": "health-check"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-20T00:00:00.000Z",
+  "versionId": "1"
+}

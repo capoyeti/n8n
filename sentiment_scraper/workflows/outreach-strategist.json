@@ -1,0 +1,335 @@
+{
+  "name": "Clover Era Outreach Strategist",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        },
+        "triggerAtTime": {
+          "hour": 16,
+          "minute": 0,
+          "timezone": "America/New_York"
+        }
+      },
+      "id": "daily-schedule",
+      "name": "Daily Schedule (4 PM EST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "company_insights",
+          "mode": "name"
+        },
+        "range": "A:Z"
+      },
+      "id": "fetch-company-insights",
+      "name": "Fetch Company Insights",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.priority_level }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "leftValue": "={{ $json.cloverera_opportunity_score }}",
+              "rightValue": 6.5,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-outreach-targets",
+      "name": "Filter Outreach Targets",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Prepare company data for outreach strategy generation\nconst companyData = items[0].json;\n\n// Identify weakest CLOVER dimension\nconst cloverDimensions = {\n  'Communication': companyData.avg_communication || 5,\n  'Learning & Development': companyData.avg_learning || 5,\n  'Career Opportunities': companyData.avg_opportunities || 5,\n  'Work-Life Balance': (10 - (companyData.avg_vulnerability || 5)), // Inverse vulnerability\n  'Enablement & Tools': companyData.avg_enablement || 5,\n  'Recognition & Rewards': companyData.avg_recognition || 5\n};\n\nconst weakestDimension = Object.entries(cloverDimensions)\n  .sort(([,a], [,b]) => a - b)[0];\n\n// Identify primary risk factor\nconst riskFactors = {\n  'High Turnover Risk': companyData.turnover_risk_pct || 0,\n  'Burnout Indicators': companyData.burnout_risk_pct || 0,\n  'Communication Issues': companyData.communication_issues_pct || 0,\n  'Growth Concerns': companyData.growth_concerns_pct || 0\n};\n\nconst primaryRiskFactor = Object.entries(riskFactors)\n  .sort(([,a], [,b]) => b - a)[0];\n\n// Determine data confidence level\nlet dataConfidence = 'medium';\nif (companyData.total_reviews >= 20 && companyData.data_quality === 'high') {\n  dataConfidence = 'high';\n} else if (companyData.total_reviews < 10 || companyData.data_quality === 'low') {\n  dataConfidence = 'low';\n}\n\n// Determine readiness for outreach\nlet readyForOutreach = false;\nif (companyData.cloverera_opportunity_score >= 7.0 && \n    companyData.total_reviews >= 10 && \n    dataConfidence !== 'low') {\n  readyForOutreach = true;\n}\n\nreturn [{\n  json: {\n    ...companyData,\n    weakest_clover_dimension: weakestDimension[0],\n    weakest_score: weakestDimension[1],\n    primary_risk_factor: primaryRiskFactor[0],\n    primary_risk_percentage: primaryRiskFactor[1],\n    data_confidence: dataConfidence,\n    ready_for_outreach: readyForOutreach,\n    preparation_timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "prepare-company-data",
+      "name": "Prepare Company Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "complete",
+        "prompt": {
+          "messages": {
+            "values": [
+              {
+                "role": "system",
+                "content": "You are a senior business development strategist for CloverEra, a company that specializes in employee engagement and organizational development solutions. Your role is to create sophisticated, personalized outreach strategies based on employee sentiment analysis.\n\nCloverEra's Services:\n- Employee engagement programs\n- Leadership development\n- Communication strategy optimization\n- Career development frameworks\n- Recognition and rewards programs\n- Work-life balance initiatives\n- Organizational culture transformation\n\nYour task is to generate a strategic outreach plan that:\n1. Does NOT directly reference the sentiment analysis or surveillance\n2. Positions CloverEra as a thought leader in the identified problem areas\n3. Offers value-driven insights and solutions\n4. Suggests indirect, relationship-building approaches\n5. Considers timing and business context\n\nReturn your response in valid JSON format with these fields:\n{\n  \"personalized_pitch\": \"Brief, compelling value proposition tailored to their challenges\",\n  \"pain_points_addressed\": \"Specific pain points CloverEra can solve (without referencing surveillance)\",\n  \"suggested_approach\": \"Recommended outreach method and timing\",\n  \"content_marketing_angles\": \"Thought leadership content ideas relevant to their challenges\",\n  \"social_proof_needed\": \"Type of case studies or testimonials that would resonate\",\n  \"key_stats\": \"Relevant industry statistics or CloverEra success metrics\",\n  \"conversation_starters\": \"Specific topics or questions to initiate meaningful dialogue\",\n  \"timing_rationale\": \"Why this is the right time to reach out\",\n  \"confidence_score\": 0.85\n}"
+              },
+              {
+                "role": "user",
+                "content": "Generate an outreach strategy for this company:\n\nCompany: {{ $json.company_name }}\nOpportunity Score: {{ $json.cloverera_opportunity_score }}/10\nTotal Reviews Analyzed: {{ $json.total_reviews }}\nData Quality: {{ $json.data_quality }}\n\nKey Metrics:\n- Average Sentiment: {{ $json.avg_sentiment_score }}/10\n- Communication Score: {{ $json.avg_communication }}/10\n- Learning & Development: {{ $json.avg_learning }}/10\n- Career Opportunities: {{ $json.avg_opportunities }}/10\n- Work-Life Balance: {{ (10 - $json.avg_vulnerability) }}/10\n- Enablement & Tools: {{ $json.avg_enablement }}/10\n- Recognition & Rewards: {{ $json.avg_recognition }}/10\n\nWeakest Area: {{ $json.weakest_clover_dimension }} ({{ $json.weakest_score }}/10)\nPrimary Risk Factor: {{ $json.primary_risk_factor }} ({{ $json.primary_risk_percentage }}%)\n\nTop Issues: {{ $json.top_issues }}\nTop Opportunities: {{ $json.top_opportunities }}\n\nCreate a sophisticated outreach strategy that positions CloverEra as a strategic partner without revealing sentiment surveillance."
+              }
+            ]
+          }
+        },
+        "options": {
+          "maxTokens": 800,
+          "temperature": 0.7,
+          "topP": 0.9
+        }
+      },
+      "id": "generate-outreach-strategy",
+      "name": "Generate Outreach Strategy",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Process AI-generated outreach strategy\nlet strategyResult;\ntry {\n  const aiResponse = items[0].json.message?.content || items[0].json.choices?.[0]?.message?.content || '';\n  strategyResult = JSON.parse(aiResponse);\n} catch (error) {\n  console.log('Strategy generation failed, using fallback');\n  strategyResult = {\n    personalized_pitch: `CloverEra specializes in enhancing ${items[0].json.weakest_clover_dimension.toLowerCase()} within growing organizations like ${items[0].json.company_name}.`,\n    pain_points_addressed: `${items[0].json.weakest_clover_dimension} optimization, employee engagement enhancement`,\n    suggested_approach: 'LinkedIn thought leadership engagement followed by value-driven email outreach',\n    content_marketing_angles: `Best practices for ${items[0].json.weakest_clover_dimension.toLowerCase()} in tech companies`,\n    social_proof_needed: 'Case studies from similar-sized companies in the same industry',\n    key_stats: 'Companies with strong employee engagement see 23% higher profitability',\n    conversation_starters: `How is ${items[0].json.company_name} approaching ${items[0].json.weakest_clover_dimension.toLowerCase()} in the current market?`,\n    timing_rationale: 'Strategic timing based on industry trends and company growth phase',\n    confidence_score: 0.6\n  };\n}\n\n// Calculate strategy effectiveness score\nconst effectivenessFactors = {\n  opportunityScore: items[0].json.cloverera_opportunity_score / 10,\n  dataQuality: items[0].json.data_quality === 'high' ? 1 : items[0].json.data_quality === 'medium' ? 0.7 : 0.4,\n  reviewVolume: Math.min(items[0].json.total_reviews / 50, 1),\n  riskSeverity: Math.min(items[0].json.primary_risk_percentage / 50, 1),\n  aiConfidence: strategyResult.confidence_score || 0.7\n};\n\nconst strategyScore = Object.values(effectivenessFactors)\n  .reduce((sum, factor) => sum + factor, 0) / Object.keys(effectivenessFactors).length;\n\n// Determine next review date\nconst nextReviewDate = new Date();\nif (strategyScore >= 0.8) {\n  nextReviewDate.setDate(nextReviewDate.getDate() + 7); // Weekly review for high-potential\n} else if (strategyScore >= 0.6) {\n  nextReviewDate.setDate(nextReviewDate.getDate() + 14); // Bi-weekly review for medium-potential\n} else {\n  nextReviewDate.setDate(nextReviewDate.getDate() + 30); // Monthly review for low-potential\n}\n\nreturn [{\n  json: {\n    // Company identification\n    company_name: items[0].json.company_name,\n    priority_level: items[0].json.priority_level,\n    opportunity_score: items[0].json.cloverera_opportunity_score,\n    total_reviews_analyzed: items[0].json.total_reviews,\n    avg_sentiment: items[0].json.avg_sentiment_score,\n    \n    // Strategy core\n    weakest_clover_dimension: items[0].json.weakest_clover_dimension,\n    primary_risk_factor: items[0].json.primary_risk_factor,\n    personalized_pitch: strategyResult.personalized_pitch,\n    pain_points_addressed: strategyResult.pain_points_addressed,\n    suggested_approach: strategyResult.suggested_approach,\n    \n    // Content and messaging\n    content_marketing_angles: strategyResult.content_marketing_angles,\n    social_proof_needed: strategyResult.social_proof_needed,\n    key_stats: strategyResult.key_stats,\n    \n    // Execution details\n    data_confidence: items[0].json.data_confidence,\n    ready_for_outreach: items[0].json.ready_for_outreach,\n    strategy_effectiveness_score: Math.round(strategyScore * 100) / 100,\n    \n    // Metadata\n    strategy_generated_at: new Date().toISOString(),\n    next_review_date: nextReviewDate.toISOString(),\n    ai_confidence: strategyResult.confidence_score || 0.7\n  }\n}];"
+      },
+      "id": "process-strategy",
+      "name": "Process Strategy Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "outreach_strategies",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "company_name": "={{ $json.company_name }}",
+            "priority_level": "={{ $json.priority_level }}",
+            "opportunity_score": "={{ $json.opportunity_score }}",
+            "total_reviews_analyzed": "={{ $json.total_reviews_analyzed }}",
+            "avg_sentiment": "={{ $json.avg_sentiment }}",
+            "weakest_clover_dimension": "={{ $json.weakest_clover_dimension }}",
+            "primary_risk_factor": "={{ $json.primary_risk_factor }}",
+            "personalized_pitch": "={{ $json.personalized_pitch }}",
+            "pain_points_addressed": "={{ $json.pain_points_addressed }}",
+            "suggested_approach": "={{ $json.suggested_approach }}",
+            "content_marketing_angles": "={{ $json.content_marketing_angles }}",
+            "social_proof_needed": "={{ $json.social_proof_needed }}",
+            "key_stats": "={{ $json.key_stats }}",
+            "data_confidence": "={{ $json.data_confidence }}",
+            "ready_for_outreach": "={{ $json.ready_for_outreach }}",
+            "strategy_effectiveness_score": "={{ $json.strategy_effectiveness_score }}",
+            "strategy_generated_at": "={{ $json.strategy_generated_at }}",
+            "next_review_date": "={{ $json.next_review_date }}"
+          }
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "save-strategies",
+      "name": "Save Outreach Strategies",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.ready_for_outreach }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "leftValue": "={{ $json.strategy_effectiveness_score }}",
+              "rightValue": 0.75,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-ready-for-outreach",
+      "name": "Filter Ready for Outreach",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Generate business team notification for ready-to-outreach companies\nconst readyCompanies = items;\n\nif (readyCompanies.length === 0) {\n  return [{\n    json: {\n      notification_type: 'info',\n      message: 'No companies ready for immediate outreach today',\n      timestamp: new Date().toISOString()\n    }\n  }];\n}\n\nconst topCompanies = readyCompanies\n  .sort((a, b) => b.json.opportunity_score - a.json.opportunity_score)\n  .slice(0, 5);\n\nconst notificationMessage = `🎯 OUTREACH OPPORTUNITIES IDENTIFIED\n\n${topCompanies.length} companies are ready for strategic outreach:\n\n${topCompanies.map(company => \n  `• ${company.json.company_name} (Score: ${company.json.opportunity_score}/10)\n    Focus: ${company.json.weakest_clover_dimension}\n    Approach: ${company.json.suggested_approach}\n    Confidence: ${company.json.data_confidence}`\n).join('\\n\\n')}\n\nAll strategies available in the outreach_strategies sheet.\n\nGenerated: ${new Date().toISOString()}`;\n\nreturn [{\n  json: {\n    notification_type: 'outreach_ready',\n    message: notificationMessage,\n    companies_count: readyCompanies.length,\n    top_companies: topCompanies.map(c => ({\n      name: c.json.company_name,\n      score: c.json.opportunity_score,\n      focus_area: c.json.weakest_clover_dimension,\n      approach: c.json.suggested_approach\n    })),\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "generate-notification",
+      "name": "Generate Business Team Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 300]
+    }
+  ],
+  "connections": {
+    "Daily Schedule (4 PM EST)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Company Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Company Insights": {
+      "main": [
+        [
+          {
+            "node": "Filter Outreach Targets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Outreach Targets": {
+      "main": [
+        [
+          {
+            "node": "Prepare Company Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Company Data": {
+      "main": [
+        [
+          {
+            "node": "Generate Outreach Strategy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Outreach Strategy": {
+      "main": [
+        [
+          {
+            "node": "Process Strategy Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Strategy Results": {
+      "main": [
+        [
+          {
+            "node": "Save Outreach Strategies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Outreach Strategies": {
+      "main": [
+        [
+          {
+            "node": "Filter Ready for Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Ready for Outreach": {
+      "main": [
+        [
+          {
+            "node": "Generate Business Team Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "cloverera-sentiment"
+    },
+    {
+      "name": "outreach"
+    },
+    {
+      "name": "strategy"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-20T00:00:00.000Z",
+  "versionId": "1"
+}

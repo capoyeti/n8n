@@ -1,0 +1,83 @@
+{
+  "name": "Happy Path Test Scenario",
+  "description": "Normal execution with typical review data",
+  "input": {
+    "company": "Microsoft",
+    "source": "glassdoor",
+    "scraped_reviews": [
+      {
+        "review_title": "Great place to work with excellent benefits",
+        "overall_rating": 4,
+        "review_text": "I've been working at Microsoft for 2 years and really enjoy the collaborative culture. The benefits are excellent, including comprehensive health insurance and generous parental leave. Management is generally supportive and provides clear direction on projects. The only downside is that sometimes the bureaucracy can slow down innovation, but overall it's a great place to grow your career.",
+        "pros": "Excellent benefits, supportive management, collaborative culture",
+        "cons": "Some bureaucracy, can slow innovation",
+        "job_title": "Software Engineer",
+        "location": "Seattle, WA",
+        "review_date": "2024-01-15",
+        "employment_status": "Current Employee",
+        "url": "https://www.glassdoor.com/Reviews/Microsoft-Reviews-E1651.htm"
+      },
+      {
+        "review_title": "Good work-life balance but limited growth",
+        "overall_rating": 3,
+        "review_text": "Microsoft offers decent work-life balance and the pay is competitive. However, I've found it challenging to get promoted and the learning opportunities are somewhat limited in my division. The company culture is professional but can feel impersonal at times. HR is responsive when you need help.",
+        "pros": "Good work-life balance, competitive pay, responsive HR",
+        "cons": "Limited growth opportunities, impersonal culture",
+        "job_title": "Product Manager",
+        "location": "Redmond, WA",
+        "review_date": "2024-01-10",
+        "employment_status": "Current Employee",
+        "url": "https://www.glassdoor.com/Reviews/Microsoft-Reviews-E1651.htm"
+      }
+    ]
+  },
+  "expected_output": {
+    "analyzed_reviews": [
+      {
+        "company": "Microsoft",
+        "sentiment_score": 7.5,
+        "communication_score": 8,
+        "learning_score": 6,
+        "opportunities_score": 7,
+        "vulnerability_score": 3,
+        "enablement_score": 8,
+        "recognition_score": 7,
+        "clover_overall": 6.8,
+        "key_issues": ["bureaucracy", "innovation slowdown"],
+        "opportunity_areas": ["process optimization", "innovation enablement"],
+        "risk_level": "low",
+        "cloverera_opportunity_score": 6.2
+      },
+      {
+        "company": "Microsoft",
+        "sentiment_score": 6.0,
+        "communication_score": 6,
+        "learning_score": 4,
+        "opportunities_score": 3,
+        "vulnerability_score": 6,
+        "enablement_score": 7,
+        "recognition_score": 5,
+        "clover_overall": 5.2,
+        "key_issues": ["limited growth", "impersonal culture"],
+        "opportunity_areas": ["career development", "cultural engagement"],
+        "risk_level": "medium",
+        "cloverera_opportunity_score": 7.5
+      }
+    ],
+    "company_insights": {
+      "company_name": "Microsoft",
+      "avg_sentiment_score": 6.75,
+      "avg_clover_overall": 6.0,
+      "priority_level": "medium",
+      "top_issues": ["limited growth opportunities", "bureaucracy"],
+      "top_opportunities": ["career development programs", "innovation enablement"]
+    }
+  },
+  "success_criteria": [
+    "All reviews processed successfully",
+    "CLOVER scores between 1-10",
+    "Sentiment analysis completes within 30 seconds",
+    "Company insights generated",
+    "No API errors"
+  ]
+}

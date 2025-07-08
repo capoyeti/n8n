@@ -1,0 +1,295 @@
+{
+  "name": "Clover Era Insight Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        },
+        "triggerAtTime": {
+          "hour": 14,
+          "minute": 0,
+          "timezone": "America/New_York"
+        }
+      },
+      "id": "daily-schedule",
+      "name": "Daily Schedule (2 PM EST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "analyzed_reviews",
+          "mode": "name"
+        },
+        "range": "A:Z"
+      },
+      "id": "fetch-analyzed-data",
+      "name": "Fetch Analyzed Reviews",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Aggregate company-level insights from analyzed reviews\nconst reviews = items;\nconst companyInsights = {};\n\n// Group reviews by company\nfor (const item of reviews) {\n  const company = item.json.company;\n  if (!company) continue;\n  \n  if (!companyInsights[company]) {\n    companyInsights[company] = {\n      company_name: company,\n      reviews: [],\n      total_reviews: 0,\n      sentiment_scores: [],\n      clover_scores: {\n        communication: [],\n        learning: [],\n        opportunities: [],\n        vulnerability: [],\n        enablement: [],\n        recognition: [],\n        overall: []\n      },\n      risk_indicators: {\n        high_turnover_risk: 0,\n        burnout_indicators: 0,\n        communication_issues: 0,\n        growth_concerns: 0\n      },\n      key_issues: [],\n      opportunity_areas: [],\n      cloverera_scores: []\n    };\n  }\n  \n  const company_data = companyInsights[company];\n  \n  // Add review data\n  company_data.reviews.push(item.json);\n  company_data.total_reviews++;\n  \n  // Collect scores\n  if (item.json.sentiment_score) company_data.sentiment_scores.push(parseFloat(item.json.sentiment_score));\n  if (item.json.communication_score) company_data.clover_scores.communication.push(parseFloat(item.json.communication_score));\n  if (item.json.learning_score) company_data.clover_scores.learning.push(parseFloat(item.json.learning_score));\n  if (item.json.opportunities_score) company_data.clover_scores.opportunities.push(parseFloat(item.json.opportunities_score));\n  if (item.json.vulnerability_score) company_data.clover_scores.vulnerability.push(parseFloat(item.json.vulnerability_score));\n  if (item.json.enablement_score) company_data.clover_scores.enablement.push(parseFloat(item.json.enablement_score));\n  if (item.json.recognition_score) company_data.clover_scores.recognition.push(parseFloat(item.json.recognition_score));\n  if (item.json.clover_overall) company_data.clover_scores.overall.push(parseFloat(item.json.clover_overall));\n  if (item.json.cloverera_opportunity_score) company_data.cloverera_scores.push(parseFloat(item.json.cloverera_opportunity_score));\n  \n  // Count risk indicators\n  if (item.json.high_turnover_risk === true || item.json.high_turnover_risk === 'true') company_data.risk_indicators.high_turnover_risk++;\n  if (item.json.burnout_indicators === true || item.json.burnout_indicators === 'true') company_data.risk_indicators.burnout_indicators++;\n  if (item.json.communication_issues === true || item.json.communication_issues === 'true') company_data.risk_indicators.communication_issues++;\n  if (item.json.growth_concerns === true || item.json.growth_concerns === 'true') company_data.risk_indicators.growth_concerns++;\n  \n  // Collect issues and opportunities\n  if (item.json.key_issues) {\n    const issues = item.json.key_issues.split(',').map(s => s.trim()).filter(s => s.length > 0);\n    company_data.key_issues.push(...issues);\n  }\n  if (item.json.opportunity_areas) {\n    const opportunities = item.json.opportunity_areas.split(',').map(s => s.trim()).filter(s => s.length > 0);\n    company_data.opportunity_areas.push(...opportunities);\n  }\n}\n\n// Calculate aggregated metrics for each company\nconst results = [];\nfor (const [companyName, data] of Object.entries(companyInsights)) {\n  const avg = (arr) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;\n  const percentage = (count, total) => total > 0 ? (count / total) * 100 : 0;\n  \n  // Calculate averages\n  const avgSentiment = avg(data.sentiment_scores);\n  const avgCommunication = avg(data.clover_scores.communication);\n  const avgLearning = avg(data.clover_scores.learning);\n  const avgOpportunities = avg(data.clover_scores.opportunities);\n  const avgVulnerability = avg(data.clover_scores.vulnerability);\n  const avgEnablement = avg(data.clover_scores.enablement);\n  const avgRecognition = avg(data.clover_scores.recognition);\n  const avgCloverOverall = avg(data.clover_scores.overall);\n  const avgCloverEraScore = avg(data.cloverera_scores);\n  \n  // Calculate risk percentages\n  const turnoverRiskPct = percentage(data.risk_indicators.high_turnover_risk, data.total_reviews);\n  const burnoutRiskPct = percentage(data.risk_indicators.burnout_indicators, data.total_reviews);\n  const commIssuesPct = percentage(data.risk_indicators.communication_issues, data.total_reviews);\n  const growthConcernsPct = percentage(data.risk_indicators.growth_concerns, data.total_reviews);\n  \n  // Determine priority level\n  let priorityLevel = 'low';\n  if (avgCloverEraScore >= 7.5 || turnoverRiskPct >= 30 || burnoutRiskPct >= 25) {\n    priorityLevel = 'high';\n  } else if (avgCloverEraScore >= 6.0 || turnoverRiskPct >= 15 || burnoutRiskPct >= 15) {\n    priorityLevel = 'medium';\n  }\n  \n  // Get top issues and opportunities\n  const issueCount = {};\n  const opportunityCount = {};\n  \n  data.key_issues.forEach(issue => {\n    issueCount[issue] = (issueCount[issue] || 0) + 1;\n  });\n  data.opportunity_areas.forEach(opp => {\n    opportunityCount[opp] = (opportunityCount[opp] || 0) + 1;\n  });\n  \n  const topIssues = Object.entries(issueCount)\n    .sort(([,a], [,b]) => b - a)\n    .slice(0, 3)\n    .map(([issue,]) => issue)\n    .join(', ');\n    \n  const topOpportunities = Object.entries(opportunityCount)\n    .sort(([,a], [,b]) => b - a)\n    .slice(0, 3)\n    .map(([opp,]) => opp)\n    .join(', ');\n  \n  // Data quality assessment\n  let dataQuality = 'high';\n  if (data.total_reviews < 5) dataQuality = 'low';\n  else if (data.total_reviews < 15) dataQuality = 'medium';\n  \n  results.push({\n    json: {\n      company_name: companyName,\n      total_reviews: data.total_reviews,\n      avg_sentiment_score: Math.round(avgSentiment * 100) / 100,\n      avg_clover_overall: Math.round(avgCloverOverall * 100) / 100,\n      avg_communication: Math.round(avgCommunication * 100) / 100,\n      avg_learning: Math.round(avgLearning * 100) / 100,\n      avg_opportunities: Math.round(avgOpportunities * 100) / 100,\n      avg_vulnerability: Math.round(avgVulnerability * 100) / 100,\n      avg_enablement: Math.round(avgEnablement * 100) / 100,\n      avg_recognition: Math.round(avgRecognition * 100) / 100,\n      turnover_risk_pct: Math.round(turnoverRiskPct * 100) / 100,\n      burnout_risk_pct: Math.round(burnoutRiskPct * 100) / 100,\n      communication_issues_pct: Math.round(commIssuesPct * 100) / 100,\n      growth_concerns_pct: Math.round(growthConcernsPct * 100) / 100,\n      cloverera_opportunity_score: Math.round(avgCloverEraScore * 100) / 100,\n      priority_level: priorityLevel,\n      top_issues: topIssues || 'none identified',\n      top_opportunities: topOpportunities || 'none identified',\n      last_analyzed: new Date().toISOString(),\n      data_quality: dataQuality\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "aggregate-insights",
+      "name": "Aggregate Company Insights",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "company_insights",
+          "mode": "name"
+        },
+        "range": "A2:Z1000"
+      },
+      "id": "clear-existing-insights",
+      "name": "Clear Existing Insights",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "company_insights",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "company_name": "={{ $json.company_name }}",
+            "total_reviews": "={{ $json.total_reviews }}",
+            "avg_sentiment_score": "={{ $json.avg_sentiment_score }}",
+            "avg_clover_overall": "={{ $json.avg_clover_overall }}",
+            "avg_communication": "={{ $json.avg_communication }}",
+            "avg_learning": "={{ $json.avg_learning }}",
+            "avg_opportunities": "={{ $json.avg_opportunities }}",
+            "avg_vulnerability": "={{ $json.avg_vulnerability }}",
+            "avg_enablement": "={{ $json.avg_enablement }}",
+            "avg_recognition": "={{ $json.avg_recognition }}",
+            "turnover_risk_pct": "={{ $json.turnover_risk_pct }}",
+            "burnout_risk_pct": "={{ $json.burnout_risk_pct }}",
+            "communication_issues_pct": "={{ $json.communication_issues_pct }}",
+            "growth_concerns_pct": "={{ $json.growth_concerns_pct }}",
+            "cloverera_opportunity_score": "={{ $json.cloverera_opportunity_score }}",
+            "priority_level": "={{ $json.priority_level }}",
+            "top_issues": "={{ $json.top_issues }}",
+            "top_opportunities": "={{ $json.top_opportunities }}",
+            "last_analyzed": "={{ $json.last_analyzed }}",
+            "data_quality": "={{ $json.data_quality }}"
+          }
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "save-insights",
+      "name": "Save Company Insights",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.priority_level }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-high-priority",
+      "name": "Filter High Priority Companies",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Generate trend analysis and alerts for high-priority companies\nconst companies = items;\nconst alerts = [];\n\nfor (const company of companies) {\n  const data = company.json;\n  \n  // Generate alert reasons\n  const alertReasons = [];\n  \n  if (data.cloverera_opportunity_score >= 7.5) {\n    alertReasons.push(`High CloverEra opportunity score: ${data.cloverera_opportunity_score}`);\n  }\n  \n  if (data.turnover_risk_pct >= 30) {\n    alertReasons.push(`High turnover risk: ${data.turnover_risk_pct}% of reviews indicate risk`);\n  }\n  \n  if (data.burnout_risk_pct >= 25) {\n    alertReasons.push(`High burnout risk: ${data.burnout_risk_pct}% of reviews show burnout indicators`);\n  }\n  \n  if (data.avg_communication <= 4.0) {\n    alertReasons.push(`Poor communication scores: ${data.avg_communication}/10`);\n  }\n  \n  if (data.avg_learning <= 4.0) {\n    alertReasons.push(`Limited learning opportunities: ${data.avg_learning}/10`);\n  }\n  \n  if (data.avg_opportunities <= 4.0) {\n    alertReasons.push(`Poor career opportunities: ${data.avg_opportunities}/10`);\n  }\n  \n  // Generate summary\n  const summary = `${data.company_name} flagged as high priority with ${data.total_reviews} reviews analyzed. Key concerns: ${data.top_issues}. Primary opportunities: ${data.top_opportunities}.`;\n  \n  alerts.push({\n    json: {\n      company: data.company_name,\n      priority: 'HIGH',\n      alert_reasons: alertReasons.join(' | '),\n      summary: summary,\n      opportunity_score: data.cloverera_opportunity_score,\n      total_reviews: data.total_reviews,\n      key_metrics: {\n        sentiment: data.avg_sentiment_score,\n        communication: data.avg_communication,\n        learning: data.avg_learning,\n        opportunities: data.avg_opportunities,\n        vulnerability: data.avg_vulnerability,\n        enablement: data.avg_enablement,\n        recognition: data.avg_recognition\n      },\n      risk_indicators: {\n        turnover_risk: data.turnover_risk_pct,\n        burnout_risk: data.burnout_risk_pct,\n        communication_issues: data.communication_issues_pct,\n        growth_concerns: data.growth_concerns_pct\n      },\n      top_issues: data.top_issues,\n      top_opportunities: data.top_opportunities,\n      data_quality: data.data_quality,\n      flagged_at: new Date().toISOString(),\n      recommended_action: data.cloverera_opportunity_score >= 8.0 ? 'Immediate outreach recommended' : 'Consider outreach within 1-2 weeks'\n    }\n  });\n}\n\nreturn alerts;"
+      },
+      "id": "generate-alerts",
+      "name": "Generate High Priority Alerts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "alert-summary",
+              "name": "alert_summary",
+              "value": "={{ $items().length }} high-priority companies identified for CloverEra outreach",
+              "type": "string"
+            },
+            {
+              "id": "execution-time",
+              "name": "execution_time",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "companies-list",
+              "name": "companies_flagged",
+              "value": "={{ $items().map(item => item.json.company).join(', ') }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "summary-stats",
+      "name": "Generate Summary Stats",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1780, 300]
+    }
+  ],
+  "connections": {
+    "Daily Schedule (2 PM EST)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Analyzed Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Analyzed Reviews": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Company Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Company Insights": {
+      "main": [
+        [
+          {
+            "node": "Clear Existing Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Existing Insights": {
+      "main": [
+        [
+          {
+            "node": "Save Company Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Company Insights": {
+      "main": [
+        [
+          {
+            "node": "Filter High Priority Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter High Priority Companies": {
+      "main": [
+        [
+          {
+            "node": "Generate High Priority Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate High Priority Alerts": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "cloverera-sentiment"
+    },
+    {
+      "name": "insights"
+    },
+    {
+      "name": "aggregation"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-20T00:00:00.000Z",
+  "versionId": "1"
+}
