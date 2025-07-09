@@ -16,12 +16,16 @@ Best: "Let me check templates for webhook patterns"
 
 ## The Discovery-First Method
 
-### 1. Start with What Exists
+### 1. MANDATORY: Use n8n-mcp Tools First
 ```javascript
-// Your new best friends:
-search_nodes({ query: 'glassdoor' })      // Someone probably built it
-search_templates({ query: 'scraping' })    // Someone definitely solved it
-list_node_templates(['n8n-nodes-base.httpRequest'])  // See proven patterns
+// MANDATORY - Use these n8n-mcp tools before ANY coding:
+mcp__n8n_mcp__search_nodes({ query: 'glassdoor' })      // Someone probably built it
+mcp__n8n_mcp__search_templates({ query: 'scraping' })    // Someone definitely solved it
+mcp__n8n_mcp__list_node_templates(['n8n-nodes-base.httpRequest'])  // See proven patterns
+mcp__n8n_mcp__get_node_documentation({ nodeType: 'nodes-base.splitOut' })  // Read docs first
+
+// VIOLATION: Writing custom code without using n8n-mcp tools first
+// PUNISHMENT: Auto-validation framework will FAIL and block deployment
 ```
 
 ### 2. Research Before Architecture
