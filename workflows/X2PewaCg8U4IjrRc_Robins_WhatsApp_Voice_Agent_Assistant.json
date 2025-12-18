@@ -1,0 +1,1160 @@
+{
+  "id": "X2PewaCg8U4IjrRc",
+  "name": "Robins WhatsApp Voice Agent Assistant",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2640,
+        608
+      ],
+      "id": "f9e3eb34-4b86-459f-8303-4d39c53b7ba6",
+      "name": "WhatsApp Trigger",
+      "webhookId": "2e1bbb87-ca5a-4c63-a90e-17adc57b290a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.input }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant. Your name is Floyd. Your personality is cheery and helpful. use natural language in yor replies that sound as human as possible. You can laugh, pause for thought, use filler words and show emotion with your voice.\n\nToday's date is {{ $now }}\n\nMy Location is Cape Town South Africa. \n\nMy time zone is GMT +2 hrs\n\nMy name is Robin. Use my name where appropriate. For example when signing an email you create. \n\nIf asked for the weather, summarise the output you get from the weather forecasting tool into an overview highliting the max and min temmpratures (Do not mention the units), if it will be clear, cloudy or raining as well as the wind strength as light moderate or strong and the direction described for example, strong wind from the south east. W means west, WNW means west north west, SE means South East. Do not mention units.\n\nIf asked for meeting information give the main points of the meetng which will be the date, time and duration, whether the meeting is in person or on line and the names of the attendees. Do not provide any further details unless specifically asked, for example, do not provide the full meeting URL. \n",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -1872,
+        608
+      ],
+      "id": "3eaef80d-162b-4638-a867-2e65095561a1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1968,
+        848
+      ],
+      "id": "d7c56668-fd77-44e4-8165-f83450dd5ce1",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b7b64446-f1ea-4622-990c-22f3999a8269",
+                    "leftValue": "={{ $json.messages[0].audio }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messages[0].text.body }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "08fd0c80-307e-4f45-b1de-35192ee4ec5e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2400,
+        608
+      ],
+      "id": "507ba853-d42e-4d59-ae0e-1ae5fd7cdc68",
+      "name": "Check Input Type"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1920,
+        336
+      ],
+      "id": "7667f217-f60b-4e38-b64a-a997b2e425a9",
+      "name": "Download Audio"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1728,
+        336
+      ],
+      "id": "abbebdc8-90e0-4920-89ef-dfcdf3086040",
+      "name": "Transcribe Audio"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $('AI Agent').item.json.output }}",
+        "voice": "fable",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1088,
+        528
+      ],
+      "id": "d7a32988-1dc5-4387-a4fa-85373d301b9c",
+      "name": "Generate Audio"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "530419866820084",
+        "recipientPhoneNumber": "={{ $('Check Input Type').item.json.contacts[0].wa_id }}",
+        "messageType": "audio",
+        "mediaPath": "useMedian8n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        528
+      ],
+      "id": "cfa6ef90-bcb2-4f82-aed6-fbce5ff2a34e",
+      "name": "Respond with Audio",
+      "webhookId": "975db413-9e23-41c6-a7e3-462498fdb44e"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "530419866820084",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        736
+      ],
+      "id": "86de2478-5fce-4112-85bf-4a652cf76e25",
+      "name": "Respond with Text",
+      "webhookId": "f0cfa708-585f-4658-a5f3-8374b5673511"
+    },
+    {
+      "parameters": {
+        "content": "## Audio Processing",
+        "height": 240,
+        "width": 780,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2176,
+        256
+      ],
+      "id": "4d034f06-ff87-4307-9a6f-6df48608da72",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2112,
+        848
+      ],
+      "id": "b3120058-9913-4b8f-b13a-2936cb32c802",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "robin@humanoid.biz",
+          "mode": "list",
+          "cachedResultName": "Robin Tindall - Humanoid"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "timeMax": "={{ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1840,
+        848
+      ],
+      "id": "03f4ec43-5f30-49f5-aed2-1e442a388a26",
+      "name": "Google Calendar"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool when asked for a weather report",
+        "workflowId": {
+          "__rl": true,
+          "value": "WWHTsuU4rmr4zAqe",
+          "mode": "list",
+          "cachedResultName": "Sub workflow weather report"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -1536,
+        1024
+      ],
+      "id": "ddad57d3-20a3-4e9b-9ab4-8f7f8e81b883",
+      "name": "Get a weather report"
+    },
+    {
+      "parameters": {
+        "description": "call this tool when asked to generate an image",
+        "workflowId": {
+          "__rl": true,
+          "value": "7hhUzVb2Ugs3mIy2",
+          "mode": "list",
+          "cachedResultName": "Image generator sub flow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -1536,
+        848
+      ],
+      "id": "5d3e0145-142e-4eb1-b4e5-23499f86c1ce",
+      "name": "Create an image"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "https://i.ibb.co",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "e1820f6e-6764-41e1-9af0-45ea35df90ea"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Return image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ff4527af-63d2-48d2-b450-632c5a40f600",
+                    "leftValue": "={{ $('WhatsApp Trigger').item.json.messages[0].audio }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Return Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c5ef4140-468c-4081-ac58-cbcaf0167a49",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Return text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1312,
+        528
+      ],
+      "id": "4fa3d2ea-8ba3-4bb3-a7cd-409d6f04dc91",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "robmobius@gmail.com",
+          "mode": "list",
+          "cachedResultName": "robmobius@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1840,
+        1024
+      ],
+      "id": "a7d8f685-84e7-440d-b535-cd98ad4e2fd8",
+      "name": "Create new appointments"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -1680,
+        848
+      ],
+      "id": "e848853e-4f1d-414a-88dc-6ec5d9fa2624",
+      "name": "Gmail",
+      "webhookId": "32cdaeb3-8491-4e84-82d0-82b2d24d468f"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "530419866820084",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "={{ $json.reply }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -2352,
+        336
+      ],
+      "id": "4e1ecdfe-a20a-4385-b6e1-905d71b1ef06",
+      "name": "Receipt confirmation",
+      "webhookId": "4f63b303-baf2-4ee8-b073-29f6ebc54d3f"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "530419866820084",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "messageType": "image",
+        "mediaLink": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        352
+      ],
+      "id": "06949ff2-cfdb-4d91-89d5-0fd5978a013a",
+      "name": "Respond with Image",
+      "webhookId": "1f0e5115-3764-41dd-b45a-051b5d7c769f"
+    },
+    {
+      "parameters": {
+        "content": "## Reply\n",
+        "height": 660,
+        "width": 780,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1376,
+        256
+      ],
+      "typeVersion": 1,
+      "id": "7aabf082-8593-40e0-b885-b3e3bff017f7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Input from WhatsApp\n",
+        "height": 440,
+        "width": 500,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2688,
+        496
+      ],
+      "typeVersion": 1,
+      "id": "b7d7eaf5-8c80-4750-beb9-d43480f5fdc0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $('WhatsApp Trigger').item.json.messages[0].audio.id }}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -2096,
+        336
+      ],
+      "id": "7ce1547a-bf98-450c-b86e-fdc78b31d36f",
+      "name": "Get Audio URL",
+      "webhookId": "1aaa0991-c8d8-480a-97f3-edfdd6da1c33"
+    },
+    {
+      "parameters": {
+        "content": "## Executive Agent Assistant",
+        "height": 700,
+        "width": 780
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2176,
+        512
+      ],
+      "typeVersion": 1,
+      "id": "17778673-7c3d-495a-9c9c-dda81cba3acc",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "### Get More Templates Like This 👇\n[**https://letsautomateit.biz/community/**](https://letsautomateit.biz/community/)\n[![Video Thumbnail](https://onlinethinking.io/wp-content/uploads/2024/10/Lets-Automate-It-Community.png)](https://letsautomateit.biz/community/)",
+        "height": 360,
+        "width": 500,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4096,
+        944
+      ],
+      "typeVersion": 1,
+      "id": "ee8fe3da-4906-47c9-bbb3-a8cbaa7166fb",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## WORKFLOW WAS LAST EDITED @ 11/05/25",
+        "height": 100,
+        "width": 360,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2688,
+        1136
+      ],
+      "typeVersion": 1,
+      "id": "06826e73-5cf5-428a-be2e-c28954210456",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## WhatsApp Voice-Activated Personal Assistant\n\nThis workflow transforms WhatsApp voice notes and text messages into actions using AI. It can understand your requests, perform tasks, and respond with text or even generate audio replies.\n\nBuilt for the [**Let's Automate It Community**](https://letsautomateit.biz/community/) by [Robin Tindall](https://za.linkedin.com/in/robin-tindall) & [Darryn Balanco](https://uk.linkedin.com/in/darrynbalanco)",
+        "height": 1700,
+        "width": 1340,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4112,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "0277a39e-2662-4a66-9bd5-f4ab7f8bdebc",
+      "name": "Sticky Note: Introduction"
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n\n1.  **Connect WhatsApp Trigger**: You'll need to set up a WhatsApp Trigger node using a service like Twilio or a similar WhatsApp Business API provider and connect your credentials.\n\n2.  **Configure OpenAI Credentials**: Authenticate with your OpenAI account. This is used for transcribing audio, understanding text, and generating audio responses.\n\n3.  **Set up Google Calendar and Gmail Credentials (Optional)**: If you want the workflow to interact with your Google Calendar or send emails, you'll need to connect those credentials as well.\n\n4.  **(Optional) Sub-workflow for Weather & Image Generation**: This workflow uses sub-workflows for fetching weather reports and generating images. Ensure these sub-workflows (`WWHTsuU4rmr4zAqe` and `7hhUzVb2Ugs3mIy2`) are imported and their respective credentials (if any) are configured correctly.",
+        "height": 560,
+        "width": 360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3152,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "44af90fb-5660-44d2-975e-92f24e58cc71",
+      "name": "Sticky Note: Setup"
+    },
+    {
+      "parameters": {
+        "content": "## What this workflow does\n\n1.  **Listens for WhatsApp Messages**: The workflow starts when a new message (text or audio) is received on your configured WhatsApp number.\n\n2.  **Handles Audio Messages**: If the message is an audio note, it retrieves the audio URL, downloads the audio, transcribes it using OpenAI, and then uses the transcribed text for further processing.\n\n3.  **Processes Text Messages**: If the message is text, it directly uses the text content.\n\n4.  **Memory Management**: It uses a simple memory buffer to keep track of recent conversations with each WhatsApp user, allowing for more context-aware interactions.\n\n5.  **AI Agent for Task Execution**: An AI agent powered by a large language model (likely GPT-4o-mini) processes the user's request based on a defined prompt. This prompt instructs the AI on how to behave, use your name, handle weather requests, etc.\n\n6.  **Tool Integration**: The AI agent can utilize various tools:\n    * **Google Calendar**: To retrieve calendar events.\n    * **Create new appointments (Google Calendar)**: To schedule new events.\n    * **Get a weather report (Sub-workflow)**: To fetch weather information.\n    * **Create an image (Sub-workflow)**: To generate images based on descriptions.\n    * **Gmail**: To send emails.\n\n7.  **Responds via WhatsApp**: The workflow sends a response back to the user, either as text or as generated audio.\n\n8.  **Image Handling**: If the AI generates an image URL, the workflow sends that image back to the user.\n\n9.  **MIME Type Correction**: There's a function to ensure audio files are sent with the correct MIME type.",
+        "height": 860,
+        "width": 500,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4096,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "11afc4a2-efa0-4ce9-8ccc-23ab6929158b",
+      "name": "Sticky Note: Workflow Description"
+    },
+    {
+      "parameters": {
+        "content": "## Tools That Are Interchangeable\n\n* **WhatsApp Trigger**: Depending on your preference and technical setup, you might be able to use different chat services like Telegram.\n\n* **OpenAI**: While this workflow is set up for OpenAI, you could potentially adapt it to use other language models or transcription services with appropriate modifications to the AI Agent and Transcribe Audio nodes.\n\n* **Memory**: The `Simple Memory` node could be replaced with other memory management solutions offered by Langchain if you require more advanced features.\n\n* **Sub-workflows for Tools**: The weather and image generation functionalities are handled by sub-workflows. You could replace these with direct API calls to weather services or image generation platforms if you prefer not to use sub-workflows.",
+        "height": 540,
+        "width": 360,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3152,
+        656
+      ],
+      "typeVersion": 1,
+      "id": "00762908-6c67-4dc8-9733-2d39c959c04b",
+      "name": "Sticky Note: Interchangeable Tools"
+    },
+    {
+      "parameters": {
+        "content": "## How to customize this flow\n\n* **Adjust the AI Agent Prompt**: The prompt in the 'AI Agent' node is crucial for defining the AI's behavior and capabilities. You can modify this prompt to add more specific instructions, personality traits, or limitations.\n\n* **Add More Tools**: You can integrate more tools into the AI agent's capabilities, such as searching the web, accessing other APIs, or controlling smart home devices.\n\n* **Improve Memory Management**: For more complex conversations, you might want to explore more advanced memory options provided by Langchain.\n\n* **Customize Responses**: You can modify the 'Respond with Text' and 'Generate Audio' nodes to tailor the responses to your liking.",
+        "height": 440,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3568,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "34fac5ea-5389-4569-a9c2-fea86a5f1b12",
+      "name": "Sticky Note: Customization"
+    },
+    {
+      "parameters": {
+        "content": "## Build Complexity Rating System:\n\n",
+        "height": 660,
+        "width": 400,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3568,
+        912
+      ],
+      "typeVersion": 1,
+      "id": "f56f9f81-6de9-431a-a6c9-1694e5f43e15",
+      "name": "Complexity Rating System1"
+    },
+    {
+      "parameters": {
+        "content": "## Workflow Complexity Rating:\n## Advanced\n\nThis workflow incorporates several advanced features:\n* Multiple Triggers & Conditional Logic.\n* Interactions with multiple external APIs (WhatsApp, OpenAI, potentially Google).\n* Reliance on sub-workflows for key functionalities.\n* Implementation of conversational memory using Langchain.\n* Inclusion of custom code for specific tasks.\n* Use of advanced n8n and Langchain nodes.",
+        "height": 1320,
+        "width": 2160,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2720,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "dd3c6dcb-6484-42ee-aa6d-5285081c1fc5",
+      "name": "Workflow Complexity Rating1"
+    },
+    {
+      "parameters": {
+        "content": "## Beginner\n**Green**\n* Uses a few core nodes.\n* Linear flow.\n* Easy to understand.",
+        "width": 360,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3552,
+        976
+      ],
+      "typeVersion": 1,
+      "id": "1d30e610-e7cc-4ffe-9380-1ff1aa042766",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Intermediate\n**Blue**\n* Multiple integrations, more logic (loops, conditionals).\n* May use sub-workflows.\n* Moderate n8n understanding needed.\n",
+        "height": 180,
+        "width": 360,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3552,
+        1152
+      ],
+      "typeVersion": 1,
+      "id": "63581144-6ae5-41a7-91a2-6cdd767ad3fe",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Advanced\n**Red**\n* Intricate logic, many integrations, custom code.\n* Extensive sub-workflows, error handling, complex data.\n* Strong n8n and potentially external API knowledge required.",
+        "height": 200,
+        "width": 360,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3552,
+        1344
+      ],
+      "typeVersion": 1,
+      "id": "904681b6-90ca-4c25-b3ae-36f813768adc",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Resources\nWatch this first [**Build an AI WhatsApp Chatbot using n8n (No-Code)**](https://www.youtube.com/watch?v=WxGBOfrQpUU&t=725s) \n[![Video Thumbnail](https://i.ibb.co/1Gbb9zMy/Screenshot-2025-05-11-at-11-09-29.png)](https://www.youtube.com/watch?v=WxGBOfrQpUU&t=725s)",
+        "height": 360,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3568,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "6e958771-024e-48a9-852a-78bd3cbb2ebc",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and change the MIME type of binary data\nfor (const item of $input.all()) {\n  // Check if the item has binary data\n  if (item.binary) {\n    // Find the binary property name (assuming there's at least one)\n    const binaryPropertyNames = Object.keys(item.binary);\n    \n    for (const propName of binaryPropertyNames) {\n      // If the MIME type is 'audio/mp3', change it to 'audio/mpeg'\n      if (item.binary[propName].mimeType === 'audio/mp3') {\n        item.binary[propName].mimeType = 'audio/mpeg';\n      }\n    }\n  }\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -912,
+        528
+      ],
+      "id": "3a714000-06de-4426-8ae4-1baf9497de88",
+      "name": "Convert to MPEG"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "219577d5-b028-48fc-90be-980f4171ab68",
+              "name": "input",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1552,
+        336
+      ],
+      "id": "1cf85247-c485-4990-97b4-bd80e5bea93d",
+      "name": "Audio Input"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c05a7fbf-309a-407e-9fee-7e0b03f4a5c8",
+              "name": "input",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].text.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2080,
+        608
+      ],
+      "id": "a9964304-98aa-4538-8840-a19815c575ee",
+      "name": "Text Only Input"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "48d059f7-0f5b-4377-91b6-949b3741c4f9",
+              "leftValue": "={{ $json.messages[0] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2656,
+        336
+      ],
+      "id": "e0ef465e-f1bb-466a-85b0-fcedeab10d87",
+      "name": "Check msg status"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all items from the previous node\nconst allReplies = $input.all();\n\n// Array of fun replies\nconst replies = [\n  \"Got it! Consider it... in progress. 😉\",\n  \"Roger that! My brain is now officially processing this. Stand by for awesomeness. 😎\",\n  \"Copy that! Engaging turbo boosters now... will report back shortly! 🚀\",\n  \"Sweet! This mission is a go. Giving it my undivided attention (after this sip of coffee ☕).\",\n  \"Duly noted! Unleashing my inner task-master. Results incoming!\",\n  \"You got it, boss! Just let me wrangle this for a bit. Should have something for ya soon. 🤠\",\n  \"Affirmative! Plotting my course of action... expect a delightful outcome! ✨\",\n  \"Consider it done-ish! Just need a moment to work my magic. Abracadabra! 🪄\",\n  \"Heard you loud and clear! Time to put on my thinking cap. Will get back to you ASAP! 🤔\",\n  \"Right on! This is now on my radar. Prepare for awesomeness delivery! 📦\",\n];\n\n// Generate a random index\nconst randomIndex = Math.floor(Math.random() * replies.length);\n\n// Select a random reply\nconst randomReply = replies[randomIndex];\n\n// Create a new item with the random reply\nconst newItem = {\n  json: {\n    reply: randomReply,\n  },\n};\n\n// Return the new item\nreturn [newItem];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2496,
+        208
+      ],
+      "id": "d1cd1f7b-4d8e-41d7-8b95-fc4c4acaf5fd",
+      "name": "Random reply"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fbd0ea4f-88ac-429b-b71e-e162ffff911e",
+              "name": "output",
+              "value": "={{ $json.output.match(/\\(([^)]+)\\)/)[1] }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1088,
+        352
+      ],
+      "id": "0e561a11-83e1-46ab-ad58-7e8dfc121217",
+      "name": "Extract Image URL"
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check msg status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Input Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Input Type": {
+      "main": [
+        [
+          {
+            "node": "Get Audio URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Text Only Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Audio Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Audio": {
+      "main": [
+        [
+          {
+            "node": "Convert to MPEG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a weather report": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an image": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Extract Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond with Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create new appointments": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio URL": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to MPEG": {
+      "main": [
+        [
+          {
+            "node": "Respond with Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio Input": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Only Input": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check msg status": {
+      "main": [
+        [
+          {
+            "node": "Random reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random reply": {
+      "main": [
+        [
+          {
+            "node": "Receipt confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Image URL": {
+      "main": [
+        [
+          {
+            "node": "Respond with Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-01-28T13:15:08.738Z",
+      "createdAt": "2025-01-28T13:15:08.738Z",
+      "id": "kNeMs0ztu2vaXmDu",
+      "name": "Lets Automate It"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

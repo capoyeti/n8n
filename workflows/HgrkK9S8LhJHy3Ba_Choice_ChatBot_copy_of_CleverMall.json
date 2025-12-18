@@ -1,0 +1,1298 @@
+{
+  "id": "HgrkK9S8LhJHy3Ba",
+  "name": "Choice ChatBot copy of CleverMall",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "7a560a02-d276-450c-801e-97862cff158e",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2440,
+        340
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "9f325463-161c-4a47-ac7a-da15591fa98c",
+      "credentials": {
+        "telegramApi": {
+          "id": "iqsp5paKajoP4PZf",
+          "name": "@RealEstateGardenRouteBot"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "={{ $('AI Agent').item.json.output.replace(/&/g, \"&amp;\").replace(/>/g, \"&gt;\").replace(/</g, \"&lt;\").replace(/\"/g, \"&quot;\") }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "d711a2bf-bb3f-409b-ad71-55a40061b9ef",
+      "name": "Correct errors",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        3000,
+        580
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "1e3e28aa-6744-404f-8074-fa5163389e53",
+      "credentials": {
+        "telegramApi": {
+          "id": "iqsp5paKajoP4PZf",
+          "name": "@RealEstateGardenRouteBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "database",
+        "description": "Details about real estate properties"
+      },
+      "id": "88887e94-8786-4c53-9788-188a9b95920e",
+      "name": "database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "0612a6fb-d9a9-4fa8-bc59-fd7434fda92a",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        1140
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ed7f328d-1afb-4230-b0ae-cc4d8a4c98e1",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        960
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "26d9a9b5-d159-4c39-bbd1-e1e5fa259231",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1340,
+        280
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message.text",
+              "value": "={{ $json?.message?.text || \"\" }}"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "2c6d0a27-2860-4dab-844d-e1b3a9da7ef3",
+      "name": "PreProcessing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        680,
+        -380
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "id": "0adb8913-39d4-451d-b4b5-f11be390ca72",
+      "name": "Telegram2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1080,
+        440
+      ],
+      "webhookId": "f6a6008a-e30a-408d-8fd2-d6810781c8fe",
+      "credentials": {
+        "telegramApi": {
+          "id": "iqsp5paKajoP4PZf",
+          "name": "@RealEstateGardenRouteBot"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "d530a907-94d4-4638-8bed-1dd03aa51472",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3400,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4c753e0a-44ca-43b1-af09-83eaeaaa5718",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        560
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "70aa49a8-5fa2-4d69-ad85-8a6a91aae730",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        160
+      ],
+      "webhookId": "7945068b-e05c-4cd4-bad2-868dcaa2f1bb",
+      "credentials": {
+        "telegramApi": {
+          "id": "iqsp5paKajoP4PZf",
+          "name": "@RealEstateGardenRouteBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "chat_with_{{ $('Telegram Trigger').first().json.message.chat.id }}"
+      },
+      "id": "3c7ed16d-4da5-4f24-b45b-6f2f90e1a109",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        1740,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "real-estate",
+          "mode": "list",
+          "cachedResultName": "real-estate"
+        },
+        "options": {
+          "pineconeNamespace": "choice"
+        }
+      },
+      "id": "d921dd78-9993-4808-8c6a-9aceb1dcbcf8",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        960
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "xnnrfc9Lo6SDzCym",
+          "name": "CleverAssets Google Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant for Choice Properties, a property real estate company. Use the Pinecone database tool for information about properties, tenants, and related data, and other tools to handle user queries. Use the persons name that is chatting to you wherever relevant and natural to create a personal experience. The persons name is {{ $('Switch').item.json.message.from.first_name }}\n\nIMPORTANT: Handling Contacts & Communication\n\t•\tAlways check the \"Get Staff Information\" tool or \"List all staff\" tool first for contact details, including email addresses and phone numbers, when managing emails and meeting invites.\n\t•\tIf the Staff tools does not have the required details, check the Pinecone database next.\n\t•\tDo not invent phone numbers or email addresses. If they are unavailable, ask the user for them.\n\nDate & Time Reference\n\t•\tToday’s date is {{ $now }}, but always reference the sender’s timezone for date and calendar bookings.\n\t•\tDefault to South African Standard Time (GMT +2 hrs) if no timezone is specified.\n\nDocument Management\n\t•\tUse the Get Document Link tool to retrieve documents.\n\t•\tIf the exact file name is unclear, select the closest match. If uncertainty remains, ask for clarification and display similar names for confirmation.\n\t•\tWhen emailing documents, send a link instead of attaching the document.\n\nText & Output Formatting\n\t•\tFormat all responses cleanly using HTML where needed for an improved user experience.\n\t•\tEnsure any markdown formatting is properly managed for clean and professional output.\n\nProperty details\n- Use information from the Pinecone database to answer any questions about properties. This may include for sale, recently sold or anything else related to them\n\nSending Emails\n\t•\tAlways sign off emails with:\n“Warm regards,\nChoice Properties Management Team”"
+        }
+      },
+      "id": "fee82717-1b41-4140-a8ac-20559595157c",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1880,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('email_address') }}",
+        "subject": "={{ $fromAI('Subject') }}",
+        "emailType": "text",
+        "message": "={{ $fromAI('emailBody') }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Choice Properties Management Team"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        2160,
+        560
+      ],
+      "id": "b53795fc-0b68-4967-8dfa-dcef82703f62",
+      "name": "Gmail",
+      "webhookId": "cb6a1019-ad08-4c56-a771-f04a390a7c79",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QF7l9tuBbTaWOH86",
+          "name": "gmail api (n8n and related project)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "f2b6ebe5116cb7ece2a3b6a2fb24f02b709e1b93b25426defb19c92d4fc6a440@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Choice Properties"
+        },
+        "start": "={{ $fromAI('startDateTime') }}",
+        "end": "={{ $fromAI('endDateTime') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI('attendeeList') }}"
+          ],
+          "description": "={{ $fromAI('description') }}",
+          "summary": "={{ $fromAI('summary') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        2300,
+        560
+      ],
+      "id": "dae10950-a9c7-4775-b606-241b1ec4e5ff",
+      "name": "Make appointments in Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2WyKcCWBhILiJqvx",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "687276c40bf5743df474fb3edff1019d924265158a8271fde94abdc76d4a9fd0@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "CleverMall Events"
+        },
+        "returnAll": true,
+        "options": {
+          "timeMin": "={{ $fromAI('oneDayBefore','one day before the day the user requested') }}",
+          "timeMax": "={{ $fromAI('oneDayAfter','one day after the day the user requested') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        2040,
+        760
+      ],
+      "id": "8e2171b8-6987-4fd5-9727-737affe236da",
+      "name": "Get Appointments from Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2WyKcCWBhILiJqvx",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Research_Agent",
+        "description": "Call this tool to search the internet and answer the users question.",
+        "workflowId": {
+          "__rl": true,
+          "value": "Qq0iYmoQkiAYDox8",
+          "mode": "list",
+          "cachedResultName": "Research Agent"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2180,
+        760
+      ],
+      "id": "584f6f50-b537-47c3-a895-0bd4ba0b81f7",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8b143a29-c71d-46eb-89fd-7f0529177c89",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        620,
+        160
+      ],
+      "id": "0fa5690a-d275-40bb-a760-ec5e8110b0e3",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "34ca9e2a-c867-436a-9a22-4503b467bca9",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1080,
+        180
+      ],
+      "id": "047fc5a0-3ae9-4cd9-abcb-27484c76978b",
+      "name": "Set 'Text'"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        840,
+        -240
+      ],
+      "id": "b34537c9-1e43-4441-bc6e-749896e0993d",
+      "name": "Download Voice File",
+      "webhookId": "fb342dfa-6de5-4fb5-aaf8-29972cc1336b",
+      "credentials": {
+        "telegramApi": {
+          "id": "iqsp5paKajoP4PZf",
+          "name": "@RealEstateGardenRouteBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        1080,
+        -240
+      ],
+      "id": "b65ad429-d64c-45c2-8ab2-758b43ff7a2b",
+      "name": "Transcribe recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "StTWW03POtmODq8b",
+          "name": "Clever Assets (Mall)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/flq6f7yk4E4fJM5XTYuZ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "sk_5bfe4d76c2832dbfb5c1e8ccf0e0f731a6b64f13ae7fb7e8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ JSON.stringify($json.message.content).replace(/(^\\\"|\\\"$)/g, ``) }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2740,
+        60
+      ],
+      "id": "c563307a-b809-47c5-8025-2a2774d22d78",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {
+          "fileName": "={{ $('Switch').item.json.update_id }}.mpeg"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3000,
+        60
+      ],
+      "id": "07872bc9-b775-44aa-88e8-25c19c46c148",
+      "name": "Send Audio File",
+      "webhookId": "8fff5177-8eee-4d3d-a66f-ad171f203467",
+      "credentials": {
+        "telegramApi": {
+          "id": "bYFmZz96wR9Hekkv",
+          "name": "CleverMall_Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Summarise this incoming information: {{ $json.output }}\n\nOutput only plain text. There should be no formatting or symbols. ",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        2300,
+        60
+      ],
+      "id": "8fc6814a-5cbf-4a6d-b07e-b19caf6833ef",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "StTWW03POtmODq8b",
+          "name": "Clever Assets (Mall)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Disconnected\n- All preceding audio files are played when playing any one.\n- Also, the logic for when to send an audio file should be improved, it shouldn't be for every query.\n ",
+        "height": 600,
+        "width": 1120
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        -280
+      ],
+      "id": "edc1840e-17c6-45aa-b1ca-557c97c5be26",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        780
+      ],
+      "id": "c724530a-b764-449b-8c62-036f68e4f997",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblnbG5vo8mFD3BZ0",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tblnbG5vo8mFD3BZ0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $fromAI('name') }}",
+            "Email": "={{ $fromAI('emailAddress') || '' }}",
+            "Mobile": "={{ $fromAI('phoneNumber') || '' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Todo",
+                  "value": "Todo"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Mobile",
+              "displayName": "Mobile",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        1940,
+        920
+      ],
+      "id": "a3dd410a-6dec-4fb4-841c-bf59df9bffd1",
+      "name": "Add Contact",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "jO5P27PvyEErPtGX",
+          "name": "Airtable Personal Access Token account CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "3e98228b-9045-4ae0-9257-f75bbb3182fc",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1360,
+        -140
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "id": "89ed1c86-d26a-4404-b036-4ae9dcd521cc",
+      "name": "Telegram3",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1080,
+        -20
+      ],
+      "webhookId": "584a606d-ec05-452d-97ae-af59e2ccc79e",
+      "credentials": {
+        "telegramApi": {
+          "id": "iqsp5paKajoP4PZf",
+          "name": "@RealEstateGardenRouteBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbljTX8ctlcW5mJsZ",
+          "mode": "list",
+          "cachedResultName": "Documents",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tbljTX8ctlcW5mJsZ"
+        },
+        "options": {
+          "fields": [
+            "url",
+            "Name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        2320,
+        1000
+      ],
+      "id": "caed4816-0386-4ead-a3b4-b1c8214379e5",
+      "name": "Get document URL for sending",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "jO5P27PvyEErPtGX",
+          "name": "Airtable Personal Access Token account CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app2EYAZ9xK3bGuo3",
+          "mode": "list",
+          "cachedResultName": "Staff Details",
+          "cachedResultUrl": "https://airtable.com/app2EYAZ9xK3bGuo3"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblws1SFca2rNJD5i",
+          "mode": "list",
+          "cachedResultName": "Staff Details",
+          "cachedResultUrl": "https://airtable.com/app2EYAZ9xK3bGuo3/tblws1SFca2rNJD5i"
+        },
+        "filterByFormula": "={Name} = \"{{ $fromAI('name') }}\"",
+        "options": {
+          "fields": [
+            "First Name",
+            "Last Name",
+            "Email",
+            "Mobile",
+            "Position",
+            "Area Covered"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        1960,
+        560
+      ],
+      "id": "ec58b04a-5f4b-4977-9638-7b3d968e4df4",
+      "name": "Get Staff information",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app2EYAZ9xK3bGuo3",
+          "mode": "list",
+          "cachedResultName": "Staff Details",
+          "cachedResultUrl": "https://airtable.com/app2EYAZ9xK3bGuo3"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblws1SFca2rNJD5i",
+          "mode": "list",
+          "cachedResultName": "Staff Details",
+          "cachedResultUrl": "https://airtable.com/app2EYAZ9xK3bGuo3/tblws1SFca2rNJD5i"
+        },
+        "options": {
+          "view": {
+            "__rl": true,
+            "value": "viwT3NjcP3BQ165A1",
+            "mode": "list",
+            "cachedResultName": "Grid view",
+            "cachedResultUrl": "https://airtable.com/app2EYAZ9xK3bGuo3/tblws1SFca2rNJD5i/viwT3NjcP3BQ165A1"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        2120,
+        960
+      ],
+      "id": "f23e1a51-4bd5-40f9-a4a5-63646d1b75e7",
+      "name": "List all staff",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Correct errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correct errors": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make appointments in Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Appointments from Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Download Voice File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set 'Text'",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Voice File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe recording": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 'Text'": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Audio File": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Contact": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram3": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get document URL for sending": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Staff information": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List all staff": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-09-24T18:08:43.910Z",
+      "createdAt": "2024-09-24T18:08:43.910Z",
+      "id": "Tej2PW2VcNzkvBHB",
+      "name": "chatbot"
+    },
+    {
+      "updatedAt": "2024-10-09T16:08:23.899Z",
+      "createdAt": "2024-10-09T16:08:23.899Z",
+      "id": "fdV01E9B5XB3kSxT",
+      "name": "pinecone"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:19.299Z",
+      "createdAt": "2024-09-21T19:53:19.299Z",
+      "id": "sKkwnItsSnVITUWx",
+      "name": "telegram"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

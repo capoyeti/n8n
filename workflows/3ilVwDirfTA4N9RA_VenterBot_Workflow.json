@@ -1,0 +1,249 @@
+{
+  "id": "3ilVwDirfTA4N9RA",
+  "name": "VenterBot Workflow",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "id": "eec1322f-55ce-41c7-9cd8-b395b73066d7",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -40
+      ],
+      "webhookId": "telegram-updates"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message",
+              "value": "={{$json[\"message\"][\"text\"]}}"
+            },
+            {
+              "name": "user_id",
+              "value": "={{$json[\"message\"][\"from\"][\"id\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set User & Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -40
+      ],
+      "id": "a2bb219e-9258-4abe-9cfc-2bd5c7a2911e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"message\"]}}",
+              "operation": "contains",
+              "value2": "weather"
+            }
+          ]
+        }
+      },
+      "name": "Is Weather Request?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        40,
+        -40
+      ],
+      "id": "307cc82c-252f-4133-a636-8f7814cdc3db"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "options": {},
+        "queryParametersUi": {
+          "parameter": [
+            {
+              "name": "q",
+              "value": "Knysna"
+            },
+            {
+              "name": "appid",
+              "value": "YOUR_OPENWEATHER_API_KEY"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            }
+          ]
+        }
+      },
+      "name": "Get Weather",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -140
+      ],
+      "id": "9e3d4ee8-510d-4301-ad5b-082c37b61344"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "={{\"Weather in Knysna: \" + $json[\"weather\"][0][\"description\"] + \", \" + $json[\"main\"][\"temp\"] + \"°C\"}}",
+        "additionalFields": {}
+      },
+      "name": "Reply with Weather",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        440,
+        -140
+      ],
+      "id": "d66b3664-d4f0-4b21-bbbf-24ff1935bf89",
+      "webhookId": "a56b31e4-e652-4ce1-a7e3-f79966c3e6dc",
+      "credentials": {
+        "telegramApi": {
+          "id": null,
+          "name": "YOUR_TELEGRAM_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://api.zep.cloud/v1/chat",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"session_id\": \"telegram-{{$json[\"user_id\"]}}\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{{$json[\"message\"]}}\"\n    }\n  ]\n}"
+      },
+      "name": "Store in Zep",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        240,
+        60
+      ],
+      "id": "981cc0b7-dd84-4470-bc4b-90bd4d1011c0"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json[\"user_id\"]}}",
+        "text": "Got it, I’ve saved this in your memory.",
+        "additionalFields": {}
+      },
+      "name": "Reply Memory Stored",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        440,
+        60
+      ],
+      "id": "f66b779f-1250-41b5-8e53-a7ef9ebcc392",
+      "webhookId": "64db0da8-3c22-4822-81fc-94c7f8019f36",
+      "credentials": {
+        "telegramApi": {
+          "id": null,
+          "name": "YOUR_TELEGRAM_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreZep",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        20
+      ],
+      "id": "30b7c677-28d1-48cb-af1b-4a736cbcd858",
+      "name": "Zep Vector Store",
+      "credentials": {
+        "zepApi": {
+          "id": "hGVIb8XxEUGLxMPL",
+          "name": "Zep Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set User & Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set User & Message": {
+      "main": [
+        [
+          {
+            "node": "Is Weather Request?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Weather Request?": {
+      "main": [
+        [
+          {
+            "node": "Get Weather",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store in Zep",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather": {
+      "main": [
+        [
+          {
+            "node": "Reply with Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store in Zep": {
+      "main": [
+        [
+          {
+            "node": "Reply Memory Stored",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

@@ -1,0 +1,245 @@
+{
+  "id": "FJplpdH2gnC7BW9K",
+  "name": "Reset Test Data - Clever Connections",
+  "active": false,
+  "nodes": [
+    {
+      "id": "manual-trigger",
+      "name": "Reset Data",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "get-all-leads",
+      "name": "Get All Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "reset-fields",
+      "name": "Reset Campaign Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Reset campaign-related fields to original state\nconst leads = $input.all();\n\nreturn leads.map(item => ({\n  json: {\n    email: item.json.email,\n    campaign_status: 'pending',\n    sequence_step: '',\n    last_message_sent: '',\n    next_followup_due: '',\n    needs_human: '',\n    dom_notified: ''\n  }\n}));"
+      }
+    },
+    {
+      "id": "batch-update",
+      "name": "Batch Update",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "batchSize": 50,
+        "options": {}
+      }
+    },
+    {
+      "id": "update-leads",
+      "name": "Update Leads Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "campaign_status": "={{ $json.campaign_status }}",
+            "sequence_step": "={{ $json.sequence_step }}",
+            "last_message_sent": "={{ $json.last_message_sent }}",
+            "next_followup_due": "={{ $json.next_followup_due }}",
+            "needs_human": "={{ $json.needs_human }}",
+            "dom_notified": "={{ $json.dom_notified }}"
+          }
+        },
+        "matchingColumns": [
+          "email"
+        ]
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "wait",
+      "name": "Wait 2 seconds",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "clear-messages",
+      "name": "Clear Messages Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        150
+      ],
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Messages"
+        },
+        "clear": "exceptFirstRow"
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Reset Data": {
+      "main": [
+        [
+          {
+            "node": "Get All Leads",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Clear Messages Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Leads": {
+      "main": [
+        [
+          {
+            "node": "Reset Campaign Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset Campaign Fields": {
+      "main": [
+        [
+          {
+            "node": "Batch Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Update": {
+      "main": [
+        [
+          {
+            "node": "Wait 2 seconds",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Leads Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Leads Sheet": {
+      "main": [
+        [
+          {
+            "node": "Batch Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2 seconds": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

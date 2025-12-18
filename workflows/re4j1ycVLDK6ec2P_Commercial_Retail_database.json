@@ -1,0 +1,66 @@
+{
+  "id": "re4j1ycVLDK6ec2P",
+  "name": "Commercial Retail database",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7821c16f-69d6-46bb-98ea-cca541fec73d",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "7TONEG6Ytxv93hZb",
+          "name": "CleverAssets GSheets"
+        }
+      }
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-02-16T11:10:23.644Z",
+      "createdAt": "2025-02-16T11:10:23.644Z",
+      "id": "Q1OAUUYJHRUev1Fa",
+      "name": "Google sheet"
+    },
+    {
+      "updatedAt": "2025-02-13T15:24:44.659Z",
+      "createdAt": "2025-02-13T15:24:44.659Z",
+      "id": "eMxtBg4qWhWGQemu",
+      "name": "supabase"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

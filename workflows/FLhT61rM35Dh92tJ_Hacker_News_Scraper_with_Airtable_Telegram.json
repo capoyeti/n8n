@@ -1,0 +1,323 @@
+{
+  "id": "FLhT61rM35Dh92tJ",
+  "name": "Hacker News Scraper with Airtable & Telegram",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "http-tavily",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        450,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"api_key\": \"YOUR_TAVILY_API_KEY\",\n  \"query\": \"site:news.ycombinator.com top stories OR Ask HN OR Show HN\",\n  \"search_depth\": \"advanced\",\n  \"include_answer\": true,\n  \"max_results\": 10,\n  \"include_raw_content\": false\n}",
+        "options": {}
+      }
+    },
+    {
+      "id": "extract-results",
+      "name": "Extract Results",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        650,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "fields": {
+          "values": [
+            {
+              "name": "results",
+              "type": "array",
+              "value": "={{ $json.results }}"
+            },
+            {
+              "name": "answer",
+              "type": "string",
+              "value": "={{ $json.answer }}"
+            },
+            {
+              "name": "query",
+              "type": "string",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "split-out",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ],
+      "parameters": {
+        "sourceField": "results"
+      }
+    },
+    {
+      "id": "format-airtable",
+      "name": "Format for Airtable",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1050,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "fields": {
+          "values": [
+            {
+              "name": "Title",
+              "type": "string",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "URL",
+              "type": "string",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "name": "Summary",
+              "type": "string",
+              "value": "={{ $json.content ? $json.content.substring(0, 500) : 'No summary available' }}"
+            },
+            {
+              "name": "Score",
+              "type": "number",
+              "value": "={{ $json.score || 0 }}"
+            },
+            {
+              "name": "Scraped_Date",
+              "type": "string",
+              "value": "={{ $now.format('YYYY-MM-DD HH:mm:ss') }}"
+            },
+            {
+              "name": "Source",
+              "type": "string",
+              "value": "Hacker News"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "airtable-insert",
+      "name": "Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        300
+      ],
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_TABLE_NAME",
+          "mode": "name"
+        }
+      }
+    },
+    {
+      "id": "aggregate-results",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        300
+      ],
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldName": "Title",
+              "aggregationFunction": "count"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "format-telegram",
+      "name": "Format Telegram Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1650,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "js",
+        "jsCode": "// Get all scraped items\nconst items = $input.all();\nconst count = items[0].json.Title;\n\n// Get original Tavily results from earlier in workflow\nconst tavilyResults = $('Extract Results').item.json.results;\n\n// Format top 5 stories\nconst topStories = tavilyResults.slice(0, 5).map((story, index) => {\n  const title = story.title.length > 60 ? story.title.substring(0, 60) + '...' : story.title;\n  const preview = story.content ? story.content.substring(0, 100) + '...' : 'No preview';\n  return `${index + 1}. *${title}*\\n   ${preview}\\n   [Read more](${story.url})`;\n}).join('\\n\\n');\n\n// Create summary message with emojis\nconst message = `🚀 *Hacker News Update*\\n_${new Date().toLocaleString()}_\\n\\n📊 *Summary:*\\n• Total stories scraped: ${count}\\n• Saved to Airtable: ✅\\n\\n📰 *Top 5 Stories:*\\n\\n${topStories}\\n\\n⏰ _Next update in 6 hours_`;\n\nreturn [\n  {\n    json: {\n      message: message,\n      totalStories: count,\n      timestamp: new Date().toISOString()\n    }\n  }\n];"
+      }
+    },
+    {
+      "id": "telegram-send",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1850,
+        300
+      ],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "YOUR_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "disable_web_page_preview": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Results": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Format for Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format for Airtable": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Format Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

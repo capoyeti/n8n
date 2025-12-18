@@ -1,0 +1,524 @@
+{
+  "id": "wPg2Gapx0tf8zDxI",
+  "name": "KM WhatsApp - working copy",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "id": "ee47fb5c-f1a9-46fc-9a71-93e691ed9b3f",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        640,
+        380
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "450053168194790",
+        "recipientPhoneNumber": "={{ $json.body.entry[0].changes[0].value.contacts[0].wa_id }}",
+        "textBody": "=Echo back: {{ $json.body.entry[0].changes[0].value.messages[0].text.body }}\n\nReceived from: {{ $json.body.entry[0].changes[0].value.contacts[0].profile.name }}\n\nand the phone number is {{ $json.body.entry[0].changes[0].value.contacts[0].wa_id }}\n",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "id": "5f052c21-db5e-4599-8f00-fa5fb7243b03",
+      "name": "Echo the message back",
+      "type": "n8n-nodes-base.whatsApp",
+      "position": [
+        1880,
+        420
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "All the perms WA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "8a765e57-8e39-4547-a99a-0458df2b75f4",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.messages[0] }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "looseTypeValidation": true
+        }
+      },
+      "id": "c8e1b6bf-a5ed-4009-a412-12b0e4f26f1b",
+      "name": "Is message?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        640,
+        740
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## Verify Webhook\n* Go to your [Meta for Developers App page](https://developers.facebook.com/apps/), navigate to the App settings\n* Add a **production webhook URL** as a new Callback URL\n* *Verify* webhook receives a GET Request and sends back a verification code\n",
+        "height": 272,
+        "width": 618
+      },
+      "id": "823cd819-9754-4ded-b8f8-7cb8694352e7",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Main flow\n* *Respond* webhook receives various POST Requests from Meta regarding WhatsApp messages (user messages + status notifications)\n* Check if the incoming JSON contains user message\n* Echo back the text message to the user. This is a custom message, not a WhatsApp Business template message",
+        "height": 343,
+        "width": 619
+      },
+      "id": "f3f62c68-26ec-415e-9112-7bbad33b2800",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Important!\n### Configure the webhook nodes this way:\n* Make sure that both *Verify* and *Respond* have the same URL\n* *Verify* should have GET HTTP Method\n* *Respond* should have POST HTTP Method",
+        "height": 177,
+        "width": 405,
+        "color": 3
+      },
+      "id": "a8778c7a-b45d-44c0-8d52-9c5e16ddc308",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "eb74818c-8a25-4f20-91d5-edd039014e55",
+      "name": "Switch1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        2320,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "phoneNumberId": "450053168194790",
+        "recipientPhoneNumber": "={{ $json.contacts[0].wa_id }}",
+        "template": "hello_world|en_US",
+        "requestOptions": {}
+      },
+      "id": "eb39d7e4-4094-4616-b45e-9390475233d9",
+      "name": "WhatsApp Business Cloud",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        420
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "All the perms WA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ed9dc2ef-cc72-4591-ac4e-7cf8a98b976f",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        960,
+        900
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "a1b389b6-903b-4745-8250-c1e2305f5446",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "name": "database",
+        "description": "details about the knysna montessori school"
+      },
+      "id": "8a7e8ff1-58db-4a41-a2ec-1c4cd81baf01",
+      "name": "Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "0bea5d61-ceaf-4caa-9c0d-1b0d095e10cd",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        1200
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "1ca74f22-02aa-4111-ab84-57b45f5ed37d",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        1060
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "montessori",
+          "mode": "list",
+          "cachedResultName": "montessori"
+        },
+        "options": {
+          "pineconeNamespace": "general_info"
+        }
+      },
+      "id": "e6c6378b-8a31-4406-a271-8b267124c73b",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        1060
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "knysna-montessori-chatbot",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "937bca1f-8112-42f6-9fbe-482d077aa115",
+      "name": "Verify1",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        440,
+        740
+      ],
+      "webhookId": "67f603dc-8c0a-4d08-84f0-86e99429aa97",
+      "typeVersion": 1.1,
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "GVVqgKmORZQzVntk",
+          "name": "summit"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "humanMessage": "TOOLS\n------\nAssistant can ask the user to use tools to look up information that may be helpful in answering the users original question. The tools the human can use are:\n\n{tools}\n\n{format_instructions}\n\nUSER'S INPUT\n--------------------\nHere is the user's input (remember to respond with a markdown code snippet of a json blob with a single action, and NOTHING else):\n\n{{input}}",
+          "systemMessage": "You are a helpful AI assistant. You are chatting with the user named {{ $json.message.from.first_name }}. Today is {{ DateTime.fromISO($now).toLocaleString(DateTime.DATETIME_FULL) }}.\n\nIf a user requests a document (such as by asking for 'school fees', 'application forms', information about preschool, middle school, high school or similar), use the Send Document tool to send the relevant document. Do not attempt to retrieve this information from the Pinecone vector store. If the user does not specifically request these documents to be sent, query the attached database for the information.\n\nTools include:\n\nDatabase tool for general queries.\nImage generation tool for image creation.\nSend Document tool for sending documents (use this when a document is requested, such as 'school fees').\nIn your reply, always send a message in general HTML format. Here are the formatting instructions:\n\nThe following tags are currently supported: <b>bold</b>, <strong>bold</strong>, <i>italic</i>, <em>italic</em>, <u>underline</u>, <ins>underline</ins>, <s>strikethrough</s>, <strike>strikethrough</strike>, <del>strikethrough</del>, <span class=\"tg-spoiler\">spoiler</span>, <tg-spoiler>spoiler</tg-spoiler>, <b>bold <i>italic bold <s>italic bold strikethrough <span class=\"tg-spoiler\">italic bold strikethrough spoiler</span></s> <u>underline italic bold</u></i> bold</b>, <a href=\"http://www.example.com/\">inline URL</a>, <code>inline fixed-width code</code>, <pre>pre-formatted fixed-width code block</pre>.\"<span class=\"tg-spoiler\">spoiler</span>, <tg-spoiler>spoiler</tg-spoiler>\n<b>bold <i>italic bold <s>italic bold strikethrough <span class=\"tg-spoiler\">italic bold strikethrough spoiler</span></s> <u>underline italic bold</u></i> bold</b>\n<a href=\"http://www.example.com/\">inline URL</a>\n<code>inline fixed-width code</code>\n<pre>pre-formatted fixed-width code block</pre>"
+        }
+      },
+      "id": "8ee90bad-fba2-4d19-b59d-27a03fd5cff5",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1080,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "path": "knysna-montessori-chatbot",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0918b5a2-e06a-439f-9470-8a770e3b3c13",
+      "name": "Verify",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        420,
+        380
+      ],
+      "webhookId": "0ebb5bda-b3a3-4187-a187-7922fa22e55d",
+      "typeVersion": 1.1,
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "GVVqgKmORZQzVntk",
+          "name": "summit"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Is message?": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Echo the message back": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Business Cloud": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify1": {
+      "main": [
+        [
+          {
+            "node": "Is message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Echo the message back",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    },
+    {
+      "updatedAt": "2024-09-22T09:22:06.260Z",
+      "createdAt": "2024-09-22T09:22:06.260Z",
+      "id": "pH5gPyJAqv8IwfPP",
+      "name": "vpc"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateId": "2162",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

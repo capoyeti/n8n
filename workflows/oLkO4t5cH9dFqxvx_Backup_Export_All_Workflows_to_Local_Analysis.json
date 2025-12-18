@@ -1,0 +1,156 @@
+{
+  "id": "oLkO4t5cH9dFqxvx",
+  "name": "📦 Backup: Export All Workflows to Local + Analysis",
+  "active": false,
+  "nodes": [
+    {
+      "id": "trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "http-1",
+      "name": "Get All Workflows (Full)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.N8N_HOST || 'http://localhost:5678' }}/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      }
+    },
+    {
+      "id": "code-analyze",
+      "name": "Analyze & Prepare Export",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst workflows = response.data || response;\n\n// Analyze all workflows\nconst analysis = {\n  totalWorkflows: workflows.length,\n  activeWorkflows: workflows.filter(w => w.active).length,\n  exportDate: new Date().toISOString(),\n  credentials: new Set(),\n  nodeTypes: new Set(),\n  tags: new Set(),\n  webhookPaths: [],\n  workflowSummary: []\n};\n\nconst exportData = workflows.map(workflow => {\n  // Track credentials needed\n  workflow.nodes?.forEach(node => {\n    if (node.credentials) {\n      Object.keys(node.credentials).forEach(credType => {\n        analysis.credentials.add(credType);\n      });\n    }\n    analysis.nodeTypes.add(node.type);\n    \n    // Track webhook paths\n    if (node.type.includes('webhook')) {\n      const path = node.parameters?.path;\n      if (path) {\n        analysis.webhookPaths.push({\n          workflow: workflow.name,\n          path: path\n        });\n      }\n    }\n  });\n  \n  workflow.tags?.forEach(tag => {\n    analysis.tags.add(tag.name);\n  });\n  \n  // Summary for checklist\n  analysis.workflowSummary.push({\n    name: workflow.name,\n    id: workflow.id,\n    active: workflow.active,\n    nodeCount: workflow.nodes?.length || 0,\n    hasWebhook: workflow.nodes?.some(n => n.type.includes('webhook')) || false\n  });\n  \n  // Clean workflow for export (strip credential IDs but keep type)\n  return {\n    name: workflow.name,\n    id: workflow.id,\n    active: workflow.active,\n    nodes: workflow.nodes?.map(node => {\n      const cleaned = { ...node };\n      if (cleaned.credentials) {\n        // Keep credential type names but remove IDs\n        cleaned._credentialTypes = Object.keys(cleaned.credentials);\n        delete cleaned.credentials;\n      }\n      return cleaned;\n    }) || [],\n    connections: workflow.connections || {},\n    settings: workflow.settings || {},\n    tags: workflow.tags?.map(t => t.name) || []\n  };\n});\n\n// Convert Sets to Arrays\nanalysis.credentials = Array.from(analysis.credentials);\nanalysis.nodeTypes = Array.from(analysis.nodeTypes);\nanalysis.tags = Array.from(analysis.tags);\n\nreturn {\n  json: {\n    analysis,\n    workflows: exportData,\n    migrationChecklist: {\n      title: 'n8n Cloud Migration Checklist',\n      generatedAt: analysis.exportDate,\n      steps: [\n        { step: 1, task: 'Create credentials on n8n Cloud', items: analysis.credentials },\n        { step: 2, task: 'Import workflows via n8n UI or API', count: analysis.totalWorkflows },\n        { step: 3, task: 'Update webhook URLs (new Cloud domain)', webhooks: analysis.webhookPaths },\n        { step: 4, task: 'Update external services with new webhook URLs', services: analysis.webhookPaths.map(w => w.workflow) },\n        { step: 5, task: 'Test each workflow before activating', workflows: analysis.workflowSummary.filter(w => w.active) },\n        { step: 6, task: 'Activate workflows on Cloud', count: analysis.activeWorkflows }\n      ]\n    }\n  }\n};"
+      }
+    },
+    {
+      "id": "code-files",
+      "name": "Generate File Contents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Generate individual workflow files + summary files\nconst files = [];\n\n// 1. Individual workflow JSONs\ndata.workflows.forEach(workflow => {\n  const filename = workflow.name\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, '-')\n    .replace(/^-|-$/g, '') + '.json';\n  \n  files.push({\n    filename: `workflows/${filename}`,\n    content: JSON.stringify(workflow, null, 2),\n    type: 'workflow'\n  });\n});\n\n// 2. Analysis summary\nfiles.push({\n  filename: 'ANALYSIS.json',\n  content: JSON.stringify(data.analysis, null, 2),\n  type: 'analysis'\n});\n\n// 3. Migration checklist as Markdown\nconst checklist = data.migrationChecklist;\nlet md = `# ${checklist.title}\\n\\n`;\nmd += `Generated: ${checklist.generatedAt}\\n\\n`;\nmd += `## Summary\\n`;\nmd += `- Total workflows: ${data.analysis.totalWorkflows}\\n`;\nmd += `- Active workflows: ${data.analysis.activeWorkflows}\\n`;\nmd += `- Credential types needed: ${data.analysis.credentials.length}\\n`;\nmd += `- Webhooks to update: ${data.analysis.webhookPaths.length}\\n\\n`;\n\nmd += `## Credentials to Create on n8n Cloud\\n\\n`;\ndata.analysis.credentials.forEach(cred => {\n  md += `- [ ] ${cred}\\n`;\n});\n\nmd += `\\n## Webhooks That Need URL Updates\\n\\n`;\nmd += `| Workflow | Current Path | New Cloud URL |\\n`;\nmd += `|----------|--------------|---------------|\\n`;\ndata.analysis.webhookPaths.forEach(wh => {\n  md += `| ${wh.workflow} | ${wh.path} | https://YOUR-CLOUD.app.n8n.cloud/webhook/${wh.path} |\\n`;\n});\n\nmd += `\\n## Workflows to Migrate\\n\\n`;\nmd += `| Name | Nodes | Active | Has Webhook |\\n`;\nmd += `|------|-------|--------|-------------|\\n`;\ndata.analysis.workflowSummary.forEach(w => {\n  md += `| ${w.name} | ${w.nodeCount} | ${w.active ? '✅' : '❌'} | ${w.hasWebhook ? '⚠️' : '-'} |\\n`;\n});\n\nfiles.push({\n  filename: 'MIGRATION_CHECKLIST.md',\n  content: md,\n  type: 'checklist'\n});\n\n// 4. All workflows in one file (for bulk import)\nfiles.push({\n  filename: 'ALL_WORKFLOWS.json',\n  content: JSON.stringify(data.workflows, null, 2),\n  type: 'bulk'\n});\n\nreturn files.map(f => ({ json: f }));"
+      }
+    },
+    {
+      "id": "sticky-1",
+      "name": "Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -200
+      ],
+      "parameters": {
+        "content": "## Backup & Migration Toolkit\n\n**What this does:**\n1. Exports ALL workflows from self-hosted\n2. Analyzes credentials needed\n3. Lists webhooks that need URL updates\n4. Generates migration checklist\n5. Creates individual + bulk export files\n\n**Output:**\n- `workflows/*.json` - Individual workflows\n- `ANALYSIS.json` - Stats and metadata\n- `MIGRATION_CHECKLIST.md` - Step-by-step guide\n- `ALL_WORKFLOWS.json` - Bulk import file\n\n**To save locally:**\nAdd a Write File node or use the output.",
+        "width": 350,
+        "height": 320
+      }
+    },
+    {
+      "id": "set-1",
+      "name": "Output Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "message",
+              "value": "=Export complete! Generated {{ $input.all().length }} files. Copy the output to save locally.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get All Workflows (Full)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Workflows (Full)": {
+      "main": [
+        [
+          {
+            "node": "Analyze & Prepare Export",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze & Prepare Export": {
+      "main": [
+        [
+          {
+            "node": "Generate File Contents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate File Contents": {
+      "main": [
+        [
+          {
+            "node": "Output Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

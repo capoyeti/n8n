@@ -1,0 +1,934 @@
+{
+  "id": "vsz1p3xIJSkLjbBt",
+  "name": "LAIT - Upwork Template  Get Jobs 1",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Get all UpWork job listings from Airtable database \nThis node retrieves all saved UpWork job listings stored in a specified Airtable table. It performs a \"getAll\" operation to fetch all rows from the\n\n\n",
+        "height": 401.5302448356095,
+        "width": 275.0980488781304,
+        "color": 6
+      },
+      "id": "80efa0ac-f7e3-438f-adac-57eaa9bce4e0",
+      "name": "Sticky Note20",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## New listings response\nIf new listings are found this responses with a link to the airtable where the new listing are saved. \n\nThere you can review the listings and select the ones you want to apply. That will trigger part of this flow",
+        "height": 452,
+        "width": 297
+      },
+      "id": "24e4add4-4714-4dda-9153-fca561a93ba7",
+      "name": "Sticky Note22",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2380,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Merge data and keep unique job listing\nThis node merges and filters the extracted job listing links, ensuring that only unique UpWork job listing URLs are processed. It prevents duplicate listings from being handled.\n",
+        "height": 453.8095759017043,
+        "width": 273,
+        "color": 7
+      },
+      "id": "9ed95c10-060a-4671-8b48-4e3eb417d402",
+      "name": "Sticky Note18",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "base",
+        "options": {}
+      },
+      "id": "f890490d-09a4-4dc2-8ced-b3492e921c62",
+      "name": "Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        540,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "getAll",
+        "projectId": "psdqqm1bzphkodc",
+        "table": "mpagw9n92ran52o",
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "0f9a9c4e-9f3a-4f17-8d06-2baa3608781c",
+      "name": "NocoDB",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        640,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Download The Airtable Base HERE 👇\n[**https://airtable.com/appYPPKwvaSrFBvXu/shrtS0vfQGwSeOuaC**](https://airtable.com/appYPPKwvaSrFBvXu/shrtS0vfQGwSeOuaC)\n[![Video Thumbnail](https://storage.googleapis.com/msgsndr/fPZF8TtEOBArQpRVQPgN/media/6796229064e3ccc854f01338.png)](https://airtable.com/appYPPKwvaSrFBvXu/shrtS0vfQGwSeOuaC)\n",
+        "height": 343,
+        "width": 777,
+        "color": 6
+      },
+      "id": "b0c3f176-02eb-4063-88cc-4326a84d7151",
+      "name": "Sticky Note13",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        20,
+        1120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n1. **Connect to Airtable**: Ensure your Airtable account is connected and the necessary table for job listings is set up.\n\n2. **Configure APIFY**: Get your APIFY API key and create your credential.\n\n3. **Deploy Web Form**: Implement the form to capture job search criteria from users.\n\n4. **Set Up Webhook**: Configure webhooks for serving the webpage and handling responses.",
+        "height": 300,
+        "width": 360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        20,
+        800
+      ],
+      "typeVersion": 1,
+      "id": "6829eab7-112f-4063-9819-bba4d2616dcd",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Tools That Are Interchangeable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n`Airtable` can be swapped with another service like `Google Sheets` or `NocoDB`",
+        "height": 520,
+        "width": 400,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        580
+      ],
+      "typeVersion": 1,
+      "id": "748a6546-2271-4adb-a1cb-6476ec5bd9d6",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## What this workflow does\n1. **Scrapes Upwork** for jobs based on the criteria completed in the trigger form.\n\n2. **Retrieve and Filter Job Listings**: The workflow checks Airtable for existing listings to avoid duplicates.\n\n3. **Writes the listing to an Airtable**: So the listings can be reviewed and suitable listings selected to ctead application with AI in part of the flow.\n\n4. **Airtable is used to check for duplicate listings**: Only unique listings are written to the Airtable.\n\n5. **Serve Webpage with Application Details**: A webpage is served displaying either a success notice if new listings are found, or an error notice that there are no new listings since your last search.\n\n6. **Update Airtable with new listings**: Only new listings are written to the airtable.",
+        "height": 500,
+        "width": 360,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        20,
+        280
+      ],
+      "typeVersion": 1,
+      "id": "d47da71c-31c5-4f9b-93ad-0494a256bab9",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "### Get More Templates Like This 👇\n[**https://letsautomateit.biz/community/**](https://letsautomateit.biz/community/)\n[![Video Thumbnail](https://onlinethinking.io/wp-content/uploads/2024/10/Lets-Automate-It-Community.png)](https://letsautomateit.biz/community/)",
+        "height": 280,
+        "width": 400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        280
+      ],
+      "typeVersion": 1,
+      "id": "0745f5a4-502b-41f9-adce-9844ed6decf0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Automate UpWork Job Applications with AI\nBuilt for the [**Let's Automate It Community**](https://letsautomateit.biz/community/) by [Robin Tindall](https://za.linkedin.com/in/robin-tindall) & [Darryn Balanco](https://uk.linkedin.com/in/darrynbalanco)\n\nThis workflow streamlines the process of managing UpWork job applications by integrating Airtable for data storage and an AI model for generating cover letters. By automating these tasks, it enhances efficiency and consistency in job applications.\n\n## Part 1 of The Upwork Application Workflow\n`Part 1` scrapes upwork for jobs with a particular keyword and location. If a new job listing is found it added to an airtable.",
+        "height": 1480,
+        "width": 820,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "6ff2fa8f-91c1-46db-9c0f-a538a461f22d",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1O9pfcHoDrdGGK7MmGqLhEQDMBQdv1yqCgCJtGgaxZ9s",
+          "mode": "list",
+          "cachedResultName": "Superhero_Camp_Parent_Intake",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O9pfcHoDrdGGK7MmGqLhEQDMBQdv1yqCgCJtGgaxZ9s/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O9pfcHoDrdGGK7MmGqLhEQDMBQdv1yqCgCJtGgaxZ9s/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        920
+      ],
+      "id": "3613e5ba-308a-4b85-b305-6911d8267328",
+      "name": "Google Sheets"
+    },
+    {
+      "parameters": {
+        "content": "### **Create Personal Access Token:**\nPersonal access tokens grant permission to read and write data via the Airtable API.\n[https://airtable.com/create/tokens](https://airtable.com/create/tokens)\n\n### **Register an OAuth integration:**\nOAuth integrations let users grant your service or application API access to their Airtable data.\n[https://airtable.com/create/oauth](https://airtable.com/create/oauth)",
+        "height": 203,
+        "width": 737,
+        "color": 6
+      },
+      "id": "0b422c2e-e3e8-4168-80d9-52782bedf945",
+      "name": "Sticky Note14",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        40,
+        1240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apifyscraper~upwork-jobs-scraper/run-sync-get-dataset-items",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "apifyApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"clientLocations\": [\n        \"{{ $json.Country }}\"\n    ],\n    \"maxResults\": {{ $json['Max results'] }},\n    \"proxyConfiguration\": {\n        \"useApifyProxy\": true,\n        \"apifyProxyGroups\": [\n            \"RESIDENTIAL\"\n        ]\n    },\n    \"searchQueries\": [\n        \"{{ $json['Search Term'] }}\"\n    ]\n} \n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        840
+      ],
+      "id": "1ff6c4b4-3a4d-4e5a-aaaf-c34ed2086f48",
+      "name": "Scrape Upwork"
+    },
+    {
+      "parameters": {
+        "content": "## n8n Form Trigger\nComplete the form to search Upwork for jobs suited to you",
+        "height": 340,
+        "width": 220
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        980,
+        680
+      ],
+      "typeVersion": 1,
+      "id": "c6f00f5c-fb6e-4d54-b5d8-c181de3a8feb",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "path": "05d01e01-f5d7-443c-a99a-21122ec907d4",
+        "formTitle": "Let's Automate It: UpWork Jobs",
+        "formDescription": "Search Upwork for Job Listings.\n\nRecommendation: Do a test search on Upwork first to find search criteria that return good results.\n\nSet Max results to smaller rather than a larger number to control your APIFY scarping costs. We recommend between 5 and 10 results.\n\nBelow is a list of regions or countries you can use to narrow your search. Leave blank for a global search. \n\nRegions:\nAfrica Americas Antarctica Asia Europe Oceania Subregions Australia and New Zealand Caribbean Central America Central Asia Eastern Africa Eastern Asia Eastern Europe Melanesia Micronesia Middle Africa Northern Africa Northern America Northern Europe Polynesia South America South-Eastern Asia Southern Africa Southern Asia Southern Europe Western Africa Western Asia Western Europe\n\nCountries\nAlbania Algeria American Samoa Andorra Angola Anguilla Antigua and Barbuda Argentina Armenia Aruba Australia Austria Azerbaijan Bahamas Bahrain Bangladesh Barbados Belarus Belgium Belize Benin Bermuda Bhutan Bolivia Bonaire, Sint Eustatius and Saba Bosnia and Herzegovina Botswana Bouvet Island Brazil British Indian Ocean Territory British Virgin Islands Brunei Darussalam Bulgaria Burkina Faso Burundi Cambodia Cameroon Canada Cape Verde Cayman Islands Central African Republic Chad Chile China Christmas Island Cocos (Keeling) Islands Colombia Comoros Congo Congo, the Democratic Republic of the Cook Islands Costa Rica Cote d'Ivoire Croatia Curacao Cyprus Czech Republic Denmark Djibouti Dominica Dominican Republic Ecuador Egypt El Salvador Equatorial Guinea Eritrea Estonia Ethiopia Falkland Islands Faroe Islands Fiji Finland France French Guiana French Polynesia French Southern and Antarctic Lands Gabon Gambia Georgia Germany Ghana Gibraltar Greece Greenland Grenada Guadeloupe Guam Guatemala Guernsey Guinea Guinea-Bissau Guyana Haiti Heard Island and McDonald Islands Holy See Honduras Hong Kong Hungary Iceland India Indonesia Ireland Isle of Man Israel Italy Jamaica Japan Jersey Jordan Kazakhstan Kenya Kiribati Kuwait Kyrgyzstan Laos Latvia Lebanon Lesotho Liechtenstein Lithuania Luxembourg Macao Macedonia Madagascar Malawi Malaysia Maldives Mali Malta Marshall Islands Martinique Mauritania Mauritius Mayotte Mexico Micronesia, Federated States of Moldova Monaco Mongolia Montenegro Montserrat Morocco Mozambique Myanmar Namibia Nauru Nepal Netherlands Netherlands Antilles New Caledonia New Zealand Nicaragua Niger Nigeria Niue Norfolk Island Northern Mariana Islands Norway Oman Pakistan Palau Palestinian Territories Panama Papua New Guinea Paraguay Peru Philippines Pitcairn Poland Portugal Puerto Rico Qatar Reunion Romania Russia Rwanda Saint Barthelemy Saint Helena Saint Kitts and Nevis Saint Lucia Saint Martin (French part) Saint Pierre and Miquelon Saint Vincent and the Grenadines Samoa San Marino Sao Tome and Principe Saudi Arabia Senegal Serbia Seychelles Sierra Leone Singapore Sint Maarten (Dutch part) Slovakia Slovenia Solomon Islands Somalia South Africa South Korea Spain Sri Lanka Suriname Svalbard and Jan Mayen Swaziland Sweden Switzerland Taiwan Tajikistan Tanzania Thailand Timor-Leste Togo Tokelau Tonga Trinidad and Tobago Tunisia Turkey Turkmenistan Turks and Caicos Islands Tuvalu Uganda Ukraine United Arab Emirates United Kingdom United States United States Minor Outlying Islands United States Virgin Islands Uruguay Uzbekistan Vanuatu Venezuela Vietnam Wallis and Futuna Western Sahara Yemen Zambia Zimbabwe",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Search Term",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Max results"
+            },
+            {
+              "fieldLabel": "Country"
+            }
+          ]
+        },
+        "responseMode": "responseNode",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "65e08036-4cc6-4ffc-9b61-813b0cf9c9ab",
+      "name": "n8n Form Trigger",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        1040,
+        840
+      ],
+      "webhookId": "05d01e01-f5d7-443c-a99a-21122ec907d4",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "## Trigger Apify Scrape\nApify.com is a market of \"actors\" or \"scrapers\". This node starts an Upwork Scraper that will search for jobs based on the criteria supplied in the trigger form and return any suitable jobs found",
+        "height": 440,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1240,
+        580
+      ],
+      "typeVersion": 1,
+      "id": "9a3b698a-35f5-47fb-ba49-4f48423965a7",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Sets the results of the Apify Scrape\n",
+        "height": 320,
+        "width": 220
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        800
+      ],
+      "typeVersion": 1,
+      "id": "c2094040-7163-490f-b431-a945a848889a",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "618a537d-d8d2-48fd-99fd-fa2cfe554954",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "15a2090c-dbbc-45bb-b3c5-c90c00f03165",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "b84ee730-fe24-4b82-a3ba-ca2df07b0751",
+              "name": "url",
+              "value": "=https://www.upwork.com{{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "9cd88a7b-3fbb-412e-825a-110465f4efea",
+              "name": "contractType",
+              "value": "={{ $json.contractType }}",
+              "type": "string"
+            },
+            {
+              "id": "0ce78a46-f035-4a3f-96a9-6665f5bc1b62",
+              "name": "Question 1",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "6b70ae8d-6ec1-4af0-aec1-10b3954617a2",
+              "name": "Question 2",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "678ff81c-4674-4fee-9c20-6a33f5c47679",
+              "name": "Question 3",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "ce7213a6-1555-4087-a878-f856483352e2",
+              "name": "Airtable URL",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "d4460698-78d5-4780-9375-d5f1c8204155",
+              "name": "postedAt",
+              "value": "={{ $json.postedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "1d3aef29-0fce-4482-8438-308b9bd3fa08",
+              "name": "Search term",
+              "value": "={{ $('n8n Form Trigger').item.json['Search Term'] }}",
+              "type": "string"
+            },
+            {
+              "id": "ae5aedd6-76fb-4f73-a686-e2d99a67babf",
+              "name": "Country searched",
+              "value": "={{ $('n8n Form Trigger').item.json.Country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1580,
+        840
+      ],
+      "id": "f921df40-e55b-4fea-b861-adc890418962",
+      "name": "Set Scrape Results"
+    },
+    {
+      "parameters": {
+        "content": "## No new jobs found\nIf no new jobs are found since the last search then this responds",
+        "height": 320,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2100,
+        120
+      ],
+      "typeVersion": 1,
+      "id": "f2409424-8fe6-4e33-95ac-928d949ac6a2",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>UpWork Job Application</title>\n    <style>\n        body {\n            font-family: 'Open Sans', Tahoma, Geneva, Verdana, sans-serif;\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            justify-content: center;\n            min-height: 100vh;\n            background-color: #121212;\n            color: #e0e0e0;\n        }\n        .container {\n            margin-top: 2em;\n            width: 90%;\n            max-width: 670px; /* Increased the max-width for the main image area */\n            text-align: center;\n            background: #1e1e1e;\n            padding: 24px;\n            border-radius: 12px;\n            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);\n            margin-bottom: 24px;\n        }\n        .image-container {\n            margin-bottom: 20px;\n        }\n        .image-container img {\n            max-width: 35%;\n            height: auto;\n            padding: 0px;\n            border-radius: 10px;\n            border: 2px solid #5E16EB;\n        }\n        .style-text {\n            font-size: 16px;\n            font-weight: 500;\n            text-align: center;\n            margin-bottom: 20px;\n            color: #bbb;\n        }\n/* Indented bullet points */\n        ul {\n            list-style-type: disc;\n            margin-left: 40px !important;  /* Indentation */\n            color: #bbb;\n        }\n        ul li {\n            margin-bottom: 10px !important;\n            font-size: 16px;\n        }\n        .cta {\n            display: block;\n            width: 100%;\n            margin: 20px 0 0;\n            padding: 18px 0;\n            border: 3px solid #5E16EB;\n            border-radius: 6px;\n            text-decoration: none;\n            text-align: center;\n            color: #fff;\n            background-color: #5E16EB;\n            font-size: 18px;\n            font-weight: 400;\n            cursor: pointer;\n            transition: all 0.3s ease;\n        }\n        .cta:hover {\n            color: #1e1e1e;\n            background-color: #fefefe;\n            border: 3px solid #5E16EB;\n            transform: translateY(-2px);\n            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);\n        }\n        /* New section for recent renders */\n        .recent-renders {\n            display: flex;\n            justify-content: space-between;\n            flex-wrap: wrap;\n            gap: 16px;\n            margin-top: 24px;\n            max-width: 670px;\n        }\n        .recent-render img {\n            width: 100%;\n            max-width: 180px;\n            height: auto;\n            border-radius: 8px;\n            border: 2px solid #333;\n        }\n        .recent-render {\n            flex: 1;\n            max-width: 200px;\n            background-color: #2c2c2c;\n            padding: 10px;\n            border-radius: 10px;\n            margin-bottom: 3 rem;\n        }\n\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"image-container\">\n            <img src=\"https://storage.googleapis.com/msgsndr/fPZF8TtEOBArQpRVQPgN/media/6773cf8ac7fbee73833d6337.png\" alt=\"Let's Automate It\" />\n        </div>\n        <div class=\"style-text\">Any new job listings have been inserted in your Airtable</div>\n        <a href=\"\" class=\"cta\">Access your Airtable</a>\n    </div>\n<body/>",
+        "options": {}
+      },
+      "id": "9bfc0256-7be9-4e54-a175-a48691cf768f",
+      "name": "Respond with no new jobs",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        2180,
+        280
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appa5Vx8rYKjCaE1W",
+          "mode": "list",
+          "cachedResultName": "Let's Automate It OS",
+          "cachedResultUrl": "https://airtable.com/appa5Vx8rYKjCaE1W"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblorWAEGzO2ObItH",
+          "mode": "list",
+          "cachedResultName": "UpWork Job Applications",
+          "cachedResultUrl": "https://airtable.com/appWhoplrVJsldKS9/tblorWAEGzO2ObItH"
+        },
+        "filterByFormula": "=({URL} = '{{ $json.url }}')",
+        "options": {},
+        "sort": {
+          "property": [
+            {
+              "field": "CreatedAt",
+              "direction": "desc"
+            }
+          ]
+        }
+      },
+      "id": "76f43540-41ff-42e1-9d18-b9172b8bc5d7",
+      "name": "Airtable (Get All UpWork Job listings",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1860,
+        600
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>UpWork Job Application</title>\n    <style>\n        body {\n            font-family: 'Open Sans', Tahoma, Geneva, Verdana, sans-serif;\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            justify-content: center;\n            min-height: 100vh;\n            background-color: #121212;\n            color: #e0e0e0;\n        }\n        .container {\n            margin-top: 2em;\n            width: 90%;\n            max-width: 670px; /* Increased the max-width for the main image area */\n            text-align: center;\n            background: #1e1e1e;\n            padding: 24px;\n            border-radius: 12px;\n            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);\n            margin-bottom: 24px;\n        }\n        .image-container {\n            margin-bottom: 20px;\n        }\n        .image-container img {\n            max-width: 35%;\n            height: auto;\n            padding: 0px;\n            border-radius: 10px;\n            border: 2px solid #5E16EB;\n        }\n        .style-text {\n            font-size: 16px;\n            font-weight: 500;\n            text-align: center;\n            margin-bottom: 20px;\n            color: #bbb;\n        }\n/* Indented bullet points */\n        ul {\n            list-style-type: disc;\n            margin-left: 40px !important;  /* Indentation */\n            color: #bbb;\n        }\n        ul li {\n            margin-bottom: 10px !important;\n            font-size: 16px;\n        }\n        .cta {\n            display: block;\n            width: 100%;\n            margin: 20px 0 0;\n            padding: 18px 0;\n            border: 3px solid #5E16EB;\n            border-radius: 6px;\n            text-decoration: none;\n            text-align: center;\n            color: #fff;\n            background-color: #5E16EB;\n            font-size: 18px;\n            font-weight: 400;\n            cursor: pointer;\n            transition: all 0.3s ease;\n        }\n        .cta:hover {\n            color: #1e1e1e;\n            background-color: #fefefe;\n            border: 3px solid #5E16EB;\n            transform: translateY(-2px);\n            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);\n        }\n        /* New section for recent renders */\n        .recent-renders {\n            display: flex;\n            justify-content: space-between;\n            flex-wrap: wrap;\n            gap: 16px;\n            margin-top: 24px;\n            max-width: 670px;\n        }\n        .recent-render img {\n            width: 100%;\n            max-width: 180px;\n            height: auto;\n            border-radius: 8px;\n            border: 2px solid #333;\n        }\n        .recent-render {\n            flex: 1;\n            max-width: 200px;\n            background-color: #2c2c2c;\n            padding: 10px;\n            border-radius: 10px;\n            margin-bottom: 3 rem;\n        }\n\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"image-container\">\n            <img src=\"https://storage.googleapis.com/msgsndr/fPZF8TtEOBArQpRVQPgN/media/6773cf8ac7fbee73833d6337.png\" alt=\"Let's Automate It\" />\n        </div>\n        <div class=\"style-text\">Any new job listings have been inserted in your Airtable</div>\n        <a href=\"\" class=\"cta\">Access your Airtable</a>\n    </div>\n<body/>",
+        "options": {}
+      },
+      "id": "b9299e36-ab02-4992-a6a3-d4af79a042cf",
+      "name": "New listings are available",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        2460,
+        760
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appWhoplrVJsldKS9",
+          "mode": "list",
+          "cachedResultName": "Let's Automate It OS",
+          "cachedResultUrl": "https://airtable.com/appWhoplrVJsldKS9"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblorWAEGzO2ObItH",
+          "mode": "list",
+          "cachedResultName": "UpWork Job Applications",
+          "cachedResultUrl": "https://airtable.com/appWhoplrVJsldKS9/tblorWAEGzO2ObItH"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "❓Applied On UpWork": false,
+            "Job Listing Title": "={{ $('Merge data and keep unique results').item.json.title }}",
+            "Additional Question #1": "={{ $('Merge data and keep unique results').item.json['Question 1'] }}",
+            "Additional Question #2": "={{ $('Merge data and keep unique results').item.json['Question 2'] }}",
+            "Additional Question #3": "={{ $('Merge data and keep unique results').item.json['Question 3'] }}",
+            "Description": "={{ $('Merge data and keep unique results').item.json.description }}",
+            "URL": "={{ $('Merge data and keep unique results').item.json.url }}",
+            "Contract Type": "={{ $('Merge data and keep unique results').item.json.contractType }}",
+            "Job posting recency": "={{ $('Merge data and keep unique results').item.json.postedAt }}",
+            "Search term": "={{ $('Merge data and keep unique results').item.json['Search term'] }}",
+            "Country searched": "={{ $('Merge data and keep unique results').item.json['Country searched'] }}",
+            "id": "=",
+            "Apply": false
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Job Listing Title",
+              "displayName": "Job Listing Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Search term",
+              "displayName": "Search term",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Country searched",
+              "displayName": "Country searched",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "CreatedAt",
+              "displayName": "CreatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Job posting recency",
+              "displayName": "Job posting recency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contract Type",
+              "displayName": "Contract Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Question #1",
+              "displayName": "Additional Question #1",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Question #2",
+              "displayName": "Additional Question #2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Question #3",
+              "displayName": "Additional Question #3",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Apply",
+              "displayName": "Apply",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cover Letter",
+              "displayName": "Cover Letter",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Additional Answer #1",
+              "displayName": "Additional Answer #1",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Additional Answer #2",
+              "displayName": "Additional Answer #2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Additional Answer #3",
+              "displayName": "Additional Answer #3",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Audio View Link",
+              "displayName": "Audio View Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Audio Download Link",
+              "displayName": "Audio Download Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "❓Applied On UpWork",
+              "displayName": "❓Applied On UpWork",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Listing ID",
+              "displayName": "Job Listing ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6fdbc2ac-71cc-4c40-b46d-60875dc5835f",
+      "name": "Post new listings",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2800,
+        760
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "## Updates airtable with new listings",
+        "height": 280,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2720,
+        660
+      ],
+      "typeVersion": 1,
+      "id": "b8a057c8-3efd-4b56-8d27-73e633ece02e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "URL",
+              "field2": "url"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input2",
+        "options": {}
+      },
+      "id": "b5a9f0f5-f214-40b5-b8c7-374c1681b1c6",
+      "name": "Merge data and keep unique results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        2180,
+        760
+      ]
+    }
+  ],
+  "connections": {
+    "Scrape Upwork": {
+      "main": [
+        [
+          {
+            "node": "Set Scrape Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "n8n Form Trigger": {
+      "main": [
+        [
+          {
+            "node": "Scrape Upwork",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Scrape Results": {
+      "main": [
+        [
+          {
+            "node": "Airtable (Get All UpWork Job listings",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge data and keep unique results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Airtable (Get All UpWork Job listings": {
+      "main": [
+        [
+          {
+            "node": "Respond with no new jobs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge data and keep unique results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New listings are available": {
+      "main": [
+        [
+          {
+            "node": "Post new listings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge data and keep unique results": {
+      "main": [
+        [
+          {
+            "node": "New listings are available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-02-12T17:28:30.735Z",
+      "createdAt": "2025-02-12T17:28:30.735Z",
+      "id": "9FW4Qt4xgJy86IKP",
+      "name": "UpWork"
+    },
+    {
+      "updatedAt": "2025-02-12T17:28:30.717Z",
+      "createdAt": "2025-02-12T17:28:30.717Z",
+      "id": "Q1qaOS4srU6hOPgB",
+      "name": "Apify"
+    },
+    {
+      "updatedAt": "2025-02-12T17:28:30.738Z",
+      "createdAt": "2025-02-12T17:28:30.738Z",
+      "id": "cXNF38vDY1XQ5uV2",
+      "name": "Airtable"
+    },
+    {
+      "updatedAt": "2025-01-28T13:15:08.738Z",
+      "createdAt": "2025-01-28T13:15:08.738Z",
+      "id": "kNeMs0ztu2vaXmDu",
+      "name": "Lets Automate It"
+    },
+    {
+      "updatedAt": "2025-02-12T17:28:44.022Z",
+      "createdAt": "2025-02-12T17:28:44.022Z",
+      "id": "oaMzQkFOk4oWDwQ1",
+      "name": "AI"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

@@ -1,0 +1,1483 @@
+{
+  "id": "ncXKadAA2hos5p3c",
+  "name": "CA Google Maps optimised",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Google Maps Leads Generator",
+        "formDescription": "Extract leads from Google Maps",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Search Term",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "City",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Country"
+            },
+            {
+              "fieldLabel": "Your business type"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "The process is under way. Results will appear in MT as a contact with the tag \"Google Maps Prospect\" and as a suspect in your Opportunities Pipeline"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        1160,
+        -440
+      ],
+      "id": "9f8be05c-a722-4a68-bc51-72bcaf658177",
+      "name": "On form submission",
+      "webhookId": "b0bce992-a3ad-4910-9092-89d533393327"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "773a9ff6-c76b-4acc-aa49-e25bef120352",
+              "name": "Search term 1",
+              "value": "={{ $json['Search Term'] }}",
+              "type": "string"
+            },
+            {
+              "id": "fd0c7bbf-9355-4c9e-b263-298bd7d044b8",
+              "name": "Location",
+              "value": "={{ $json.City }}, {{ $json.Country }}",
+              "type": "string"
+            },
+            {
+              "id": "d85fbe4e-fb92-404f-adf4-c39dd33c071d",
+              "name": "Limit the number of places per each search term/URL",
+              "value": "=10",
+              "type": "number"
+            },
+            {
+              "id": "1894bb46-5824-4659-9967-9c4eaef9d320",
+              "name": "Language",
+              "value": "English",
+              "type": "string"
+            },
+            {
+              "id": "47d5da7b-1a42-4ea0-a8ec-14f1704b7f31",
+              "name": "Your business type",
+              "value": "={{ $json['Your business type'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "id": "6e84ef35-30f6-48e4-af32-282688b14244",
+      "name": "Set URL to Scrape",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        1380,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://24a2-197-155-46-97.ngrok-free.app/scrape",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"searches\": [\n    {\n      \"query\": \"{{ $json['Search term 1'] }}\",\n      \"location\": \"{{ $json.Location }}\",\n      \"maxResults\": {{ $json['Limit the number of places per each search term/URL'] }}\n    }\n  ],\n  \"config\": {\n    \"maxConcurrent\": 3,\n    \"withContactDetails\": true,\n    \"timeout\": 30000\n  }\n}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1600,
+        -440
+      ],
+      "id": "a91d1e78-cb3a-40e2-b9c9-6057e3ccf61b",
+      "name": "Fast Google Maps Scraper"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process scraper results and transform to match existing format\nconst results = $json.results || [];\nconst processedResults = [];\n\nfor (const item of results) {\n  // Transform to match your existing data structure\n  const transformedItem = {\n    title: item.name || '',\n    categories: [\n      item.category || '',\n      '', '', '', '', '' // Empty slots for categories 2-6\n    ],\n    street: item.address ? item.address.split(',')[0] || '' : '',\n    city: item.searchLocation ? item.searchLocation.split(',')[0] || '' : '',\n    state: item.searchLocation ? item.searchLocation.split(',')[1] || '' : '',\n    postalCode: '',\n    phone: item.phone || '',\n    website: item.website || '',\n    placeId: item.placeId || Math.random().toString(36).substr(2, 9), // Generate if missing\n    neighborhood: '',\n    reviewsCount: item.reviews || 0,\n    totalScore: item.rating || 0,\n    scrapedAt: new Date().toISOString(),\n    description: '',\n    additionalInfo: {},\n    \n    // Social media - initialize as empty arrays to match your structure\n    twitters: [],\n    instagrams: [],\n    facebooks: [],\n    youtubes: [],\n    linkedIns: [],\n    tiktoks: [],\n    \n    // Emails - try to extract from contact details if available\n    emails: [\n      item.email || '',\n      '', ''\n    ].filter(email => email) // Remove empty emails\n  };\n  \n  // Only include results that have names and are not duplicates\n  if (transformedItem.title && transformedItem.title.length > 0) {\n    processedResults.push(transformedItem);\n  }\n}\n\nconsole.log(`Processed ${processedResults.length} results from scraper`);\n\nreturn processedResults.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -440
+      ],
+      "id": "af17bd45-de76-46c2-bcf2-fd1230783bd5",
+      "name": "Process Scraper Results"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0d27ef22-f192-4b0c-a1bc-7151183609d6",
+              "leftValue": "={{ $json.emails }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1960,
+        -440
+      ],
+      "id": "910f3ba2-660a-41a9-b613-84c375c4902a",
+      "name": "If email address found"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6e7f813d-e0eb-417e-9284-b6c27ca14908",
+              "name": "Business name",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "8632e815-48f5-4200-991f-b5b47b7948d1",
+              "name": "Business category 1",
+              "value": "={{ $json.categories[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "fd4f3740-b790-48e3-96ac-dd4bbeda68d3",
+              "name": "street",
+              "value": "={{ $json.street }}",
+              "type": "string"
+            },
+            {
+              "id": "1b8a4256-1e53-4767-a93b-a0a9199b36c3",
+              "name": "city",
+              "value": "={{ $json.city }}",
+              "type": "string"
+            },
+            {
+              "id": "915f8d85-c117-44fc-bd57-9b7ac8ee1bd7",
+              "name": "state",
+              "value": "={{ $json.state }}",
+              "type": "string"
+            },
+            {
+              "id": "a888fd98-d8f6-46b9-9a81-2d1a210ceb16",
+              "name": "postalCode",
+              "value": "={{ $json.postalCode }}",
+              "type": "string"
+            },
+            {
+              "id": "df380c3b-aa1d-4245-a57b-7da7f244a8ee",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "96485f9a-e032-406f-b6c2-3f2f5c1a2d35",
+              "name": "website",
+              "value": "={{ $json.website ? $json.website.replace(/^(https?:\\/\\/)?(www\\.)?/, '').replace(/\\/$/, '').trim() : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "5a60cfb3-e220-42f7-9b04-e0b49920880a",
+              "name": "Google Map Url",
+              "value": "=https://www.google.com/maps/place/?q=place_id:{{ $json.placeId }}",
+              "type": "string"
+            },
+            {
+              "id": "113693fc-4fab-4195-874f-84cf6069db06",
+              "name": "Twitter",
+              "value": "={{ $json.twitters[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "caa18299-7e41-4c26-ba62-8f4f33c8049b",
+              "name": "Instagram",
+              "value": "={{ $json.instagrams[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "670ace35-1d08-45d0-86a8-764f3dba9d80",
+              "name": "Facebook",
+              "value": "={{ $json.facebooks[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "2ea30d57-f871-47db-8043-a5d11445b9fa",
+              "name": "Youtube",
+              "value": "={{ $json.youtubes[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "cc965396-4286-4907-aff3-9ce67dfbfff9",
+              "name": "Email 1",
+              "value": "={{ $json.emails[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "53cbb14f-9720-44d2-a8e1-00dd9d07d498",
+              "name": "Email 2",
+              "value": "={{ $json.emails[1] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "01350fcd-355d-463b-b228-0303847cd33e",
+              "name": "Email 3",
+              "value": "={{ $json.emails[2] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "6776a472-aa4a-4c82-a93d-0897734ebe0d",
+              "name": "LinkedIn",
+              "value": "={{ $json.linkedIns[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "70a89141-2c2e-4148-bd3f-c9510b906d25",
+              "name": "TikTok",
+              "value": "={{ $json.tiktoks[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "bb7b8383-12e8-4ccc-8fc7-74eb7ebd11aa",
+              "name": " Business category 2",
+              "value": "={{ $json.categories[1] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "303f389a-aa1c-401a-bf71-47b5fddb1e3c",
+              "name": " Business category 3",
+              "value": "={{ $json.categories[2] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "4aaafe3b-77f5-4335-8d43-0f5537ebd19a",
+              "name": " Business category 4",
+              "value": "={{ $json.categories[3] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "cdfcd372-c6cb-4fa7-b780-399e4ec5a5ca",
+              "name": " Business category 5",
+              "value": "={{ $json.categories[4] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "508cce97-31b4-41c6-93fd-58ddf99a1b45",
+              "name": " Business category 6",
+              "value": "={{ $json.categories[5] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "4240503b-5ad6-4c14-a7b8-8ee9ebb79ca6",
+              "name": "reviewsCount",
+              "value": "={{ $json.reviewsCount || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "f4fcfa27-4681-432c-827f-7f9a5dc0071a",
+              "name": "neighborhood",
+              "value": "={{ $json.neighborhood || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "99934e3d-45a9-4e53-b6ac-e14343405a4b",
+              "name": "Search Phrases",
+              "value": "={{ $('Set URL to Scrape').item.json['Search term 1'] }}",
+              "type": "string"
+            },
+            {
+              "id": "88c5f847-1524-4162-a818-f3b67b60e563",
+              "name": "Avg rating out of 5 stars",
+              "value": "={{ $json.totalScore || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "9fde8fa3-d63e-47db-b2a7-84baa78ccd56",
+              "name": "Total Reviews",
+              "value": "={{ $json.reviewsCount || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "61f07dfd-5cfd-4927-8454-71dae17c9b34",
+              "name": "scrapedAt",
+              "value": "={{ $json.scrapedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "b339e552-bad5-440b-b94e-12d1c3a2cd60",
+              "name": "additionalInfo",
+              "value": "={{ JSON.stringify($json.additionalInfo || {}) }}",
+              "type": "string"
+            },
+            {
+              "id": "c6dd6d2c-2645-455f-913f-1f2142542b6e",
+              "name": "description",
+              "value": "={{ $json.description || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "id": "f8d8a589-e882-497c-8adc-64b450c9dd52",
+      "name": "Process Items",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        2140,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1BBa6OuJ9ClXFPukjxnd4QZdRbvBzcqK4rAsXa8zzPQY/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 191147847,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BBa6OuJ9ClXFPukjxnd4QZdRbvBzcqK4rAsXa8zzPQY/edit#gid=191147847"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Google Map Url",
+              "lookupValue": "={{ $json['Google Map Url'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1160,
+        0
+      ],
+      "id": "cdcea6c1-a205-4cd4-91ab-e62749944848",
+      "name": "Checks if already processed",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "['Google Map Url']",
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1340,
+        0
+      ],
+      "id": "9c651a5a-7204-4311-9150-b3a408396607",
+      "name": "Processes new companies only"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d0719072-ba2c-43bc-8b18-668a44ba07e1",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "facebook",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "check-website-exists",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1540,
+        0
+      ],
+      "id": "5fd0de0a-2cdf-43d0-ae97-b7d7b47444d0",
+      "name": "Do they have a website that is not a FB page?"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1BBa6OuJ9ClXFPukjxnd4QZdRbvBzcqK4rAsXa8zzPQY/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 191147847,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BBa6OuJ9ClXFPukjxnd4QZdRbvBzcqK4rAsXa8zzPQY/edit#gid=191147847"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Search Phrases": "={{ $json['Search Phrases'] }}",
+            "Business name": "={{ $json['Business name'] }}",
+            "Neigbourhood": "={{ $json.neighborhood }}",
+            "Business category 1": "={{ $json['Business category 1'] }}",
+            "Business category 2": "={{ $json[' Business category 2'] }}",
+            "Business category 3": "={{ $json[' Business category 3'] }}",
+            "Business category 4": "={{ $json[' Business category 4'] }}",
+            "Business category 5": "={{ $json[' Business category 5'] }}",
+            "Business category 6": "={{ $json[' Business category 6'] }}",
+            "street": "={{ $json.street }}",
+            "city": "={{ $json.city }}",
+            "state": "={{ $json.state }}",
+            "postalCode": "={{ $json.postalCode }}",
+            "phone": "='{{ $json.phone }}",
+            "website": "={{ $json.website }}",
+            "Google Map Url": "={{ $json['Google Map Url'] }}",
+            "Reviews Count": "={{ $json.reviewsCount }}",
+            "Avg Review rating": "={{ $json['Avg rating out of 5 stars'] }}",
+            "Twitter": "={{ $json.Twitter }}",
+            "Instagram": "={{ $json.Instagram }}",
+            "Facebook": "={{ $json.Facebook }}",
+            "Youtube": "={{ $json.Youtube }}",
+            "LinkedIn": "={{ $json.LinkedIn }}",
+            "Tik Tok": "={{ $json.TikTok }}",
+            "Email 1": "={{ $json['Email 1'] }}",
+            "Email 2": "={{ $json['Email 2'] }}",
+            "Email 3": "={{ $json['Email 3'] }}",
+            "scrapedAt": "={{ $json.scrapedAt }}",
+            "additionalInfo": "={{ $json.additionalInfo }}",
+            "Additional Info": "={{ $json.additionalInfo }}",
+            "Description": "={{ $json.description }}"
+          },
+          "matchingColumns": [
+            "Business name"
+          ],
+          "schema": [
+            {
+              "id": "Search Phrases",
+              "displayName": "Search Phrases",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business name",
+              "displayName": "Business name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business category 1",
+              "displayName": "Business category 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business category 2",
+              "displayName": "Business category 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business category 3",
+              "displayName": "Business category 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business category 4",
+              "displayName": "Business category 4",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business category 5",
+              "displayName": "Business category 5",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business category 6",
+              "displayName": "Business category 6",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Neigbourhood",
+              "displayName": "Neigbourhood",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "street",
+              "displayName": "street",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "postalCode",
+              "displayName": "postalCode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reviews Count",
+              "displayName": "Reviews Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Avg Review rating",
+              "displayName": "Avg Review rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Google Map Url",
+              "displayName": "Google Map Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Twitter",
+              "displayName": "Twitter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Instagram",
+              "displayName": "Instagram",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Facebook",
+              "displayName": "Facebook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Youtube",
+              "displayName": "Youtube",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn",
+              "displayName": "LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tik Tok",
+              "displayName": "Tik Tok",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email 1",
+              "displayName": "Email 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email 2",
+              "displayName": "Email 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email 3",
+              "displayName": "Email 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Additional Info",
+              "displayName": "Additional Info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scrapedAt",
+              "displayName": "scrapedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "additionalInfo",
+              "displayName": "additionalInfo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject line",
+              "displayName": "Subject line",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ice Breaker Email",
+              "displayName": "Ice Breaker Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1740,
+        0
+      ],
+      "id": "6c4379a2-66d6-4d37-a368-05cfc06a35e8",
+      "name": "Update DB",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "25145cd1-2d22-4fc3-9b65-1f252f8a4421",
+              "name": "website",
+              "value": "={{ $json.website }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fa02342b-0640-4108-8ff4-6070cde61194",
+      "name": "Set correct domain format for merging",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1740,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "website"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "09d89db9-c147-46d6-917f-d8cfcc03be24",
+      "name": "Combine all domains into 1 item",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3001/scrape-websites",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"websites\": {{ JSON.stringify($json.website) }},\n  \"config\": {\n    \"timeout\": 15000,\n    \"maxConcurrent\": 5\n  }\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2140,
+        200
+      ],
+      "id": "75016bb0-9182-42c7-a0f1-5f2fed2c940b",
+      "name": "Fast Website Scraper"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process website scraping results\nconst results = $json.results || [];\nconst processedResults = [];\n\nfor (const item of results) {\n  if (item.website && item.content) {\n    processedResults.push({\n      website: item.website,\n      text: item.content,\n      domain: item.website\n    });\n  }\n}\n\nconsole.log(`Processed ${processedResults.length} website scraping results`);\n\nreturn processedResults.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        2340,
+        200
+      ],
+      "id": "9c66965d-874b-4f5b-a464-c94cb38a9333",
+      "name": "Connect scrape and biz"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=# Automated Quote System Cold Email Generator\n\n## Primary Objective\nGenerate a concise, subtly persuasive HTML-formatted cold email that avoids hard selling while promoting this business {{ $('Set URL to Scrape').item.json['Your business type'] }} \n\n## Input Analysis Requirements\nAnalyze the provided website content ({{ $json.text }}) for:\n1. Business type and primary services\n2. Decision maker's first name (if available - extract from about/team pages). If no first name found, leave firstname empty.\n3. Recent achievements or growth indicators\n4. Evidence of manual processes/pain points\n5. Company size and market position\n\n## Output Format\nJSON object structured as:\n```json\n{\n    \"website\": \"domain.com\",\n    \"firstname\": \"decision maker name or empty string if not found\",\n    \"subject\": \"email subject\",\n    \"emailBody\": \"<p>HTML formatted email content</p>\"\n}\n```\n\n## Critical Requirements\n1. HTML Formatting:\n   - Use proper HTML tags (<p>, <br>, etc.)\n   - No greeting (Hi/Hello/Dear) or sign-off\n   - Clean, mobile-friendly formatting\n2. Email Structure:\n   - 2-3 concise paragraphs maximum\n   - Each paragraph 1-2 sentences only\n   - Total length under 100 words\n3. Subject Line:\n   - Maximum 50 characters\n   - Must intrigue and relate to business focus\n   - Avoid generic phrases\n4. Tone:\n   - Subtly persuasive\n   - Professional but conversational\n   - No hard selling or pushy language\n5. Technical:\n   - No apostrophes allowed\n   - Include the exact input domain address {{ $json.website }} in the output as its own JSON item. Do not add www unless the input domain contains www\n   - If no first name found, leave firstname as empty string\n\n## Example Outputs\n\n### For Construction Company:\n```json\n{\n    \"website\": \"buildmaster.com\",\n    \"firstname\": \"Sarah\",\n    \"subject\": \"Your 200% quote response improvement\",\n    \"emailBody\": \"<p>Your recent project showcase demonstrates BuildMaster's commitment to efficiency in commercial construction.</p><p>Construction companies using our automated quote system typically reduce response times by 200% while handling twice the volume of site visit requests.</p><p>Let me show you how we help construction firms deliver instant quotes and automated scheduling without losing the personal touch.</p>\"\n}\n```\n\n### If No First Name Found:\n```json\n{\n    \"website\": \"premiumestates.com\",\n    \"firstname\": \"\",\n    \"subject\": \"Premium Estates + 24/7 viewing scheduler\",\n    \"emailBody\": \"<p>Premium Estates stands out for luxury property marketing - imagine combining that with instant viewing scheduling.</p><p>Our automation platform enables 24/7 quote generation and viewing bookings, resulting in 40% more scheduled viewings for luxury agencies.</p><p>Let me demonstrate how this aligns with your high-end service standards.</p>\"\n}\n```\n\n## Key Components for Success\n1. Business-Specific Details:\n   - Reference recent achievement\n   - Mention industry-specific challenge\n   - Include relevant metrics\n2. Value Proposition:\n   - Focus on time/resource savings\n   - Highlight 24/7 capability\n   - Emphasize automation benefits\n3. Call to Action:\n   - Single, clear next step\n   - Low-commitment ask\n   - Benefit-focused invitation\n\n## Technical Notes\n- All HTML must be properly formatted and escaped in JSON\n- Line breaks using <p> tags, not \\n\n- No inline styles in HTML\n- Must validate as proper JSON\n- Subject should be action-oriented but not pushy\n- If firstname is empty, the email greeting will be handled separately"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "90a51487-4c8b-47b8-b1e1-696de244ee3c",
+      "name": "Create Ice Breaker Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.7,
+      "position": [
+        1140,
+        640
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "website",
+              "field2": "choices[0].message.content.website"
+            }
+          ]
+        },
+        "options": {
+          "fuzzyCompare": false
+        }
+      },
+      "id": "245efe68-95b4-4ae5-a3dc-8adc86ee7c87",
+      "name": "Match email with lead",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1340,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Enhanced first name extraction and email processing\nconst emailData = $json.choices[0].message.content;\nconst leadData = $('Do they have a website that is not a FB page?').item.json;\n\n// Get first name from AI or try to extract from email addresses\nlet firstName = emailData.firstname || '';\n\n// If no first name from AI, try to extract from email addresses\nif (!firstName) {\n  const emails = [\n    leadData['Email 1'],\n    leadData['Email 2'], \n    leadData['Email 3']\n  ].filter(email => email && email.trim());\n  \n  for (const email of emails) {\n    if (email && email.includes('@')) {\n      const localPart = email.split('@')[0];\n      \n      // Common patterns to extract first names from emails\n      const patterns = [\n        /^([a-zA-Z]+)\\./,           // john.doe@\n        /^([a-zA-Z]+)_/,           // john_doe@\n        /^([a-zA-Z]+)-/,           // john-doe@\n        /^([a-zA-Z]+)$/            // john@\n      ];\n      \n      for (const pattern of patterns) {\n        const match = localPart.match(pattern);\n        if (match && match[1] && match[1].length > 1) {\n          // Capitalize first letter\n          firstName = match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase();\n          break;\n        }\n      }\n      \n      if (firstName) break;\n    }\n  }\n}\n\n// Determine greeting based on first name availability\nlet greeting;\nif (firstName && firstName.trim()) {\n  greeting = `Hi ${firstName.trim()}`;\n} else {\n  greeting = 'Hi there';\n}\n\n// Return combined data with proper greeting\nreturn {\n  ...leadData,\n  'First Name': firstName || '',\n  'Subject line': emailData.subject || '',\n  'Ice Breaker Email': emailData.emailBody || '',\n  'Greeting': greeting,\n  'Email Generated': true\n};"
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        640
+      ],
+      "id": "10b3b1a0-4eb3-4acf-ad95-db36678f9a31",
+      "name": "Process Email Data with Smart Greeting"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1BBa6OuJ9ClXFPukjxnd4QZdRbvBzcqK4rAsXa8zzPQY/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 191147847,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BBa6OuJ9ClXFPukjxnd4QZdRbvBzcqK4rAsXa8zzPQY/edit#gid=191147847"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Business name": "={{ $json['Business name'] }}",
+            "First Name": "={{ $json['First Name'] }}",
+            "Subject line": "={{ $json['Subject line'] }}",
+            "Ice Breaker Email": "={{ $json['Ice Breaker Email'] }}"
+          },
+          "matchingColumns": [
+            "Business name"
+          ],
+          "schema": [
+            {
+              "id": "Business name",
+              "displayName": "Business name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject line",
+              "displayName": "Subject line",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ice Breaker Email",
+              "displayName": "Ice Breaker Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1740,
+        640
+      ],
+      "id": "c9af00fb-ae3d-425d-b079-35c9e8e45e9d",
+      "name": "Add to Database",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "website",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1940,
+        640
+      ],
+      "id": "fbbf161f-6c14-4ef4-a5eb-6ebf7747004c",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1BBa6OuJ9ClXFPukjxnd4QZdRbvBzcqK4rAsXa8zzPQY/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 191147847,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BBa6OuJ9ClXFPukjxnd4QZdRbvBzcqK4rAsXa8zzPQY/edit#gid=191147847"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "website",
+              "lookupValue": "={{ $json.website }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2140,
+        640
+      ],
+      "id": "cf5cdd48-ac87-46dc-b44f-e28fa4d030d0",
+      "name": "Get email addresses",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9db84acf-be39-4e65-91a7-c4cef9950ebf",
+              "leftValue": "={{ $json['Subject line'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            },
+            {
+              "id": "check-email-exists",
+              "leftValue": "={{ $json['Email 1'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2340,
+        640
+      ],
+      "id": "1cf31b76-72b7-43e4-935a-889dd6070b6a",
+      "name": "Ready to Send Email?"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>My HTML document</title>\n</head>\n<body>\n  <div class=\"container\">\n    <p>{{ $json['Greeting'] || 'Hi there' }}</p>\n    <p>{{ $json[\"Ice Breaker Email\"] }}</p>\n  </div>\n</body>\n \n</html>\n\n<style>\n.container {\n  background-color: #ffffff;\n  text-align: left;\n  padding: 16px;\n  border-radius: 8px;\n}\n  body, p {\n            margin: 0;\n            padding: 0;\n            font-family: Arial, sans-serif;\n            font-size: 14px;\n            line-height: 1.6;\n        }\n   p {\n            margin-bottom: 16px;\n            font-family: Arial, sans-serif;\n            font-size: 14px;\n        }\n\nh1 {\n  color: #ff6d5a;\n  font-size: 24px;\n  font-weight: bold;\n  padding: 8px;\n}\n\nh2 {\n  color: #909399;\n  font-size: 18px;\n  font-weight: bold;\n  padding: 8px;\n}\n</style>\n\n<script>\nconsole.log(\"Hello World!\");\n</script>\n\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        2540,
+        640
+      ],
+      "id": "6e43d0e3-7998-4470-ad19-a246203011b0",
+      "name": "Create email format"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json['Subject line'] }}",
+        "emailType": "html",
+        "message": "={{ $('Create email format').item.json.html }}",
+        "options": {
+          "bccList": "={{ $json['Email 3'] }}",
+          "ccList": "={{ $json[\"Email 2\"] }}",
+          "fromAlias": "chad@cleverassets.co.za",
+          "sendTo": "={{ $json[\"Email 1\"] }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2740,
+        640
+      ],
+      "id": "0646e813-1514-4e21-a8e1-3fb541f804d4",
+      "name": "Send emails",
+      "webhookId": "7e6e94b0-0aea-407e-9740-fdd8b7382167",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UHT3DR6OjiDawuYi",
+          "name": "CleverAssets Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process scraper results and transform to match existing format\nconst results = $json.results || [];\nconst processedResults = [];\n\nfor (const item of results) {\n  // Transform to match your existing data structure\n  const transformedItem = {\n    title: item.name || '',\n    categories: [\n      item.category || '',\n      '', '', '', '', '' // Empty slots for categories 2-6\n    ],\n    street: item.address ? item.address.split(',')[0] || '' : '',\n    city: item.searchLocation ? item.searchLocation.split(',')[0] || '' : '',\n    state: item.searchLocation ? item.searchLocation.split(',')[1] || '' : '',\n    postalCode: '',\n    phone: item.phone || '',\n    website: item.website || '',\n    placeId: item.placeId || Math.random().toString(36).substr(2, 9), // Generate if missing\n    neighborhood: '',\n    reviewsCount: item.reviews || 0,\n    totalScore: item.rating || 0,\n    scrapedAt: new Date().toISOString(),\n    description: '',\n    additionalInfo: {},\n    \n    // Social media - initialize as empty arrays to match your structure\n    twitters: [],\n    instagrams: [],\n    facebooks: [],\n    youtubes: [],\n    linkedIns: [],\n    tiktoks: [],\n    \n    // Emails - try to extract from contact details if available\n    emails: [\n      item.email || '',\n      '', ''\n    ].filter(email => email) // Remove empty emails\n  };\n  \n  // Only include results that have names and are not duplicates\n  if (transformedItem.title && transformedItem.title.length > 0) {\n    processedResults.push(transformedItem);\n  }\n}\n\nconsole.log(`Processed ${processedResults.length} results from scraper`);\n\nreturn processedResults.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        -580
+      ],
+      "id": "2e38db13-39e0-4e44-8eec-86c18964754c",
+      "name": "Code"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Set URL to Scrape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set URL to Scrape": {
+      "main": [
+        [
+          {
+            "node": "Fast Google Maps Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fast Google Maps Scraper": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Scraper Results": {
+      "main": [
+        []
+      ]
+    },
+    "If email address found": {
+      "main": [
+        [
+          {
+            "node": "Process Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Items": {
+      "main": [
+        [
+          {
+            "node": "Checks if already processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checks if already processed": {
+      "main": [
+        [
+          {
+            "node": "Processes new companies only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processes new companies only": {
+      "main": [
+        [
+          {
+            "node": "Do they have a website that is not a FB page?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Do they have a website that is not a FB page?": {
+      "main": [
+        [
+          {
+            "node": "Update DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set correct domain format for merging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set correct domain format for merging": {
+      "main": [
+        [
+          {
+            "node": "Combine all domains into 1 item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine all domains into 1 item": {
+      "main": [
+        [
+          {
+            "node": "Fast Website Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fast Website Scraper": {
+      "main": [
+        [
+          {
+            "node": "Connect scrape and biz",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Connect scrape and biz": {
+      "main": [
+        [
+          {
+            "node": "Create Ice Breaker Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Ice Breaker Email": {
+      "main": [
+        [
+          {
+            "node": "Match email with lead",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Match email with lead": {
+      "main": [
+        [
+          {
+            "node": "Process Email Data with Smart Greeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Email Data with Smart Greeting": {
+      "main": [
+        [
+          {
+            "node": "Add to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Database": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Get email addresses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get email addresses": {
+      "main": [
+        [
+          {
+            "node": "Ready to Send Email?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ready to Send Email?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create email format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create email format": {
+      "main": [
+        [
+          {
+            "node": "Send emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "If email address found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

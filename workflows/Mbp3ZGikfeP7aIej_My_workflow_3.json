@@ -1,0 +1,31 @@
+{
+  "id": "Mbp3ZGikfeP7aIej",
+  "name": "My workflow 3",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "19f1cea2-93ac-4605-b077-3ee252cac525",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        580,
+        280
+      ],
+      "webhookId": "0ab2f49c-dfd5-4324-bb94-a36d5b22f6ca"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

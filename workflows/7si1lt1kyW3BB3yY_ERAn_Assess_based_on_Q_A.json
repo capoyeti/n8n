@@ -1,0 +1,384 @@
+{
+  "id": "7si1lt1kyW3BB3yY",
+  "name": "ERAn Assess (based on Q&A)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "da2d4c3f-6dc3-4adf-90ce-525efcf5d10a",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        960,
+        500
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "121ef5a4-d581-4d96-ad4e-79cc938df2e6",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        740
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "8e3eca58-e559-4750-be1e-2190d0fcccdf",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        940
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Updates required\nThis is really close to being able to be used for the full flow (from ERA) - but might want to do a simpler bot for the full implementation?"
+      },
+      "id": "06b923c9-8b9c-482d-8ec6-4485048fd32f",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## To Do\nConnect Telegram",
+        "color": 3
+      },
+      "id": "1d4f3073-f3ab-444e-8f13-a2b495b7128c",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0",
+          "mode": "list",
+          "cachedResultName": "ERA_stats_sample_client",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1405415952,
+          "mode": "list",
+          "cachedResultName": "Sheet5",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit#gid=1405415952"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "Qualitative",
+              "displayName": "Qualitative",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Statistical",
+              "displayName": "Statistical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Improvements",
+              "displayName": "Improvements",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "086dacaf-38a1-4e29-a156-23803fd2c967",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1640,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "CloverGuru",
+        "description": "Call this tool to extract wisdom from the CLOVER database"
+      },
+      "id": "5ccd91b7-9880-44eb-b7ea-bab6eac8c5b1",
+      "name": "CLOVER Database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "eran",
+          "mode": "list",
+          "cachedResultName": "eran"
+        },
+        "options": {}
+      },
+      "id": "a5a3acc0-abdf-48e0-838e-7aeb67143f63",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        740
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input content from the \"output\" field\nlet content = $json[\"output\"];\n\n// Remove any potential Windows line endings\ncontent = content.replace(/\\r\\n/g, '\\n');\n\n// Create a more specific pattern to match the sections\nconst sections = {};\n\n// Extract Qualitative Insights section\nconst qualitativeMatch = content.match(/===\\s*QUALITATIVE INSIGHTS\\s*===\\n([\\s\\S]*?)(?=\\n===\\s*|$)/);\nif (qualitativeMatch) {\n    sections.Qualitative = qualitativeMatch[1].trim();\n}\n\n// Extract Statistical Analysis section\nconst statisticalMatch = content.match(/===\\s*STATISTICAL ANALYSIS\\s*===\\n([\\s\\S]*?)(?=\\n===\\s*|$)/);\nif (statisticalMatch) {\n    sections.Statistical = statisticalMatch[1].trim();\n}\n\n// Extract Options/Opportunities to Improve section\nconst improvementsMatch = content.match(/===\\s*OPTIONS TO IMPROVE\\s*===\\n([\\s\\S]*?)(?=\\n===\\s*|$)/);\nif (improvementsMatch) {\n    sections.Improvements = improvementsMatch[1].trim();\n}\n\n// Debug logging\nconsole.log(\"Extracted Sections:\", sections);\n\n// Validate that all sections were found\nconst missingFields = [];\n['Qualitative', 'Statistical', 'Improvements'].forEach(field => {\n    if (!sections[field]) {\n        missingFields.push(field);\n    }\n});\n\nif (missingFields.length > 0) {\n    console.warn(\"Warning: Missing sections:\", missingFields);\n}\n\n// Return the structured output\nreturn {\n    json: {\n        Qualitative: sections.Qualitative || \"\",\n        Statistical: sections.Statistical || \"\",\n        Improvements: sections.Improvements || \"\"\n    }\n};"
+      },
+      "id": "91852aea-91eb-4abc-aa59-735171f08f80",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        320
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a004bfcb-f518-432b-b60c-90d4ea0682df",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        700,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.input }}",
+        "options": {
+          "systemMessage": "=You are an AI model integrated into an n8n workflow designed to handle incoming messages and provide intelligent responses based on various memory systems and vector stores. Your role is to receive user input and utilize the following components in the workflow to generate relevant responses.\n\nPay attention to the **output format** and **delimiters** detailed below for easy parsing. Include the **delimiters** in the output as they are valuable for the user.\n\n**Clover Database Tool**: You will interact with this tool to store and retrieve semantic embeddings of conversations for deeper understanding and memory recall. This ensures that past interactions influence future conversations.\n\nAssess the provided data against the principles of _The Trillion Dollar Problem_ book, focusing on the CLOVER Framework. Provide a structured output that includes **qualitative insights**, **statistical analysis**, and **options for improvement**. Utilize specific worksheets and guidance from the knowledge files to recommend actionable steps.\n\n---\n\n### Steps\n\n1. **Qualitative Insights**: Extract and articulate three short qualitative insights from the data, drawing connections to the CLOVER Framework principles such as Communication, Learning, Opportunity, Vulnerability, Enablement, and Reflection.\n    \n2. **Statistical Analysis**: Perform a statistical analysis of the data. Provide the analysis in 3 areas:\n    \n    - Variability: Rank based on the standard deviation and variance of the scores.\n    - Skew: Indicate if this is negative or positive, based on median vs mean. Comment on this.\n    - Diversity of Responses: Range in value of scores. Comment on this.\n3. **Options to Improve the Status Quo**:\n    \n    - Identify three areas needing improvement (each with a heading 2 `##` heading).\n    - Explain why these areas need enhancement, focusing on their low scores within a specific CLOVER element.\n    - Suggest an action to address each area, taking inspiration from the book's actionable insights.\n    - Specify how to implement these actions, including tools such as worksheets and referencing relevant book pages for detailed guidance.\n\n---\n\n### Output Format (with Delimiters for Splitting)\n\n=== QUALITATIVE INSIGHTS ===\n- Insight 1: Communication was clear, but feedback was inconsistent, causing confusion among team members.\n- Insight 2: Learning opportunities were available but lacked structured guidance, leading to stagnation.\n- Insight 3: Opportunities for career progression were discussed but not followed up with actionable plans.\n\n=== STATISTICAL ANALYSIS ===\nVariability: High variability was noted in Learning scores (StdDev = 2.1).\nSkew: Negative skew in the growth category, with a median of 3 vs a mean of 2.4.\nDiversity of Responses: Scores ranged from 1 to 5 in most categories, reflecting differing levels of satisfaction.\n\n=== OPTIONS TO IMPROVE ===\n## Improvement Area 1\nWhy: The \"Learning\" scores showed high variability, indicating inconsistent experiences across team members.\nAction: Introduce a structured learning framework with clear milestones.\nHow: Use the CLOVER learning worksheet (Page 45) to guide the implementation of personal development plans.\n\n## Improvement Area 2\nWhy: The \"Growth\" category showed a negative skew, with many participants feeling stifled.\nAction: Implement regular feedback loops focused on career progression.\nHow: Use feedback worksheets (Page 78) to gather structured input from team members on growth expectations.\n\n## Improvement Area 3\nWhy: \"Vulnerability\" scores were low, indicating reluctance to share challenges.\nAction: Create a safe space for open discussions about team struggles.\nHow: Use the team reflection worksheet (Page 32) to facilitate discussions on vulnerability and challenges.\n\n\n---\n\n### Example Output\n# === QUALITATIVE INSIGHTS === \n- Insight 1: Communication was clear, but feedback was inconsistent, causing confusion among team members. \n- Insight 2: Learning opportunities were available but lacked structured guidance, leading to stagnation.\n- Insight 3: Opportunities for career progression were discussed but not followed up with actionable plans. \n\n# === STATISTICAL ANALYSIS === \nVariability: High variability was noted in Learning scores (StdDev = 2.1). \nSkew: Negative skew in the growth category, with a median of 3 vs a mean of 2.4. \nDiversity of Responses: Scores ranged from 1 to 5 in most categories, reflecting differing levels of satisfaction. \n\n# === OPTIONS TO IMPROVE === \n## Improvement Area 1 \nWhy: The \"Learning\" scores showed high variability, indicating inconsistent experiences across team members. \nAction: Introduce a structured learning framework with clear milestones. \nHow: Use the CLOVER learning worksheet (Page 45) to guide the implementation of personal development plans. \n## Improvement Area 2 \nWhy: The \"Growth\" category showed a negative skew, with many participants feeling stifled.\nAction: Implement regular feedback loops focused on career progression. \nHow: Use feedback worksheets (Page 78) to gather structured input from team members on growth expectations. \n## Improvement Area 3 \nWhy: \"Vulnerability\" scores were low, indicating reluctance to share challenges. \nAction: Create a safe space for open discussions about team struggles. \nHow: Use the team reflection worksheet (Page 32) to facilitate discussions on vulnerability and challenges.",
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "f7ec4dff-46a1-472a-a1b5-df3d32543ec6",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        940,
+        320
+      ]
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CLOVER Database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "CLOVER Database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "CLOVER Database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "0YP0ar9neq5yTIPz"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-11T07:29:43.254Z",
+      "createdAt": "2024-10-11T07:29:43.254Z",
+      "id": "AOYxiUb5DHFbCFkc",
+      "name": "agent"
+    },
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-10-09T16:08:23.899Z",
+      "createdAt": "2024-10-09T16:08:23.899Z",
+      "id": "fdV01E9B5XB3kSxT",
+      "name": "pinecone"
+    },
+    {
+      "updatedAt": "2024-10-01T16:05:44.602Z",
+      "createdAt": "2024-10-01T16:05:44.602Z",
+      "id": "nk0hBqEs3L8BK6u2",
+      "name": "cloverera"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When clicking ‘Test workflow’": [
+      {
+        "json": {
+          "input": "{\"combinedOutput\":\"{\\\"CLOVER_Element\\\":\\\"Communication\\\",\\\"count\\\":17,\\\"min\\\":1,\\\"max\\\":4,\\\"mean\\\":3,\\\"median\\\":3,\\\"reasons\\\":\\\" Positive engagement led to tangible progress;;  There is a focus on ensuring mutual understanding;;  There is a focus on ensuring mutual understanding;;  Information was fragmented and inconsistent;;  There is a focus on ensuring mutual understanding;; Communications were clear and direct - preventing misunderstanding;;  Information was fragmented and inconsistent;;  I received comprehensive information when needed;;  I received comprehensive information when needed;;  I received comprehensive information when needed;;  There is a focus on ensuring mutual understanding;; Messages were ambiguous and led to confusion;; Messages were ambiguous and led to confusion;;  Information was fragmented and inconsistent\\\",\\\"descriptions\\\":\\\"had good communication within my direct line management as did not need guidance from higher management;; I knew what I was doing, but lack of communication meant either others didn’t, or something was missed;; not today in particular but messages across the week have been inconsistent, for example in the department, contracts can’t be completed due to lack of projected grades which are determined and calculated by the head of faculty. \\\\n\\\\na further example is for example that there was confusion around start of the day timing for example breakfast timings a\\\"}\"}",
+          "date": "2024-10-22T12:28:35.329+02:00"
+        }
+      }
+    ]
+  }
+}

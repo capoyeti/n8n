@@ -1,0 +1,682 @@
+{
+  "id": "vIuzCRs0tainhRhF",
+  "name": "Choice ChatBot",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "b8f43db7-4cbc-496d-bffc-4193d2239fd5",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2160,
+        340
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "b414b102-d5d9-4246-b59a-f91618278b53",
+      "credentials": {
+        "telegramApi": {
+          "id": "L89GKDPRxJxSbBCN",
+          "name": "Choice_chat"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "={{ $('AI Agent').item.json.output.replace(/&/g, \"&amp;\").replace(/>/g, \"&gt;\").replace(/</g, \"&lt;\").replace(/\"/g, \"&quot;\") }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "9164fb1e-e84f-4044-bfd1-c27115f1744e",
+      "name": "Correct errors",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2800,
+        540
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "54f9b3f4-5776-4319-a270-5f86cf25abb2",
+      "credentials": {
+        "telegramApi": {
+          "id": "L89GKDPRxJxSbBCN",
+          "name": "Choice_chat"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "database",
+        "description": "Details about the local properties"
+      },
+      "id": "78fd52db-680a-444e-9d15-521bf588fa7d",
+      "name": "database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "b065eb1c-d1ef-4e6e-a684-81966e05279b",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        1220
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "f770949b-091b-4ef8-bee3-175c2ace3434",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        1080
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "send_document",
+        "description": "Call this tool to send a document to the user",
+        "workflowId": "m9MtDEXyHjSakPs8",
+        "fields": {
+          "values": [
+            {
+              "name": "chat_id",
+              "stringValue": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "id": "6b0fc9ac-2dab-442e-87c5-0dbe34a4632f",
+      "name": "Send Document Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        1940,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "baf536b6-a8e2-43c1-83f6-1d457fa0de42",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1340,
+        340
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message.text",
+              "value": "={{ $json?.message?.text || \"\" }}"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "7eb463fe-8b78-4f6b-832a-282678b89051",
+      "name": "PreProcessing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        860,
+        320
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "id": "8f2cb6c0-c934-4c30-878e-cb72a98594b0",
+      "name": "Telegram2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1080,
+        560
+      ],
+      "webhookId": "b62550d6-e40a-46c4-94e5-5f86ab25e777",
+      "credentials": {
+        "telegramApi": {
+          "id": "L89GKDPRxJxSbBCN",
+          "name": "Choice_chat"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "a1b34fdd-19d5-4698-87f8-8f9f8c0bc539",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2960,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "6de01fbd-5b20-4981-bd02-54de94b26290",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        540
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "humanMessage": "TOOLS\n------\nAssistant can ask the user to use tools to look up information that may be helpful in answering the users original question. The tools the human can use are:\n\n{tools}\n\n{format_instructions}\n\nUSER'S INPUT\n--------------------\nHere is the user's input (remember to respond with a markdown code snippet of a json blob with a single action, and NOTHING else):\n\n{{input}}",
+          "systemMessage": "=Today is {{ DateTime.fromISO($now).toLocaleString(DateTime.DATETIME_FULL) }}.\n\nYou are a friendly and helpful AI assistant for Choice Properties, and should respond to the user by name {{ $json.message.from.first_name }}\n\nYou are an AI model specialized in providing real estate information for a specific area using details stored in the Pinecone database. Your primary role is to answer user queries about real estate accurately by retrieving and referencing data directly from the Pinecone database. Your responses should be focused, clear, and tailored to the user’s question based on available data. Follow these guidelines when responding:\n\nPrimary Objectives:\nDatabase-Centric Responses:\n\nAlways retrieve responses directly from the Pinecone database, which contains specific, relevant information about real estate in the area.\nAvoid providing general or external information that is not sourced from the Pinecone database.\nDetail and Accuracy:\n\nInclude precise information such as property specifications, prices, market trends, location benefits, and neighborhood amenities as available in the database.\nEnsure that responses are accurate and reflect the latest data in the database, updating your information as needed.\nUse of the send_document Tool:\n\nWhere relevant, use the send_document tool to provide users with comprehensive documents from the Pinecone database, such as property listings, market reports, or neighborhood guides.\nWhen sending a document, give a brief overview of its contents and explain its relevance to the user’s query.\nResponse Style:\nMaintain a professional and informative tone, avoiding speculation and remaining data-focused.\nUse clear, concise language, ensuring complex details are easily understood by the user.\nTailor responses based on user intent, emphasizing key details that directly answer their questions about properties, market insights, or other real estate factors in the area.\n\nFormatting: Respond in general HTML format, using supported tags like <b>bold</b>, <i>italic</i>, <a href=\"http://www.example.com/\">inline URL</a>, and <pre> for fixed-width code blocks.\nClarity and Precision: Provide clear, direct answers based on club information. Do not elaborate beyond the data found in the official documents."
+        }
+      },
+      "id": "a61801de-6620-4e5d-b135-6c0f0b41f9da",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1660,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "real-estate",
+          "mode": "list",
+          "cachedResultName": "real-estate"
+        },
+        "options": {
+          "pineconeNamespace": "choice"
+        }
+      },
+      "id": "c2ab6d32-5047-483d-bffb-968641d44196",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        1080
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "xnnrfc9Lo6SDzCym",
+          "name": "CleverAssets Google Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "f54dd4f2-ca43-4d80-840c-a78be0cd41ca",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        320
+      ],
+      "webhookId": "809f23d0-1598-49a9-ae2a-fa763e9a42aa",
+      "credentials": {
+        "telegramApi": {
+          "id": "L89GKDPRxJxSbBCN",
+          "name": "Choice_chat"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "chat_with_{{ $('Telegram Trigger').first().json.message.chat.id }}"
+      },
+      "id": "2dfb04c3-d824-4b2e-bded-5db0c79a35a6",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        1700,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1tPi2LMcPjmjckITr_a5r5Y5aZpGsH0qg",
+            "mode": "list",
+            "cachedResultName": "n8n Projects",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1tPi2LMcPjmjckITr_a5r5Y5aZpGsH0qg"
+          }
+        },
+        "options": {}
+      },
+      "id": "2ed47062-2519-4557-9c42-f9ec52f69c7e",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2260,
+        -80
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Qgz1I3JePuqgSPkX",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2063020611,
+          "mode": "list",
+          "cachedResultName": "choice properties-tg",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Z9SKIi3MOirIV2Sv48lsaRjOrrwkFCEbuLIowYoKXHs/edit#gid=2063020611"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "response",
+              "displayName": "response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "032e765d-3a9e-4cab-bbef-67282ed79019",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2560,
+        100
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Pf6xFAnAFTm4M64e",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "aab93492-d02a-4db0-80e5-9724115714f6",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2200,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LB5jagGMofMGM_5M8HdtAzKEGbgmwYdtrjrI2pV_aWM",
+          "mode": "list",
+          "cachedResultName": "XbyX campaign",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LB5jagGMofMGM_5M8HdtAzKEGbgmwYdtrjrI2pV_aWM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1763708165,
+          "mode": "list",
+          "cachedResultName": "XbyX campaign",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LB5jagGMofMGM_5M8HdtAzKEGbgmwYdtrjrI2pV_aWM/edit#gid=1763708165"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "CampaignName",
+              "lookupValue": "8x8 Buyer"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        960,
+        0
+      ],
+      "id": "6d1c4f54-f926-4dee-9c03-17c19d0cf3ce",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Correct errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correct errors": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PreProcessing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "PreProcessing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-24T18:08:43.910Z",
+      "createdAt": "2024-09-24T18:08:43.910Z",
+      "id": "Tej2PW2VcNzkvBHB",
+      "name": "chatbot"
+    },
+    {
+      "updatedAt": "2024-10-09T16:08:23.899Z",
+      "createdAt": "2024-10-09T16:08:23.899Z",
+      "id": "fdV01E9B5XB3kSxT",
+      "name": "pinecone"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:19.299Z",
+      "createdAt": "2024-09-21T19:53:19.299Z",
+      "id": "sKkwnItsSnVITUWx",
+      "name": "telegram"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

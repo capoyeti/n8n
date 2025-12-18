@@ -1,0 +1,426 @@
+{
+  "id": "6aMrNHCrj6OPZeNO",
+  "name": "Campaign Trigger - Clever Connections",
+  "active": false,
+  "nodes": [
+    {
+      "id": "manual-trigger",
+      "name": "Start Campaign",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "get-pending-leads",
+      "name": "Get Pending Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "filter-pending",
+      "name": "Filter Pending Only",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Filter leads with campaign_status = 'pending'\n// These are leads that haven't been contacted yet\n\nconst leads = $input.all();\nconst pendingLeads = [];\n\nfor (const item of leads) {\n  const lead = item.json;\n  \n  // Only include leads with pending status (or empty status)\n  const status = lead.campaign_status?.toLowerCase() || 'pending';\n  if (status === 'pending' || status === '') {\n    // Must have a valid phone number\n    if (lead.phone_normalized && lead.phone_normalized.length >= 10) {\n      pendingLeads.push({\n        json: {\n          ...lead,\n          sequence_step: 1 // Starting at step 1\n        }\n      });\n    }\n  }\n}\n\n// Limit to 50 per campaign run to avoid WhatsApp rate limits\nreturn pendingLeads.slice(0, 50);"
+      }
+    },
+    {
+      "id": "check-any-pending",
+      "name": "Any Pending?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-items",
+              "operator": {
+                "type": "boolean",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.email }}",
+              "rightValue": ""
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "get-templates",
+      "name": "Get Templates",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        -100
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Templates"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "batch-process",
+      "name": "Process in Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      }
+    },
+    {
+      "id": "merge-template",
+      "name": "Personalize Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Get lead data and find step 1 template\nconst lead = $('Process in Batches').item.json;\nconst templates = $('Get Templates').all();\n\n// Find template for step 1 (initial outreach)\nconst template = templates.find(t => parseInt(t.json.step) === 1);\n\nif (!template) {\n  return [{ json: { error: 'No template found for step 1', lead } }];\n}\n\n// Replace placeholders in template\nlet message = template.json.message || '';\nmessage = message.replace(/\\{\\{first_name\\}\\}/g, lead.first_name || 'there');\nmessage = message.replace(/\\{\\{business_name\\}\\}/g, lead.business_name || '');\nmessage = message.replace(/\\{\\{city\\}\\}/g, lead.city || '');\nmessage = message.replace(/\\{\\{industry\\}\\}/g, lead['what_industry_do_you_work_in?'] || '');\n\nreturn [{\n  json: {\n    lead_id: lead.id,\n    phone: lead.phone_normalized,\n    email: lead.email,\n    first_name: lead.first_name,\n    business_name: lead.business_name,\n    message: message,\n    sequence_step: 1,\n    template_name: template.json.name\n  }\n}];"
+      }
+    },
+    {
+      "id": "send-whatsapp",
+      "name": "Send WhatsApp Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://159.223.23.22:8080/message/sendText/n8n-whatsapp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "EVO_ae4f6e1250e3330e5e6bca56532bfa2a"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"text\": \"{{ $json.message }}\"\n}"
+      },
+      "disabled": true
+    },
+    {
+      "id": "log-message",
+      "name": "Log to Messages Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1760,
+        0
+      ],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $runId }}-{{ $itemIndex }}",
+            "lead_id": "={{ $json.lead_id }}",
+            "phone": "={{ $json.phone }}",
+            "direction": "outbound",
+            "content": "={{ $json.message }}",
+            "sentiment": "",
+            "is_automated": "TRUE",
+            "sent_by": "bot",
+            "timestamp": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "update-lead",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1980,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "campaign_status": "sent",
+            "sequence_step": "1",
+            "last_message_sent": "={{ $now.toISO() }}",
+            "next_followup_due": "={{ $now.plus({ days: 3 }).toISO() }}"
+          }
+        },
+        "matchingColumns": [
+          "email"
+        ]
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "wait-rate-limit",
+      "name": "Wait 5 seconds",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        0
+      ],
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "no-pending",
+      "name": "No Pending Leads",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        880,
+        100
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Start Campaign": {
+      "main": [
+        [
+          {
+            "node": "Get Pending Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending Leads": {
+      "main": [
+        [
+          {
+            "node": "Filter Pending Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Pending Only": {
+      "main": [
+        [
+          {
+            "node": "Any Pending?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Pending?": {
+      "main": [
+        [
+          {
+            "node": "Get Templates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Pending Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Templates": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process in Batches": {
+      "main": [
+        [
+          {
+            "node": "Wait 5 seconds",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Personalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Personalize Message": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Message": {
+      "main": [
+        [
+          {
+            "node": "Log to Messages Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Messages Sheet": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5 seconds": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

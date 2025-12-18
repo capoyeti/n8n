@@ -1,0 +1,440 @@
+{
+  "id": "m9MtDEXyHjSakPs8",
+  "name": "KYC send_document_live",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "llama3-70b-8192",
+        "options": {}
+      },
+      "id": "abc4a5b0-0a7c-48ad-b5b3-6da4ecc4b8b7",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        620,
+        700
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "TeMrq8iV1WCfXr5T",
+          "name": "Groq (n8n testing)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Educational\nUsed Postman to test flow for age of student and what school they would go to for document send"
+      },
+      "id": "74a7e90a-72cd-4522-b72e-0ae29312a5f7",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"doc_type\": {\n      \"type\": \"string\",\n      \"enum\": [\"application\", \"sanpark\", \"visiting\"]\n    }\n  },\n  \"required\": [\"doc_type\"]\n}\n"
+      },
+      "id": "e2aeb6a8-c78d-46c1-b9a1-821dcb19e0df",
+      "name": "Structured Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        860,
+        680
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "6b54a30e-3ee3-4dee-bade-90bf3e984f20",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        140,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "873c2413-8fb1-4bb2-9504-d84fb309bd82",
+              "name": "chat_id",
+              "value": "={{ $json.chat_id }}",
+              "type": "number"
+            },
+            {
+              "id": "f95402e5-a76c-4120-a8be-ad99fcb819a4",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "72f47b43-4220-40fd-9c37-12587fc5d85b",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        360,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75fc2d90-8a50-4028-9831-dd02d7953ea7",
+              "name": "response",
+              "value": "Sent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3ad84231-2cd3-4599-8d20-e5a1ead9ab53",
+      "name": "Response:Sent",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2140,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.doc_type }}",
+                    "rightValue": "application",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "application"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "17b67d8b-56af-49da-9ba3-425fd4872535",
+                    "leftValue": "={{ $json.output.doc_type }}",
+                    "rightValue": "sanpark",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "sanpark"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "11a4f37e-20a3-4cd5-b11b-0ef4f04b9b5c",
+                    "leftValue": "={{ $json.output.doc_type }}",
+                    "rightValue": "visiting",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "visiting"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "da828169-3a20-4f4c-b090-f4b1aaa7eec5",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1060,
+        440
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $node[\"Edit Fields\"].json[\"chat_id\"] }}",
+        "file": "BQACAgQAAxkBAANHZx-404xmIzUy-J0PPpzs0G9o4CMAAh8WAAI8fQABUZoBtp7cbNi-NgQ",
+        "additionalFields": {}
+      },
+      "id": "18d037bc-ee04-4a47-9dc0-f78f80d38782",
+      "name": "send application doc",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1660,
+        240
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "48GGSxQBafzkrLON",
+          "name": "KYC-TG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $node[\"Edit Fields\"].json[\"chat_id\"] }}",
+        "file": "BQACAgQAAxkBAANIZx-5JtNv4c_81rX1mJ2bl9U2oKUAAoYWAAI8fQABUSxK4XmSuKUfNgQ",
+        "additionalFields": {}
+      },
+      "id": "94e0b8c3-686e-49d2-9ff7-b5f1c9e07e05",
+      "name": "Send sanpark mooring doc",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1660,
+        440
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "48GGSxQBafzkrLON",
+          "name": "KYC-TG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $node[\"Edit Fields\"].json[\"chat_id\"] }}",
+        "file": "BQACAgQAAxkBAANGZx-4Uxp7lPjQBCDzVxXuYHqdv1oAAoMWAAI8fQABUbOdWij0mtlUNgQ",
+        "additionalFields": {}
+      },
+      "id": "b6bb1206-eeeb-44c2-8f7b-7a3565cfbeaf",
+      "name": "Send visiting yacht doc",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1660,
+        640
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are tasked with identifying what type of document or information a user is requesting. The user could be asking about Sanparks, visiting, applications,  Use the following terms for your output: 'application', 'sanpark', 'visiting', 'high_school'. Your job is to classify the user's request using the output schema attached."
+            }
+          ]
+        }
+      },
+      "id": "79c0f6c1-e61c-44d9-9452-b1248a872109",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        440
+      ],
+      "notesInFlow": false
+    }
+  ],
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "send application doc",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send sanpark mooring doc",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send visiting yacht doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send application doc": {
+      "main": [
+        [
+          {
+            "node": "Response:Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send sanpark mooring doc": {
+      "main": [
+        [
+          {
+            "node": "Response:Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send visiting yacht doc": {
+      "main": [
+        [
+          {
+            "node": "Response:Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-16T18:05:59.499Z",
+      "createdAt": "2024-10-16T18:05:59.499Z",
+      "id": "AiXyhxvT783EEQjK",
+      "name": "live"
+    },
+    {
+      "updatedAt": "2024-10-28T13:24:53.720Z",
+      "createdAt": "2024-10-28T13:24:53.720Z",
+      "id": "RHyq9rBat7IYLc1o",
+      "name": "kyc"
+    },
+    {
+      "updatedAt": "2024-10-16T13:10:25.573Z",
+      "createdAt": "2024-10-16T13:10:25.573Z",
+      "id": "dQtgiwCaSm2YFQUr",
+      "name": "subagent"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

@@ -1,0 +1,62 @@
+{
+  "id": "Fa7sUNnzBcgRnCmJ",
+  "name": "My workflow 5",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f50816cf-2488-4879-b4a9-2cbc4813aed9",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        680,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "=",
+        "subject": "=",
+        "emailType": "text",
+        "message": "=",
+        "options": {
+          "appendAttribution": false,
+          "bccList": "=",
+          "ccList": "=",
+          "senderName": "="
+        }
+      },
+      "id": "a7458f35-2155-4e60-8bb0-fcc6a881e41b",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        900,
+        340
+      ]
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

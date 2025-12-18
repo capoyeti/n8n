@@ -1,0 +1,160 @@
+{
+  "id": "qr63EBTwAV3Z9Maw",
+  "name": "🔄 Sync: Bulk Export All Workflows to GitHub",
+  "active": false,
+  "nodes": [
+    {
+      "id": "trigger-1",
+      "name": "Schedule or Manual",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "http-1",
+      "name": "Get All Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.N8N_API_URL || 'https://n8n.visagility.co.za' }}/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      }
+    },
+    {
+      "id": "code-extract",
+      "name": "Extract Workflow Array",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Extract workflows array from API response\nconst response = $input.first().json;\nconst workflows = response.data || response;\n\nreturn workflows.map(w => ({ json: w }));"
+      }
+    },
+    {
+      "id": "code-1",
+      "name": "Prepare for GitHub",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const workflow = $input.first().json;\n\n// Strip credentials\nconst sanitized = {\n  name: workflow.name,\n  id: workflow.id,\n  active: workflow.active,\n  nodes: workflow.nodes?.map(node => {\n    const { credentials, ...rest } = node;\n    return rest;\n  }) || [],\n  connections: workflow.connections || {},\n  settings: workflow.settings || {},\n  tags: workflow.tags?.map(t => t.name) || [],\n  _metadata: {\n    exportedAt: new Date().toISOString(),\n    nodeCount: workflow.nodes?.length || 0\n  }\n};\n\n// Generate filename\nconst filename = workflow.name\n  .toLowerCase()\n  .replace(/[^a-z0-9]+/g, '-')\n  .replace(/^-|-$/g, '') + '.json';\n\nreturn {\n  json: {\n    filename,\n    content: JSON.stringify(sanitized, null, 2),\n    workflowName: workflow.name,\n    workflowId: workflow.id\n  }\n};"
+      }
+    },
+    {
+      "id": "github-1",
+      "name": "Commit to GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": "={{ $env.GITHUB_OWNER || 'your-username' }}",
+        "repository": "={{ $env.GITHUB_REPO || 'n8n-templates' }}",
+        "filePath": "=workflows/{{ $json.filename }}",
+        "fileContent": "={{ $json.content }}",
+        "commitMessage": "=Backup: {{ $json.workflowName }}",
+        "additionalParameters": {}
+      }
+    },
+    {
+      "id": "sticky-1",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -150
+      ],
+      "parameters": {
+        "content": "## Bulk Workflow Backup\n\n**Setup Required:**\n1. Create GitHub repo for templates\n2. Add GitHub credentials in n8n\n3. Set environment variables:\n   - GITHUB_OWNER\n   - GITHUB_REPO\n   - N8N_API_URL\n4. Add HTTP Header Auth credential for n8n API\n\n**Schedule:**\nRuns weekly by default. Adjust as needed.",
+        "width": 320,
+        "height": 200
+      }
+    }
+  ],
+  "connections": {
+    "Schedule or Manual": {
+      "main": [
+        [
+          {
+            "node": "Get All Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Workflows": {
+      "main": [
+        [
+          {
+            "node": "Extract Workflow Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Workflow Array": {
+      "main": [
+        [
+          {
+            "node": "Prepare for GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare for GitHub": {
+      "main": [
+        [
+          {
+            "node": "Commit to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

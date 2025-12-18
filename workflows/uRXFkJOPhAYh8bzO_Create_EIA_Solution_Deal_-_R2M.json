@@ -1,0 +1,89 @@
+{
+  "id": "uRXFkJOPhAYh8bzO",
+  "name": "Create EIA Solution Deal - R2M",
+  "active": false,
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "2",
+      "name": "Create EIA Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        450,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/deals",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_HUBSPOT_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"properties\": {\n    \"dealname\": \"EIA Solution - Clever Assets Integration\",\n    \"amount\": \"2000000\",\n    \"closedate\": \"2025-10-31\",\n    \"pipeline\": \"default\",\n    \"dealstage\": \"qualifiedtobuy\",\n    \"description\": \"Environmental Impact Assessment (EIA) data integration solution for property intelligence platform. Bridges gap between Lightstone property data and environmental compliance requirements. Includes:\\n\\n- EIA data aggregation from government sources\\n- Real-time environmental sensitivity screening\\n- Compliance monitoring and alerts\\n- GIS integration for risk assessment\\n- API access to DFFE screening tools\\n\\nValue Proposition: First-to-market complete property + environmental risk platform in South Africa.\",\n    \"hubspot_owner_id\": \"1060188728\"\n  },\n  \"associations\": [\n    {\n      \"to\": {\n        \"id\": \"38122399270\"\n      },\n      \"types\": [\n        {\n          \"associationCategory\": \"HUBSPOT_DEFINED\",\n          \"associationTypeId\": 341\n        }\n      ]\n    }\n  ]\n}"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Success",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create EIA Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create EIA Deal": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

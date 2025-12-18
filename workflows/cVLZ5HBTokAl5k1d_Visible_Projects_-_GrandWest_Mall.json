@@ -1,0 +1,576 @@
+{
+  "id": "cVLZ5HBTokAl5k1d",
+  "name": "Visible Projects - GrandWest Mall",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Set Webhooks\n## Testing\ncurl -X POST \"https://api.telegram.org/bot7476787229:AAFMT_9YTQE2MWLSinTvYn3jayRppyN6HYg/setWebhook?url=https://n8n.visagility.co.za/webhook-test/b4a331c8-f443-482b-ac1f-72bc8e058a19/webhook\"\n\n\n## Production\ncurl -X POST \"https://api.telegram.org/bot7476787229:AAFMT_9YTQE2MWLSinTvYn3jayRppyN6HYg/setWebhook?url=https://n8n.visagility.co.za/webhook/b4a331c8-f443-482b-ac1f-72bc8e058a19/webhook\"\n\n\n## Clear and Purge Webhook\nhttps://api.telegram.org/bot7476787229:AAFMT_9YTQE2MWLSinTvYn3jayRppyN6HYg/deleteWebhook?drop_pending_updates=true",
+        "height": 558.2648693944202,
+        "width": 687.5005796298557
+      },
+      "id": "65c90940-489a-4dda-bc17-e1e833902d13",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e3a0a50d-5845-4f92-a379-af93965e65a8",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2860,
+        640
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "dRV9yt9zJzQCl5zi",
+          "name": "Visible Projects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "b4945b00-4dcd-4dbc-934e-31fa3162c8ae",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1920,
+        500
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message.text",
+              "value": "={{ $json?.message?.text || \"\" }}"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "c7ae46a2-8005-4c41-88ff-11f7dbdd4107",
+      "name": "PreProcessing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1300,
+        480
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "frequencyPenalty": 0.2,
+          "temperature": 0.7
+        }
+      },
+      "id": "ae4a1708-ccd0-409b-842f-b6fc9c58daa6",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2140,
+        720
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Draw_Dalle_image",
+        "description": "Call this tool to request a Dall-E 3 model, when the user asks to draw something. Please send the user request for an image as an inline query string.",
+        "workflowId": "14eb3AwsS8wKYMDO",
+        "fields": {
+          "values": [
+            {
+              "name": "chat_id",
+              "stringValue": "={{ $('Listen for incoming events').first().json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "id": "277cb8e4-fcfc-4034-a84b-c9cb388dff13",
+      "name": "Dall-E 3 Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        2500,
+        720
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "database",
+        "description": "Details about the Grand West Mall development"
+      },
+      "id": "dca6fb93-fa10-4729-9d99-bc39cc0e312b",
+      "name": "database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        2280,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "bd5beb7f-a2bf-476a-b5a0-3cb27f1cb438",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2040,
+        1180
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "0e230afa-4835-404a-94f8-d06d228e5127",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        1040
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "send_document",
+        "description": "Call this tool to send a document to the user",
+        "workflowId": "1AOlk4P31G4Nv8FA",
+        "fields": {
+          "values": [
+            {
+              "name": "chat_id",
+              "stringValue": "={{ $('Listen for incoming events').first().json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "id": "6110968f-37d9-4435-b5f3-06b0ac02e822",
+      "name": "Send Document Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        2640,
+        720
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "clever-assets",
+          "mode": "list",
+          "cachedResultName": "clever-assets"
+        },
+        "options": {}
+      },
+      "id": "7ec1b152-152c-4600-b55a-492647a95dc7",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        1040
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "62f4649c-c0e7-4d39-be99-e1f207b4ed04",
+      "name": "Listen for incoming events",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1060,
+        480
+      ],
+      "webhookId": "b4a331c8-f443-482b-ac1f-72bc8e058a19",
+      "credentials": {
+        "telegramApi": {
+          "id": "dRV9yt9zJzQCl5zi",
+          "name": "Visible Projects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "id": "1ac7abe8-8ad1-49d4-b69f-54f2358548cf",
+      "name": "Telegram2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        640
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "dRV9yt9zJzQCl5zi",
+          "name": "Visible Projects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are a friendly and helpful AI assistant. You are chatting with {{ $json.message.from.first_name }}.\n\nToday is {{ DateTime.fromISO($now).toLocaleString(DateTime.DATETIME_FULL) }}.\n\nYour goal is to assist the user with any queries related to the Grand West Shopping Centre by retrieving relevant information from the Pinecone database. Make sure to respond in a conversational, curteous tone, personalising the message to the user's name.\n\nMake sure to:\n\nPersonalise the conversation by addressing the user by name.\nDeliver the response in a casual, friendly tone.\nInclude the output from the Pinecone data query wrapped within the conversational response.\nLists should be bulleted, and where relevant, used headings and bold. Markdown format is encouraged.\n"
+        }
+      },
+      "id": "056cf5df-5116-4296-a1bd-f6ebeb11cc02",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        2300,
+        500
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "append",
+        "workbook": {
+          "__rl": true,
+          "value": "01QRYE6R7Y7HV5IZF2FFEKAUO3Z22AXLKT",
+          "mode": "list",
+          "cachedResultName": "n8n data",
+          "cachedResultUrl": "https://frontporchagilityltd-my.sharepoint.com/personal/chad_williams_frontporchagility_com/_layouts/15/Doc.aspx?sourcedoc=%7BD4EBF9F8-BA64-4829-A051-DBCEB40BAD53%7D&file=n8n%20data.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{DB4DEF1C-0675-DF4C-B27A-596E868CBA3F}",
+          "mode": "list",
+          "cachedResultName": "F-G_GrandWest",
+          "cachedResultUrl": "https://frontporchagilityltd-my.sharepoint.com/personal/chad_williams_frontporchagility_com/_layouts/15/Doc.aspx?sourcedoc=%7BD4EBF9F8-BA64-4829-A051-DBCEB40BAD53%7D&file=n8n%20data.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1&activeCell=F-G_GrandWest!A1"
+        },
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "First Name",
+              "fieldValue": "={{ $('Merge').item.json.message.from.first_name }}"
+            },
+            {
+              "column": "Last Name",
+              "fieldValue": "={{ $('Merge').item.json.message.from.last_name }}"
+            },
+            {
+              "column": "ID",
+              "fieldValue": "={{ $('Merge').item.json.message.from.id }}"
+            },
+            {
+              "column": "Query",
+              "fieldValue": "={{ $('Merge').item.json.message.text }}"
+            },
+            {
+              "column": "Response",
+              "fieldValue": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0a02ab6c-c02c-4de2-93d0-df7cd3c7ec59",
+      "name": "Microsoft Excel 365",
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.1,
+      "position": [
+        2860,
+        380
+      ],
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "hfzNTR4mKkpj436y",
+          "name": "Microsoft Excel account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "a84a5ebc-abb8-47dc-84cf-7bff6485b0d6",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Listen for incoming events').item.json.message.message_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        2280,
+        720
+      ],
+      "id": "c40e18a9-cf10-47e9-b1ea-1e4468912174",
+      "name": "Window Buffer Memory"
+    }
+  ],
+  "connections": {
+    "PreProcessing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dall-E 3 Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Document Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listen for incoming events": {
+      "main": [
+        [
+          {
+            "node": "PreProcessing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Microsoft Excel 365": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "0YP0ar9neq5yTIPz"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:19.299Z",
+      "createdAt": "2024-09-21T19:53:19.299Z",
+      "id": "sKkwnItsSnVITUWx",
+      "name": "telegram"
+    },
+    {
+      "updatedAt": "2024-10-19T06:19:43.935Z",
+      "createdAt": "2024-10-19T06:19:43.935Z",
+      "id": "sXy9L66rkjO9tdxz",
+      "name": "cleverassets"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

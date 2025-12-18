@@ -1,0 +1,163 @@
+{
+  "id": "qTJ4LI1fDs1uw3LM",
+  "name": "create_event",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "01c2e546-5e54-4841-9bbf-3cb88754d154",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        820,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "7dgibf1kuvjub8gtf33l9dv8ck@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Visagility"
+        },
+        "start": "={{ $json.message.content.start }}",
+        "end": "={{ $json.message.content.end }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.message.content.attendees }}"
+          ],
+          "description": "={{ $json.message.content.description }}",
+          "summary": "={{ $json.message.content.summary }}"
+        }
+      },
+      "id": "34ce0b77-ca97-4c44-ae82-266da6710c50",
+      "name": "Google Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.1,
+      "position": [
+        1420,
+        380
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2WyKcCWBhILiJqvx",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Parse the 'query' and output the parameters separately.",
+              "role": "system"
+            },
+            {
+              "content": "={{ JSON.stringify($json.query) }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "d46b829b-831b-4c13-b144-21d53f9323b6",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        1040,
+        380
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d00c509a-9b81-4cb1-a7e7-5ef4e6d1ebab",
+              "name": "response",
+              "value": "Created",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6943a17c-06bb-42b0-b650-c4f45a562eb2",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1720,
+        320
+      ]
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "query": "start=&end=&attendees=&description=&summary="
+        }
+      }
+    ]
+  }
+}

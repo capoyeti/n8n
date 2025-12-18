@@ -1,0 +1,325 @@
+{
+  "id": "3ztDbDOFBIbBp35D",
+  "name": "CAVA - NoteTakingAgent",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.noteDetails }}",
+        "options": {
+          "systemMessage": "=Current date/time: {{ $now }}\n\nMake sure to pass Title, Notes and Category to the tools while creating a new note. If all the tool calls succeed, tell the user that you successfully performed the given task. If any tool call fails, say you failed to perform the task along with some details.\n\nYou manage notes in Airtable. Your responsibilities:\n1. Interpret what information should be saved\n2. Categorize information appropriately\n3. Structure notes for easy retrieval\n4. Confirm successful storage\n5. Retrieve relevant notes when requested\n\n**Record Deletion**:\n   - To delete an entry, we need to first fetch the records, find the matching record and use that record's id to delete it.\n\nMake sure to pass the correct field names and values to the tool.\n\nUse predefined categories when possible. If information spans multiple categories, create separate entries or use tags. Always confirm note creation with record ID."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        280,
+        -140
+      ],
+      "id": "16b2054f-3d9b-4525-bee6-94fe1d28e4fd",
+      "name": "Note Taking Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "noteDetails"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -20,
+        -140
+      ],
+      "id": "3faa5686-92ff-4ca8-abf2-93c6f6ff58e0",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4f360190-a717-4a93-8336-d03ea65975d5",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        -240
+      ],
+      "id": "d1a82f74-035b-4338-bb45-6d95c885a9e7",
+      "name": "Response1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4f360190-a717-4a93-8336-d03ea65975d5",
+              "name": "response",
+              "value": "An error occurred. Please try again.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        -60
+      ],
+      "id": "9f1f29f9-1c48-49ff-a969-49a759abe2cd",
+      "name": "Try Again"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        160
+      ],
+      "id": "e4e327f7-bc32-4021-954e-fcd067455edd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblBWFTsMEyzjpFyw",
+          "mode": "list",
+          "cachedResultName": "Notes",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tblBWFTsMEyzjpFyw"
+        },
+        "filterByFormula": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Filter_By_Formula', ``, 'string') }}",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "options": {}
+      },
+      "id": "f5274156-d742-4744-a788-fff5fdc7f02b",
+      "name": "Search",
+      "type": "n8n-nodes-base.airtableTool",
+      "position": [
+        380,
+        160
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblBWFTsMEyzjpFyw",
+          "mode": "list",
+          "cachedResultName": "Notes",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tblBWFTsMEyzjpFyw"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+            "Notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', ``, 'string') }}",
+            "Category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Category', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c0227a7e-6f45-479a-a401-df2768a4d4aa",
+      "name": "Create",
+      "type": "n8n-nodes-base.airtableTool",
+      "position": [
+        520,
+        160
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Note Taking Agent",
+        "height": 280,
+        "width": 460,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -240
+      ],
+      "id": "80bf5e5a-1d31-46bd-a2b7-312c07c8901a",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Note Taking Agent": {
+      "main": [
+        [
+          {
+            "node": "Response1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Try Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Note Taking Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Note Taking Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Note Taking Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create": {
+      "ai_tool": [
+        [
+          {
+            "node": "Note Taking Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "noteDetails": "Need to buy mac tomorrow evening"
+        }
+      }
+    ]
+  }
+}

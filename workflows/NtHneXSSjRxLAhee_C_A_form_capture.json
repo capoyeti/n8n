@@ -1,0 +1,302 @@
+{
+  "id": "NtHneXSSjRxLAhee",
+  "name": "C_A_form_capture",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c41fa0c5-38c2-43b3-8fab-28c1090503e9",
+              "name": "body.name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "75b3c3e0-f68c-4726-a1c0-33ececacfc20",
+              "name": "body.company",
+              "value": "={{ $json.body.company }}",
+              "type": "string"
+            },
+            {
+              "id": "86876d84-d609-4dbe-b476-c53a7e057301",
+              "name": "body.email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "2da0a7c6-ad8d-4e27-9ed9-fc4064038353",
+              "name": "body.phone",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "c687bfc1-af94-4ea7-8f59-da202d7407c1",
+              "name": "body.message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2eee7e86-4ecd-4044-9f38-984fdb31c507",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1180,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "28d681d0-3f8f-4426-81f0-4a0a47e8cdd2",
+              "name": "response",
+              "value": "=Thanks {{ $json.body.name }}, We'll be in touch!",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0acb189f-a1b1-443e-91d0-505dce9e6417",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1480,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"Thanks for your interest, {{ $json.body.name }} - we'll be in touch\"\n}",
+        "options": {}
+      },
+      "id": "797ecff4-04aa-4ccf-bfbf-e0fb1d5cd162",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1480,
+        640
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "31dbb4f6-a58c-43dd-ab68-9da3cf178640",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2040,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Kiette0FrrvXDF6M3QV02X1WB7zW9zhaZZ7Y1nxUlsU",
+          "mode": "list",
+          "cachedResultName": "CA_form_submissions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kiette0FrrvXDF6M3QV02X1WB7zW9zhaZZ7Y1nxUlsU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "web_landing_page",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kiette0FrrvXDF6M3QV02X1WB7zW9zhaZZ7Y1nxUlsU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.body.name }}",
+            "Email": "={{ $json.body.email }}",
+            "Company": "={{ $json.body.company }}",
+            "Phone": "={{ $json.body.phone }}",
+            "Message": "={{ $json.body.message }}"
+          },
+          "matchingColumns": [
+            "response"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc06dd13-7355-4003-aadb-33719099b18c",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1480,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "website_lead_capture",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "dde82189-f7d8-4db9-b5c1-f06d551fdaa4",
+      "name": "website_form_submission",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        900,
+        480
+      ],
+      "webhookId": "4bf41932-970f-470c-9776-4fa3910fbf56"
+    }
+  ],
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "website_form_submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-19T06:19:43.935Z",
+      "createdAt": "2024-10-19T06:19:43.935Z",
+      "id": "sXy9L66rkjO9tdxz",
+      "name": "cleverassets"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

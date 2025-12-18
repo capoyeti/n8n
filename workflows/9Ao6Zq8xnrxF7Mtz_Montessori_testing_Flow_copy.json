@@ -1,0 +1,225 @@
+{
+  "id": "9Ao6Zq8xnrxF7Mtz",
+  "name": "Montessori testing Flow copy",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "id": "2d2087c9-bbf3-4725-8d85-5f08d0808773",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        640,
+        380
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "423518137516832",
+        "recipientPhoneNumber": "={{ $json.body.entry[0].changes[0].value.contacts[0].wa_id }}",
+        "textBody": "=Echo back: {{ $json.body.entry[0].changes[0].value.messages[0].text.body }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "id": "79c5c6a2-80e9-4d45-94a2-7cf6ea8c50a1",
+      "name": "Echo the message back",
+      "type": "n8n-nodes-base.whatsApp",
+      "position": [
+        880,
+        720
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "All the perms WA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "8a765e57-8e39-4547-a99a-0458df2b75f4",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.messages[0] }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {
+          "looseTypeValidation": true
+        }
+      },
+      "id": "ab655c03-676b-48f9-b0e4-fb43d54aea5f",
+      "name": "Is message?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        640,
+        734
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## Verify Webhook\n* Go to your [Meta for Developers App page](https://developers.facebook.com/apps/), navigate to the App settings\n* Add a **production webhook URL** as a new Callback URL\n* *Verify* webhook receives a GET Request and sends back a verification code\n",
+        "height": 272,
+        "width": 618
+      },
+      "id": "cde327ce-946d-4a29-b0c9-84354976a6f3",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Main flow\n* *Respond* webhook receives various POST Requests from Meta regarding WhatsApp messages (user messages + status notifications)\n* Check if the incoming JSON contains user message\n* Echo back the text message to the user. This is a custom message, not a WhatsApp Business template message",
+        "height": 343,
+        "width": 619
+      },
+      "id": "8242a0d1-28f0-4270-9c93-1c66f09efcf6",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        554
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Important!\n### Configure the webhook nodes this way:\n* Make sure that both *Verify* and *Respond* have the same URL\n* *Verify* should have GET HTTP Method\n* *Respond* should have POST HTTP Method",
+        "height": 177,
+        "width": 405,
+        "color": 3
+      },
+      "id": "874e9230-e545-4710-8aa8-96e667e72450",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        454
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "27619532-7ec9-431a-97c6-07e952ccd0ce",
+        "options": {}
+      },
+      "id": "984f9e28-7a2a-4b90-99e8-bc777a72045b",
+      "name": "Respond",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        420,
+        734
+      ],
+      "webhookId": "27619532-7ec9-431a-97c6-07e952ccd0ce",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "path": "b1eb8cfd-1e0b-4d5d-a3be-e6df952b7b3b",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ad3f1fe1-84b1-4787-9a6a-b79c7e2b49bc",
+      "name": "Verify",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        420,
+        380
+      ],
+      "webhookId": "b1eb8cfd-1e0b-4d5d-a3be-e6df952b7b3b",
+      "typeVersion": 1.1
+    }
+  ],
+  "connections": {
+    "Is message?": {
+      "main": [
+        [
+          {
+            "node": "Echo the message back",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond": {
+      "main": [
+        [
+          {
+            "node": "Is message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    },
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:13.010Z",
+      "createdAt": "2024-09-21T19:53:13.010Z",
+      "id": "eRW7d7ykLq2q1q5B",
+      "name": "montessori"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateId": "2162",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

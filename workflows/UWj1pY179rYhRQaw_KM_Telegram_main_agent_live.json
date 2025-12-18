@@ -1,0 +1,542 @@
+{
+  "id": "UWj1pY179rYhRQaw",
+  "name": "KM Telegram_main_agent_live",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "gpt-4-1106-preview",
+        "options": {
+          "frequencyPenalty": 0.2,
+          "temperature": 0.7
+        }
+      },
+      "id": "e275f31f-6a5f-4444-8bf7-6c003a8e53df",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        420,
+        460
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionKey": "=chat_with_{{ $('Listen for incoming events').first().json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "id": "f25a6666-ff23-4372-afd0-4920a99aab6a",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        540,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "96faef5d-0349-47fe-a7cf-150953490e90",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        940,
+        240
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+        "text": "={{ $('AI Agent').item.json.output.replace(/&/g, \"&amp;\").replace(/>/g, \"&gt;\").replace(/</g, \"&lt;\").replace(/\"/g, \"&quot;\") }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "5ad43039-aaa6-43cd-9b0f-1d02f4d9c4ff",
+      "name": "Correct errors",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1300,
+        260
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "69a45c1f-838f-49ce-9b89-75db6a8b876f",
+      "name": "Listen for incoming events",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -480,
+        220
+      ],
+      "webhookId": "322dce18-f93e-4f86-b9b1-3305519b7834",
+      "typeVersion": 1,
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Draw_Dalle_image",
+        "description": "Call this tool to request a Dall-E 3 model, when the user asks to draw something. Please send the user request for an image as an inline query string.",
+        "workflowId": "14eb3AwsS8wKYMDO",
+        "fields": {
+          "values": [
+            {
+              "name": "chat_id",
+              "stringValue": "={{ $('Listen for incoming events').first().json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "id": "4d81d201-70bf-4c80-9689-4b65851ad770",
+      "name": "Dall-E 3 Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        780,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "database",
+        "description": "Details about the Montessori school in Knysna"
+      },
+      "id": "d181cbe6-4056-4c28-a367-0536375fc8dc",
+      "name": "database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        560,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "0d902d5a-9f0b-42f4-b3e8-1790f9304c4c",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        320,
+        920
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "9151d36b-7f05-4168-88fd-b1b3b9b56d9f",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        680,
+        780
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "send_document",
+        "description": "Call this tool to send a document to the user",
+        "workflowId": "1AOlk4P31G4Nv8FA",
+        "fields": {
+          "values": [
+            {
+              "name": "chat_id",
+              "stringValue": "={{ $('Listen for incoming events').first().json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "id": "192707ac-dfd6-4252-93e4-488fbe6d2dff",
+      "name": "Send Document Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        920,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "73989199-4fe3-43d5-8ad0-8fc9b492006a",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        280,
+        240
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message.text",
+              "value": "={{ $json?.message?.text || \"\" }}"
+            },
+            {
+              "name": "tg_bot.id",
+              "value": "={{ $node['Listen for incoming events'].context.credentials.telegramApi.name }}\n"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "7c4303a7-29a2-43ff-8f7d-f05475c24723",
+      "name": "PreProcessing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -260,
+        220
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "id": "086e2a7f-5647-4cd4-8b83-df1ebbd4dceb",
+      "name": "Telegram2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -20,
+        360
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "3d1f8d32-3a38-419e-aa2a-86ad7c4b0a07",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1480,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "humanMessage": "TOOLS\n------\nAssistant can ask the user to use tools to look up information that may be helpful in answering the users original question. The tools the human can use are:\n\n{tools}\n\n{format_instructions}\n\nUSER'S INPUT\n--------------------\nHere is the user's input (remember to respond with a markdown code snippet of a json blob with a single action, and NOTHING else):\n\n{{input}}",
+          "systemMessage": "=You are a helpful AI assistant. You are chatting with the user named {{ $json.message.from.first_name }}. Today is {{ DateTime.fromISO($now).toLocaleString(DateTime.DATETIME_FULL) }}.\n\nIf a user requests a document (such as by asking for 'school fees', 'application forms', information about preschool, middle school, high school or similar), use the Send Document tool to send the relevant document. Do not attempt to retrieve this information from the Pinecone vector store. If the user does not specifically request these documents to be sent, query the attached database for the information.\n\nTools include:\n\nDatabase tool for general queries.\nImage generation tool for image creation.\nSend Document tool for sending documents (use this when a document is requested, such as 'school fees').\nIn your reply, always send a message in general HTML format. Here are the formatting instructions:\n\nThe following tags are currently supported: <b>bold</b>, <strong>bold</strong>, <i>italic</i>, <em>italic</em>, <u>underline</u>, <ins>underline</ins>, <s>strikethrough</s>, <strike>strikethrough</strike>, <del>strikethrough</del>, <span class=\"tg-spoiler\">spoiler</span>, <tg-spoiler>spoiler</tg-spoiler>, <b>bold <i>italic bold <s>italic bold strikethrough <span class=\"tg-spoiler\">italic bold strikethrough spoiler</span></s> <u>underline italic bold</u></i> bold</b>, <a href=\"http://www.example.com/\">inline URL</a>, <code>inline fixed-width code</code>, <pre>pre-formatted fixed-width code block</pre>.\"<span class=\"tg-spoiler\">spoiler</span>, <tg-spoiler>spoiler</tg-spoiler>\n<b>bold <i>italic bold <s>italic bold strikethrough <span class=\"tg-spoiler\">italic bold strikethrough spoiler</span></s> <u>underline italic bold</u></i> bold</b>\n<a href=\"http://www.example.com/\">inline URL</a>\n<code>inline fixed-width code</code>\n<pre>pre-formatted fixed-width code block</pre>"
+        }
+      },
+      "id": "e5aa496d-55d3-456b-82bb-fe10a06c7338",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        580,
+        240
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "montessori",
+          "mode": "list",
+          "cachedResultName": "montessori"
+        },
+        "options": {
+          "pineconeNamespace": "general_info"
+        }
+      },
+      "id": "c92c5b83-3adb-479c-a3c8-78287d0c83be",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        360,
+        780
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Correct errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dall-E 3 Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listen for incoming events": {
+      "main": [
+        [
+          {
+            "node": "PreProcessing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Document Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PreProcessing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Correct errors": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v0",
+    "errorWorkflow": "0YP0ar9neq5yTIPz"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-16T18:05:59.499Z",
+      "createdAt": "2024-10-16T18:05:59.499Z",
+      "id": "AiXyhxvT783EEQjK",
+      "name": "live"
+    },
+    {
+      "updatedAt": "2024-10-09T16:43:18.976Z",
+      "createdAt": "2024-10-09T16:43:18.976Z",
+      "id": "f7EmhD96a1FaZ3H9",
+      "name": "knysna-montessori"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:19.299Z",
+      "createdAt": "2024-09-21T19:53:19.299Z",
+      "id": "sKkwnItsSnVITUWx",
+      "name": "telegram"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateId": "2035",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

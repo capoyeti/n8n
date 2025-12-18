@@ -1,0 +1,324 @@
+{
+  "id": "z3gUUWJYUZg7Cfyd",
+  "name": "Google Sheets Supabase - Hari",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30",
+          "mode": "list",
+          "cachedResultName": "malls",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 155532584,
+          "mode": "list",
+          "cachedResultName": "landlord",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30/edit#gid=155532584"
+        },
+        "options": {
+          "columnsToWatch": []
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -280
+      ],
+      "id": "f00dcaa4-2861-468c-aedf-66b5593fe11e",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "7TONEG6Ytxv93hZb",
+          "name": "CleverAssets GSheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(({ json }) => {\n  // Optional: Add new field\n  json.myNewField = 1;\n\n  // Destructure fields\n  const {\n    mall_name,\n    address,\n    city,\n    province,\n    postal_code,\n    website,\n    anchor_tenants,\n    managing_agent_temp,\n    landlord_name_temp,\n    landline,\n    cellphone,\n    email,\n    general_manager,\n  } = json;\n\n  // Build text\n  const text = `Mall Name: ${mall_name}, Address: ${address}, City: ${city}, ` +\n               `Province: ${province}, Postal Code: ${postal_code}, Website: ${website}, ` +\n               `Anchor Tenants: ${anchor_tenants}, Managing Agent: ${managing_agent_temp}, ` +\n               `Landlord Name: ${landlord_name_temp}, Landline: ${landline}, ` +\n               `Cellphone: ${cellphone}, Email: ${email}, General Manager: ${general_manager}`;\n\n  // Return just the text (or add more fields if needed)\n  return { text };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        120,
+        -60
+      ],
+      "id": "cc995a92-6c55-4e62-bc59-43735665b045",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "commercial-properties",
+          "mode": "list",
+          "cachedResultName": "commercial-properties"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        340,
+        -120
+      ],
+      "id": "05a6dcaf-d82c-4874-bda6-308923e1d7cc",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "Name",
+                "value": "={{ $('Google Sheets Trigger').item.json.name }}"
+              },
+              {
+                "name": "={{ $('Google Sheets Trigger').item.json.contact_person }}",
+                "value": "={{ $('Google Sheets Trigger').item.json.contact_person }}"
+              },
+              {
+                "name": "landline",
+                "value": "={{ $('Google Sheets Trigger').item.json.landline }}"
+              },
+              {
+                "name": "email",
+                "value": "={{ $('Google Sheets Trigger').item.json.email }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        380,
+        120
+      ],
+      "id": "1857d8b2-e8fd-49da-8f38-a6ec5c2b4159",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        540,
+        340
+      ],
+      "id": "6ed83cc2-9627-49b7-b7b0-99ea8500dc3f",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        120
+      ],
+      "id": "36b1cc78-3747-41cd-9d41-99be56f84944",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30",
+          "mode": "list",
+          "cachedResultName": "malls",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1227302176,
+          "mode": "list",
+          "cachedResultName": "mall",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30/edit#gid=1227302176"
+        },
+        "options": {
+          "columnsToWatch": [
+            "mall_name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -60
+      ],
+      "id": "bef75e77-b86b-45a7-9625-bc58f8fc4aa0",
+      "name": "Google Sheets Trigger1",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "7TONEG6Ytxv93hZb",
+          "name": "CleverAssets GSheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(({ json }) => {\n  // Optionally add a new field\n  json.myNewField = 1;\n\n  // Destructure fields for easier access\n  const {\n    name,\n    contact_person,\n    landline,\n    email,\n    address,\n    website,\n    cellphone\n  } = json;\n\n  // Build the concatenated text\n  const text = `Name: ${name}, Contact Person: ${contact_person}, Landline: ${landline}, ` +\n               `Email: ${email}, Address: ${address}, Website: ${website}, ` +\n               `Cellphone: ${cellphone}`;\n\n  // Return a new object with only the 'text' field\n  return { text };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        120,
+        -280
+      ],
+      "id": "ef2390fd-64fe-4187-88c9-f7712efd8318",
+      "name": "Code1"
+    }
+  ],
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-02-16T11:10:23.644Z",
+      "createdAt": "2025-02-16T11:10:23.644Z",
+      "id": "Q1OAUUYJHRUev1Fa",
+      "name": "Google sheet"
+    },
+    {
+      "updatedAt": "2025-02-13T15:24:44.659Z",
+      "createdAt": "2025-02-13T15:24:44.659Z",
+      "id": "eMxtBg4qWhWGQemu",
+      "name": "supabase"
+    }
+  ],
+  "staticData": {
+    "node:Google Sheets Trigger": {
+      "documentId": "1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30",
+      "sheetId": 155532584,
+      "lastRevision": 33,
+      "lastRevisionLink": "https://docs.google.com/spreadsheets/export?id=1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30&revision=33&exportFormat=xlsx"
+    },
+    "node:Google Sheets Trigger1": {
+      "documentId": "1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30",
+      "sheetId": 1227302176,
+      "lastRevision": 33,
+      "lastRevisionLink": "https://docs.google.com/spreadsheets/export?id=1u8bO3nwm-5PqeQbEasJ6a6DPS3IzHXioTqarDVNxr30&revision=33&exportFormat=xlsx"
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

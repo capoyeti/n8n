@@ -1,0 +1,238 @@
+{
+  "id": "od5w6Qd0bC3eVfLr",
+  "name": "ERA update_database",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "49a47bff-746d-4b54-9747-abe5693eaba2",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        600
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "34411107-e53e-484e-8a15-76c399614fae",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 300
+      },
+      "id": "675b9dc6-1f19-4047-9598-3a31b8d36a29",
+      "name": "Token Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21c21aad-b57b-4503-9ce9-9d2706269816",
+              "name": "response",
+              "value": "Done",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "33be8249-be4c-41a7-acea-21fe08fe0cb6",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1500,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "eran",
+          "mode": "list",
+          "cachedResultName": "eran"
+        },
+        "options": {
+          "pineconeNamespace": ""
+        }
+      },
+      "id": "2b59ac79-e750-4eb7-92d9-45c60d1b6255",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        380
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "6b511efd-1312-4305-a825-0fe09c3f7cbb",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        520,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1wguBJC5bfcmpT-mhm1pZ76_VC-LFRDCw",
+          "mode": "list",
+          "cachedResultName": "CLOVER-CONSOLIDATED-V1.9_Contents.docx",
+          "cachedResultUrl": "https://docs.google.com/document/d/1wguBJC5bfcmpT-mhm1pZ76_VC-LFRDCw/edit?usp=drivesdk&ouid=112643202395002145307&rtpof=true&sd=true"
+        },
+        "options": {}
+      },
+      "id": "2f9c7f1c-5e3f-48a0-b7c9-8fce073a39cc",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        780,
+        380
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9Li8NNfcRaRSLphW",
+          "name": "Google Drive account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-29T09:12:53.855Z",
+      "createdAt": "2024-10-29T09:12:53.855Z",
+      "id": "NDCjqdxBOtMSQW5J",
+      "name": "clover-db"
+    },
+    {
+      "updatedAt": "2024-10-09T16:08:23.899Z",
+      "createdAt": "2024-10-09T16:08:23.899Z",
+      "id": "fdV01E9B5XB3kSxT",
+      "name": "pinecone"
+    },
+    {
+      "updatedAt": "2024-10-01T16:05:44.602Z",
+      "createdAt": "2024-10-01T16:05:44.602Z",
+      "id": "nk0hBqEs3L8BK6u2",
+      "name": "cloverera"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

@@ -1,0 +1,188 @@
+{
+  "id": "Hu6plufhbOubEl7F",
+  "name": "ERAn_send_email",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $json.message.content.sendTo }}",
+        "subject": "={{ $json.message.content.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.message.content.message }}",
+        "options": {
+          "appendAttribution": false,
+          "bccList": "={{ $json.message.content.bccList }}",
+          "ccList": "={{ $json.message.content.ccList }}",
+          "senderName": "Knysna Montessori"
+        }
+      },
+      "id": "6cb13c8e-aa7f-4561-8393-58c9afb3a302",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1260,
+        360
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "50518290-fd60-4a1a-ab19-95ed7ec2fa21",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        660,
+        360
+      ],
+      "notes": "{\n    \"query\": [\n        \"sendTo=={{ $json.message.content.toList }}\",\n        \"subject=={{ $json.message.content.subject }}\",\n        \"emailType=text\",\n        \"message=={{ $json.message.content.body }}\",\n        \"appendAttribution=False\",\n        \"bccList=={{ $json.message.content.bccList }}\",\n        \"ccList=={{ $json.message.content.ccList }}\",\n        \"senderName=Knysna Montessori\"\n    ]\n}\n"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2833b256-d38c-4f93-a368-e70c7ff3477d",
+              "name": "response",
+              "value": "Sent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a3b74cb7-9f64-418d-9d9f-b5f09eb8d0e8",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Source\nCreated this from Devin Kearns great guide. \n\nFrom about 5:30 until 17:00 in [(1755) n8n AI Agent Tutorial | Step by Step Guide to Building Your First AI Agent | Low code - YouTube](https://www.youtube.com/watch?v=dq9CtjloFAs&t=277s)",
+        "height": 176,
+        "width": 355
+      },
+      "id": "606b2d61-2c4f-4698-8c4c-4bdcec1a0173",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        740,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "content": "set sample data"
+      },
+      "id": "dd79e8df-5d57-4aa9-b725-d17e24fff57d",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Parse the 'query' and output the parameters separately",
+              "role": "system"
+            },
+            {
+              "content": "={{ JSON.stringify($json.query) }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "1b0aaa53-82a0-4c4a-8cc3-703cbc31b752",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        880,
+        360
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-13T06:13:26.588Z",
+      "createdAt": "2024-10-13T06:13:26.588Z",
+      "id": "w64Zis9eA06qNORe",
+      "name": "ERAn"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "query": "sendTo='=', subject='=', message='=', bccList='=', ccList='=', senderName='='"
+        }
+      }
+    ]
+  }
+}

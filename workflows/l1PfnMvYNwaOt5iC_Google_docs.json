@@ -1,0 +1,73 @@
+{
+  "id": "l1PfnMvYNwaOt5iC",
+  "name": "Google docs",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "05a7bd85-2498-461c-9a52-9f1d1fe99395",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        720,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ldiuLkYAE1Zk0RIEHU_F8B8iwRbzruj61eMpX0qeOnE",
+          "mode": "list",
+          "cachedResultName": "Recommended reading and watching - 2022",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ldiuLkYAE1Zk0RIEHU_F8B8iwRbzruj61eMpX0qeOnE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ldiuLkYAE1Zk0RIEHU_F8B8iwRbzruj61eMpX0qeOnE/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "f55999d5-6976-4ade-99cd-15b06483d4a3",
+      "name": "Google Sheets - Recommended Reading",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        940,
+        340
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Recommended Reading",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

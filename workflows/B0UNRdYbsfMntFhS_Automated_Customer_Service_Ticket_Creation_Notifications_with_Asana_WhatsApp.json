@@ -1,0 +1,180 @@
+{
+  "id": "B0UNRdYbsfMntFhS",
+  "name": "Automated Customer Service Ticket Creation & Notifications with Asana & WhatsApp",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "15e05cd5-c58d-4bf2-8358-f0cd1917334f",
+        "formTitle": "Contact Us!",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Whats is your Name?",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What is your Phone Number?",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What is your problem?",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9d2a824a-6344-499e-a28a-454cf27b18e1",
+      "name": "n8n Form Trigger",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        380,
+        840
+      ],
+      "webhookId": "15e05cd5-c58d-4bf2-8358-f0cd1917334f",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "423518137516832",
+        "recipientPhoneNumber": "=+{{ $json['What is your Phone Number?'] }}",
+        "textBody": "=Hello {{ $json[\"Whats is your Name?\"] }},\n\nThank you for filling out the contact form.\nOur customer support team will get back to you as soon as possible.",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "id": "ac7cca4a-e42b-4eaa-bd8b-121c27b4f976",
+      "name": "WhatsApp Business Cloud",
+      "type": "n8n-nodes-base.whatsApp",
+      "position": [
+        1140,
+        700
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "All the perms WA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n**Create and integrate your form**\n- You can use n8n native form or services like Typeform and integrate with them.\n- If you rename the phone number field, you also have to change this in the \"WhatsApp Business Cloud\" node \n- If you let people enter their phone number in another format (e.g. text) you may need to add in additional data transformation nodes\n\n**Add your WhatsApp Business Cloud credentials & your phone number**\n- Go into the \"WhatsApp Business Cloud\" node and add your credentials\n- Replace the placeholder by your WhatsApp Business Cloud phone number\n\n**Change the text body to your liking**\n- The text body right now is a confirmation of. contact form. You can change that to your liking & use-case.\n\n**Add your Asana credentials & add your workspace ID**\n- Go into the \"Asana\" node and add your credentials\n- Replace the placeholder by your Asana workspace ID",
+        "height": 399.17043043523586,
+        "width": 835.3263974964024
+      },
+      "id": "76a1a4d6-241d-4167-a7b6-3e8552752b2a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Data input\n**Form submissions**\n\nThe default way to get your data into this workflow is a n8n-native form submission. \n\nTechnically you could also change it in a way that you get your data out of another form submission service, if you already have one in place, like Typeform or similar.\n",
+        "height": 218.49276831296547,
+        "width": 393.38103690955325
+      },
+      "id": "3259ab56-8e5b-480a-b037-a23872bd9cbd",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -60,
+        800
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "workspace": "498346170860",
+        "name": "=Support Ticket -  {{ $json.submittedAt }}",
+        "otherProperties": {
+          "notes": "={{ $json['What is your problem?'] }}"
+        }
+      },
+      "id": "71310c11-bb13-4b97-a183-da9a5e0ee007",
+      "name": "Asana",
+      "type": "n8n-nodes-base.asana",
+      "position": [
+        1140,
+        1040
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "asanaApi": {
+          "id": "3Pbbs6ezixV0ipEm",
+          "name": "Asana account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Confirmation Message\n**WhatsApp Business Cloud**\n\nThe default way to message your customer in this workflow is WhatsApp. \n\nIf your customers prefer e-mail, you can also add this capabilities to this workflow.\n\nYou would just need to change the form in a way to get the users mail, and integrate with a SMTP server or a mail-sending provider.",
+        "height": 271.78617944255603,
+        "width": 472.6712339560175
+      },
+      "id": "3827e54a-bc87-4fa3-933f-0d1619d85697",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1360,
+        640
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Task Management\n**Asana**\n\nThe default way to to save the support tickets in this workflow is Asana. \n\nIf your teams work with another task management software, you can replace this node.",
+        "height": 206.79421465037234,
+        "width": 472.6712339560175
+      },
+      "id": "299327d9-18e1-41e2-975a-4808d6b542bb",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1360,
+        1000
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "n8n Form Trigger": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Asana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "tags": [
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateId": "2237",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

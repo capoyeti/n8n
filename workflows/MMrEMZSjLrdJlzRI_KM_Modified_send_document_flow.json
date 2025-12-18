@@ -1,0 +1,211 @@
+{
+  "id": "MMrEMZSjLrdJlzRI",
+  "name": "KM Modified send document flow",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        20,
+        -20
+      ],
+      "id": "9a866bb7-1708-4f00-a52d-86d7f2633a89",
+      "name": "Execute Workflow Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a helpful assistant - Select the appropriate document to send to the user based on their input. Please analyse the input, and choose one of the below as the output. Only out the most appropriate of the below options:\n\n'Fees'\n'Preschool'\n'Middle-school'\n'High-School'\n'Application'"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        380,
+        -20
+      ],
+      "id": "9ea5f86e-1ae4-4c7a-9361-6d9602575002",
+      "name": "Document selection bot",
+      "notes": "This now sends just the url for the document - how to return it to a telegram node? or whatsapp node?\nMake sure the key words map to the look up table in the database source"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        340,
+        200
+      ],
+      "id": "5dcc57cb-f62a-4c44-88a2-d1c3b2a0d872",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "TeMrq8iV1WCfXr5T",
+          "name": "Groq (n8n testing)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app1FIK5puCcJqDkQ",
+          "mode": "list",
+          "cachedResultName": "Knynsa Montessori Documents",
+          "cachedResultUrl": "https://airtable.com/app1FIK5puCcJqDkQ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblATQiChmWaedJSQ",
+          "mode": "list",
+          "cachedResultName": "Public Documents",
+          "cachedResultUrl": "https://airtable.com/app1FIK5puCcJqDkQ/tblATQiChmWaedJSQ"
+        },
+        "filterByFormula": "={Document Name} = \"{{ $fromAI('documentName') }}\"",
+        "options": {
+          "fields": [
+            "URL"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        200
+      ],
+      "id": "f19c5676-b5d9-4629-9020-b781c7f48ff5",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "l4uWCVIoR9mD2u1J",
+          "name": "Airtable Knysna Montessori"
+        }
+      },
+      "notes": "connect this to the table with the mapping of the documents that you need to send to their keywords"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e6b1caba-90bc-47e5-922d-db720c933350",
+              "name": "return",
+              "value": "={{ $json.output.outputParser.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        820,
+        -20
+      ],
+      "id": "f1ef9cc0-b4c9-483a-a5a4-b5ba9f8a42d8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"outputParser\": {\n    \"documentName\": \"string\",\n    \"url\": \"string\"\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        700,
+        200
+      ],
+      "id": "110ae325-698d-499a-9fd6-6485d89fcb57",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Document selection bot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Document selection bot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "Document selection bot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document selection bot": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Document selection bot",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "query": "Send me the document that will give me the amount I need to pay for the school"
+        }
+      }
+    ]
+  }
+}

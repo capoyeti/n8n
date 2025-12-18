@@ -1,0 +1,247 @@
+{
+  "id": "qLGkKch5sbILGYna",
+  "name": "Clever Assets (Capoyeti) Supabase",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful DB assistant that is helping the user look up landlord, mall and tenant data. \n\nYou will be asked questions in natural language and must use the \"DB Schema\" tool to get an understanding of which tables are available in the database.  \nBased on that, you can then fetch the table definitions using the \"Get Table Schema\" tool, which is available to you and gives you all of the column and field names for the tables and also relationships. \n\nFinally, run the \"Get Queried Data\" tool to get the data and answer in natural language. Important, wrap the table name and the column name in double quotes. \n\nToday's date is {{$now}}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        -20
+      ],
+      "id": "7500aa13-6cce-4b5b-8f02-58739724179b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        220
+      ],
+      "id": "7d8c1b0c-7cd7-4996-b94a-d59fda3a788f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $fromAI('query') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        540,
+        220
+      ],
+      "id": "6384a9a3-fb71-4ff7-81a0-3a259888f447",
+      "name": "Get Queried Data1",
+      "credentials": {
+        "postgres": {
+          "id": "5g89SinPuuPmFGm2",
+          "name": "CleverAssets Capoyeti"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        100,
+        220
+      ],
+      "id": "cdf72105-af54-4994-a510-2545835ae667",
+      "name": "Window Buffer Memory1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -160
+      ],
+      "id": "4228504f-96f8-446e-a65a-bf2d41062312",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -20
+      ],
+      "id": "f03ebab0-be49-48b9-8d65-a4aef75c2b8c",
+      "name": "When chat message received",
+      "webhookId": "82607821-34fb-492d-85c3-28eac82fd57d"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    c.column_name,\n    c.data_type,\n    c.is_nullable,\n    c.column_default,\n    tc.constraint_type,\n    ccu.table_name AS referenced_table,\n    ccu.column_name AS referenced_column\nFROM information_schema.columns c\nLEFT JOIN information_schema.key_column_usage kcu \n    ON c.table_name = kcu.table_name \n    AND c.column_name = kcu.column_name\nLEFT JOIN information_schema.table_constraints tc \n    ON kcu.constraint_name = tc.constraint_name \n    AND tc.constraint_type = 'FOREIGN KEY'\nLEFT JOIN information_schema.constraint_column_usage ccu \n    ON tc.constraint_name = ccu.constraint_name\nWHERE \n    c.table_name = '{{ $fromAI('table_name') }}' -- Your table name from n8n\n    AND c.table_schema = 'public' -- Adjust schema if needed\nORDER BY \n    c.ordinal_position;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        380,
+        220
+      ],
+      "id": "36802f12-3278-47ac-b077-66ef7ecc83e7",
+      "name": "Get Table Schema",
+      "credentials": {
+        "postgres": {
+          "id": "5g89SinPuuPmFGm2",
+          "name": "CleverAssets Capoyeti"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT table_schema, table_name\nFROM information_schema.tables\nWHERE table_type = 'BASE TABLE' \nAND table_schema = 'public';\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        220
+      ],
+      "id": "11265642-5c66-4bef-8704-4ec1695096b2",
+      "name": "DB Schema",
+      "credentials": {
+        "postgres": {
+          "id": "5g89SinPuuPmFGm2",
+          "name": "CleverAssets Capoyeti"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Queried Data1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Table Schema": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB Schema": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-02-13T15:24:37.815Z",
+      "createdAt": "2025-02-13T15:24:37.815Z",
+      "id": "8LvptskQVEFGnlUS",
+      "name": "postgres"
+    },
+    {
+      "updatedAt": "2025-02-13T15:24:44.659Z",
+      "createdAt": "2025-02-13T15:24:44.659Z",
+      "id": "eMxtBg4qWhWGQemu",
+      "name": "supabase"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {
+    "When clicking ‘Test workflow’": [
+      {
+        "json": {
+          "chatInput": "Which malls does GrowthPoint own",
+          "sessionId": "123"
+        }
+      }
+    ]
+  }
+}

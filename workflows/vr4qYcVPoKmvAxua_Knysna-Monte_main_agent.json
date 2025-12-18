@@ -1,0 +1,1201 @@
+{
+  "id": "vr4qYcVPoKmvAxua",
+  "name": "Knysna-Monte main agent",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "*"
+        ],
+        "additionalFields": {}
+      },
+      "id": "fcde2d9a-973a-495e-b410-049a62e58c37",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        1820,
+        960
+      ],
+      "webhookId": "92005e15-5e6d-4ea3-abf0-b7dfe0cd6f10",
+      "typeVersion": 1,
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.message?.text }}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "contains",
+              "value2": "fee"
+            },
+            {
+              "operation": "contains",
+              "value2": "preschool",
+              "output": 1
+            },
+            {
+              "operation": "contains",
+              "value2": "application",
+              "output": 2
+            }
+          ]
+        },
+        "fallbackOutput": 3
+      },
+      "id": "b11e1969-594d-42e7-9ff5-271778fa12dd",
+      "name": "CheckCommand",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        3340,
+        840
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Error fallback for unsupported commands\n### 3",
+        "height": 231.22373949579838,
+        "width": 316.1071428571428
+      },
+      "id": "c71c8e81-7b84-4f1e-b5f5-289b6ea68c76",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5420,
+        1382
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "model_temperature",
+              "value": 0.8
+            },
+            {
+              "name": "token_length",
+              "value": 500
+            }
+          ],
+          "string": [
+            {
+              "name": "system_command",
+              "value": "=You are a friendly chatbot. User name is {{ $json?.message?.from?.first_name }}. User system language is {{ $json?.message?.from?.language_code }}. First, detect user text language. Next, provide your reply in the same language. Your purpose is to provide information about the Knysna Montessori School."
+            },
+            {
+              "name": "bot_typing",
+              "value": "={{ $json?.message?.text.startsWith('/image') ? \"upload_photo\" : \"typing\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "44fd3c4d-cd2f-481e-9d1f-c3090a728a3b",
+      "name": "Settings",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2180,
+        960
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## Chatbot mode by default\n### (when no command is provided)\n\n### 0",
+        "height": 233,
+        "width": 330.5019024637719
+      },
+      "id": "6a669e16-264b-4e90-b4d9-56c3b6413f4e",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5060,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Welcome message\n### /start\n### 1",
+        "height": 219.892857142857,
+        "width": 330.7863484403046
+      },
+      "id": "a5248786-197f-4f5d-b6de-4233f86e4ab4",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5060,
+        820
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4",
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "={{ $json.system_command }}"
+            },
+            {
+              "content": "={{ $json.message.text }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": "={{ $json.token_length }}",
+          "temperature": "={{ $json.model_temperature }}"
+        },
+        "requestOptions": {}
+      },
+      "id": "bc0a68d6-ad65-4954-9f62-95ef9444311f",
+      "name": "Chat_mode",
+      "type": "n8n-nodes-base.openAi",
+      "position": [
+        5160,
+        640
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "={{ $json.system_command }}"
+            },
+            {
+              "content": "=This is the first message from a user. Please welcome a new user in `{{ $json.message.from.language_code }}` language"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": "={{ $json.token_length }}",
+          "temperature": "={{ $json.model_temperature }}"
+        },
+        "requestOptions": {}
+      },
+      "id": "e8352d1d-3a92-4363-9f22-cfef1e923ffa",
+      "name": "Greeting",
+      "type": "n8n-nodes-base.openAi",
+      "position": [
+        5160,
+        880
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Settings').first().json.message.from.id }}",
+        "text": "={{ $json.message.content }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "1e24d2f1-e5d7-4110-9e51-9c45a5bed6ff",
+      "name": "Text reply",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        5520,
+        760
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "telegramApi": {
+          "id": "Tuh9p3P30AUEUkqs",
+          "name": "Montessori_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}",
+        "action": "={{ $json.bot_typing }}"
+      },
+      "id": "c7204cbc-3d64-43a9-ba11-72967d7699e3",
+      "name": "Send Typing action",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2380,
+        1120
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "telegramApi": {
+          "id": "Tuh9p3P30AUEUkqs",
+          "name": "Montessori_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "82163464-0416-4769-a606-47e2353e36d7",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        2600,
+        980
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "## Create an image\n### /image + request\n### 2",
+        "height": 233.8785714285713,
+        "width": 329.7428571428562
+      },
+      "id": "a66eb17c-9766-4396-96f0-39b1936de4a1",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5060,
+        1080
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "={{ $json.message.text.split(' ').slice(1).join(' ') }}",
+        "responseFormat": "imageUrl",
+        "options": {
+          "n": 1,
+          "size": "512x512"
+        },
+        "requestOptions": {}
+      },
+      "id": "51479f05-8c72-44ab-a765-37195ef4866d",
+      "name": "Create an image",
+      "type": "n8n-nodes-base.openAi",
+      "position": [
+        5160,
+        1160
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.from.id }}",
+        "text": "=Sorry, {{ $json.message.from.first_name }}! This command is not supported yet. Please type some text to a chat bot or try this command:\n/image \\[your prompt]\n\nEnter the command, then space and provide your request. Example:\n\n`/image a picture or a cute little kitten with big eyes. Miyazaki studio ghibli style`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "045911d0-cbb5-4508-b201-71b2cc5562b8",
+      "name": "Send error message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        5520,
+        1460
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "telegramApi": {
+          "id": "Tuh9p3P30AUEUkqs",
+          "name": "Montessori_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Settings').first().json.message.from.id }}",
+        "file": "={{ $json.url }}",
+        "additionalFields": {}
+      },
+      "id": "67c60116-8b2a-4c3a-9449-4ebd5fa6b647",
+      "name": "Send image",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        5520,
+        1160
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "telegramApi": {
+          "id": "Tuh9p3P30AUEUkqs",
+          "name": "Montessori_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message.text",
+              "value": "={{ $json?.message?.text || \"\" }}"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "b5e2a1b7-c854-4182-9e85-18bd66b9c09b",
+      "name": "PreProcessing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2000,
+        960
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "# Before go-live\n## Set Telegram Bot to n8n Webhook\nhttps://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook?url=<YOUR_WEBHOOK_URL>",
+        "height": 183.94471349701007,
+        "width": 525.8400173705593
+      },
+      "id": "ef23d51a-eeca-436c-b8a5-05c448b94d85",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4700,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.from.id }}",
+        "text": "=Hi {{ $json.message.chat.first_name }},\nHere is the application form.\nYou Said \"{{ $json.message.text }}\" ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "4c495c40-dae9-4bcc-9cb7-b38cc22e114a",
+      "name": "application",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3780,
+        860
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.from.id }}",
+        "text": "=Hi {{ $json.message.chat.first_name }},\nHere are some details about the preschool.\nYou Said \"{{ $json.message.text }}\" ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "47c77fba-e0dc-4020-ae25-0f34da65aa58",
+      "name": "preschool",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3780,
+        660
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.result.chat.id }}",
+        "file": "BQACAgQAAxkBAAM1Zv02cJ313HZGG8qOAmUHH2OmTsEAAukVAALbOuhTXCucJNMVySg2BA",
+        "additionalFields": {}
+      },
+      "id": "8e0efead-ba1c-4c41-891e-895dfc0b0590",
+      "name": "Send preschool doc",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4000,
+        660
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.result.chat.id }}",
+        "file": "BQACAgQAAxkBAAMmZv0rHsW-XMzNKZrj0av8p-bayloAAtYVAALbOuhTFq9mKQmpRJM2BA",
+        "additionalFields": {}
+      },
+      "id": "8a546d56-f7cc-4f5e-b00e-07282c303db9",
+      "name": "Send application form",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4000,
+        860
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.from.id }}",
+        "text": "=Hi {{ $json.message.chat.first_name }},\nHere are the School Fees. \nYou Said \"{{ $json.message.text }}\" ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e3cd34ea-e72d-4339-ab47-89394281d50a",
+      "name": "fees",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3780,
+        460
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.result.chat.id }}",
+        "file": "BQACAgQAAxkBAAMNZvz6xHI_Y4nIiZ4yARJ_g_kMaScAArEVAALbOuhTD2OnePv2a242BA",
+        "additionalFields": {}
+      },
+      "id": "71b5575d-fe22-4854-826a-c8ece59963ab",
+      "name": "Send school fees doc",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4000,
+        460
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4",
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "={{ $json.system_command }}"
+            },
+            {
+              "content": "={{ $json.message.text }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": "={{ $json.token_length }}",
+          "temperature": "={{ $json.model_temperature }}"
+        },
+        "requestOptions": {}
+      },
+      "id": "6f03723d-a971-4268-a573-d52940343538",
+      "name": "Chat_mode1",
+      "type": "n8n-nodes-base.openAi",
+      "position": [
+        3800,
+        1120
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.message.content }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "8c7937f5-9d4b-4f2e-a2af-93f47cdc9e95",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4100,
+        1120
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "9f21cead-0f44-4736-99ac-9bc43d6a4f0b",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2140,
+        1800
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "database"
+      },
+      "id": "42125072-af56-4e18-914d-7434781c0fbd",
+      "name": "database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        2300,
+        1960
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "f72b9424-fa7f-42f7-a25e-4b6c00853f7c",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2060,
+        2260
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "00c93a51-2f51-495a-aa23-8eafb042bf17",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        2180
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "send_email",
+        "description": "Call this tool to send an email",
+        "workflowId": {
+          "__rl": true,
+          "value": "k4EVMy9kmSiMdthe",
+          "mode": "list",
+          "cachedResultName": "KM_send_email"
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"query\": \"[\\\"sendTo: \\\", \\\"subject: \\\", \\\"message: \\\"]\"\n}"
+      },
+      "id": "c06c787c-cb1b-4f3e-880b-c338305f4770",
+      "name": "send_email",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2500,
+        1820
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "6cd7d649-cbc4-452d-8bd3-3fe403d1985a",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        2260,
+        1800
+      ]
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "montessori",
+          "mode": "list",
+          "cachedResultName": "montessori"
+        },
+        "options": {}
+      },
+      "id": "4501aa9a-2daa-437c-be2f-f9e12962b67d",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        2120
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama3-70b-8192",
+        "options": {}
+      },
+      "id": "8dbbd2f1-09a0-47eb-904b-da6e2b54f95d",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        2960,
+        1060
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "TeMrq8iV1WCfXr5T",
+          "name": "Groq (n8n testing)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"document_type\": {\n      \"type\": \"string\",\n      \"enum\": [\"fees\", \"preschool\", \"middle_school\", \"high_school\"]\n    }\n  },\n  \"required\": [\"document_type\"]\n}"
+      },
+      "id": "2c8abc9c-67a5-4020-9471-c393f15639b7",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        3160,
+        1060
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "={{ $json.system_command }}"
+            }
+          ]
+        }
+      },
+      "id": "af0fe4a2-7f7f-4d65-90b6-4777ba7dcc38",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        2960,
+        840
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "1AOlk4P31G4Nv8FA",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "75a8550c-870e-4631-97a5-537c3d939efa",
+      "name": "Execute Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        2800,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "=back in the main flow ({{ $json.response }})",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "90eb5593-c834-47fc-a64e-c450d8cd48e6",
+      "name": "Telegram1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3120,
+        1340
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b60a39f4-22d5-46a0-a627-5aef6e23b898",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1940,
+        1600
+      ],
+      "webhookId": "6c16cf25-0d4c-49de-9e60-10c10380da19"
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "The Chatbot is called \"Knysna Montessori Chatbot\". While the responses are limited, the chatbot must be able to respond in a natural and friendly manner, but always steer the conversation toward answering questions related to the school.\n\nFirst check if a document needs to to sent to the user, and use the tool for that. For the rest, use the pinecone database query tool\n\nOptions include:\n\n- Sending high level pamphlets about preschool, middle school or high school. \n- sending detailed booklets about grades preschool, middle school or high school\n- sending a document with details about school fees and terms\n- sending an application for admission together with the above or separately\n- answering generic questions about the school according to a rag workflow\n- Do also provide basic friendly greetings and cordial responses when appropriate. Short interactive dialogues are permissible. Do not appear abrupt and rude.\n"
+        }
+      },
+      "id": "48fe942c-b22c-4e48-b837-64f6be41e53e",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        2300,
+        1600
+      ]
+    }
+  ],
+  "connections": {
+    "Greeting": {
+      "main": [
+        [
+          {
+            "node": "Text reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings": {
+      "main": [
+        [
+          {
+            "node": "Send Typing action",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat_mode": {
+      "main": [
+        [
+          {
+            "node": "Text reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PreProcessing": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an image": {
+      "main": [
+        [
+          {
+            "node": "Send image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "PreProcessing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Typing action": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "CheckCommand": {
+      "main": [
+        [
+          {
+            "node": "fees",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "preschool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "application",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chat_mode1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "preschool": {
+      "main": [
+        [
+          {
+            "node": "Send preschool doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "application": {
+      "main": [
+        [
+          {
+            "node": "Send application form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fees": {
+      "main": [
+        [
+          {
+            "node": "Send school fees doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat_mode1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "CheckCommand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "tags": [
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-09-24T18:08:43.910Z",
+      "createdAt": "2024-09-24T18:08:43.910Z",
+      "id": "Tej2PW2VcNzkvBHB",
+      "name": "chatbot"
+    },
+    {
+      "updatedAt": "2024-09-24T18:20:42.669Z",
+      "createdAt": "2024-09-24T18:20:42.669Z",
+      "id": "YRTL5QeXEUuB8fRg",
+      "name": "draft"
+    },
+    {
+      "updatedAt": "2024-10-09T16:43:18.976Z",
+      "createdAt": "2024-10-09T16:43:18.976Z",
+      "id": "f7EmhD96a1FaZ3H9",
+      "name": "knysna-montessori"
+    },
+    {
+      "updatedAt": "2024-09-22T09:22:06.260Z",
+      "createdAt": "2024-09-22T09:22:06.260Z",
+      "id": "pH5gPyJAqv8IwfPP",
+      "name": "vpc"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:19.299Z",
+      "createdAt": "2024-09-21T19:53:19.299Z",
+      "id": "sKkwnItsSnVITUWx",
+      "name": "telegram"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateId": "1934",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

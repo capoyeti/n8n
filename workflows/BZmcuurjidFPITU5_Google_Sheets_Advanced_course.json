@@ -1,0 +1,390 @@
+{
+  "id": "BZmcuurjidFPITU5",
+  "name": "Google Sheets Advanced course",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3cc990af-a6ae-424b-abb4-49c156e65f58",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        800,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1BeBg3nP43QypLUTdlgTNOYFR22zGxdHkx8kIaAd_2Vg",
+          "mode": "list",
+          "cachedResultName": "n8n sample data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BeBg3nP43QypLUTdlgTNOYFR22zGxdHkx8kIaAd_2Vg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BeBg3nP43QypLUTdlgTNOYFR22zGxdHkx8kIaAd_2Vg/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "35be8ca2-9b1a-4f58-a85b-f88c6c41ddb2",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        1020,
+        340
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Pf6xFAnAFTm4M64e",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6bbbbb0c-517a-4b36-a308-7e389c0c4f55",
+              "name": "full name",
+              "value": "={{ $json['First Name'] }} {{ $json['Last Name'].toUpperCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "95a46500-a31d-49df-ac1c-79c8b83252b9",
+              "name": "Email Address",
+              "value": "={{ $json['Email Address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "e9491599-fb06-4c48-9768-c570c3b47555",
+              "name": "Company",
+              "value": "={{ $json['Company Name'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ebe711e5-a756-42de-81bb-fc89e80dd161",
+      "name": "Add 'full name' field",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "2bb7d1f6-7600-4342-9c71-8a258e7731b1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c861a276-eba5-4633-8f58-1ead5b0ddf49",
+              "leftValue": "={{ $json['Email Address'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "668fd5dc-4547-4209-b982-d68e78b05705",
+      "name": "Filter",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "29808a48-864d-4a49-82f6-5557550b89dc",
+              "leftValue": "={{ $json['Email Address'] }}",
+              "rightValue": "@gmail",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "12bc2f8a-87af-41df-b433-0fc0863129cb",
+              "leftValue": "={{ $json['Email Address'] }}",
+              "rightValue": "@yahoo",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "2e7060d1-0baf-4dc6-a354-7cf09ae09728",
+              "leftValue": "={{ $json['Email Address'] }}",
+              "rightValue": "@hotmail",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bcf0fdd2-5f64-4a4c-b2e3-87f0dc50eec2",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1860,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "79533022-cd98-4b9f-91cd-3a01f373ba1e",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1860,
+        140
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "46b5c9a0-64d3-4614-a5c2-b1f5bc08f04d",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        420
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "83a579b4-8e4e-4895-9a18-da9adbcaa732",
+      "name": "No Operation, do nothing1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "Email Address",
+              "renameField": true,
+              "outputFieldName": "Email"
+            },
+            {
+              "fieldToAggregate": "Company"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "196d3905-11a1-4824-a6cb-8413ef7390d9",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2580,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C07JL6XCTPE",
+          "mode": "list",
+          "cachedResultName": "general-chat"
+        },
+        "text": "=The following mails have been collected: \n{{ $json.Email }}",
+        "otherOptions": {}
+      },
+      "id": "0eb467e5-1bcb-4516-9054-0e4ed7219590",
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        2800,
+        360
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "MeJ2iDUbFiP9r7WO",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Add 'full name' field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add 'full name' field": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

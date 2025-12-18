@@ -1,0 +1,68 @@
+{
+  "id": "isxSgZgqDHE3PCXW",
+  "name": "Error testing tutorial",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f10254e4-e76d-4a46-8950-8d82e89ee634",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        760,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U07J5SE8GCE",
+          "mode": "list",
+          "cachedResultName": "chad"
+        },
+        "text": "=n8n error:\n- workflow: {{ $json.workflow.name }}\n- URL: {{ $json.execution.url }}\n- Error Message: {{ $json.execution.error.message }}",
+        "otherOptions": {}
+      },
+      "id": "44f3aebe-6c87-4822-92df-d2ad2827e2c3",
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        1000,
+        360
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "MeJ2iDUbFiP9r7WO",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

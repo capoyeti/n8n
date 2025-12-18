@@ -1,0 +1,100 @@
+{
+  "id": "fVIGiY1bD93iQkoI",
+  "name": "KM - WhatsApp Outbound Sender",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-whatsapp",
+        "options": {}
+      },
+      "id": "e77a7912-56bb-46fe-bcc3-5d0f728a3331",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        592,
+        224
+      ],
+      "webhookId": "send-whatsapp-outbound"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "450053168194790",
+        "recipientPhoneNumber": "={{ $json.body.phoneNumber }}",
+        "textBody": "={{ $json.body.message }}",
+        "additionalFields": {}
+      },
+      "id": "a53f43ab-9e39-4f27-8064-9bc0e68540a3",
+      "name": "Send WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        848,
+        224
+      ],
+      "webhookId": "3451ed43-3bb9-4d63-b3de-a111a4e185bb"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Message sent successfully', to: $('Webhook').item.json.body.phoneNumber }) }}",
+        "options": {}
+      },
+      "id": "82aeba34-d09d-4ee3-bd4d-02ce5eab81e1",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        224
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:13.010Z",
+      "createdAt": "2024-09-21T19:53:13.010Z",
+      "id": "eRW7d7ykLq2q1q5B",
+      "name": "montessori"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

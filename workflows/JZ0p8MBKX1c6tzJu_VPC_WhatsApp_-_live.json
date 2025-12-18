@@ -1,0 +1,283 @@
+{
+  "id": "JZ0p8MBKX1c6tzJu",
+  "name": "VPC WhatsApp - live",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "id": "d6a3d3b4-ebb2-4cb1-874c-cc8ffc2cb0ba",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        640,
+        380
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "423518137516832",
+        "recipientPhoneNumber": "={{ $json.body.entry[0].changes[0].value.contacts[0].wa_id }}",
+        "textBody": "=Echo back: {{ $json.body.entry[0].changes[0].value.messages[0].text.body }}\n\nReceived from: {{ $json.body.entry[0].changes[0].value.contacts[0].profile.name }}\n\nand the phone number is {{ $json.body.entry[0].changes[0].value.contacts[0].wa_id }}\n",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "id": "0cfe0c53-8a4e-4511-9f40-656676fee4fb",
+      "name": "Echo the message back",
+      "type": "n8n-nodes-base.whatsApp",
+      "position": [
+        1240,
+        720
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "All the perms WA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "8a765e57-8e39-4547-a99a-0458df2b75f4",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.messages[0] }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {
+          "looseTypeValidation": true
+        }
+      },
+      "id": "ed99e760-ce6f-4528-9ffe-aa859d091f8e",
+      "name": "Is message?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        640,
+        734
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## Verify Webhook\n* Go to your [Meta for Developers App page](https://developers.facebook.com/apps/), navigate to the App settings\n* Add a **production webhook URL** as a new Callback URL\n* *Verify* webhook receives a GET Request and sends back a verification code\n",
+        "height": 272,
+        "width": 618
+      },
+      "id": "a92a3ceb-8ff6-4a51-bd43-8809544dc513",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Main flow\n* *Respond* webhook receives various POST Requests from Meta regarding WhatsApp messages (user messages + status notifications)\n* Check if the incoming JSON contains user message\n* Echo back the text message to the user. This is a custom message, not a WhatsApp Business template message",
+        "height": 343,
+        "width": 619
+      },
+      "id": "a1dc9fb6-0c78-4d76-aa60-653cda29d139",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        554
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Important!\n### Configure the webhook nodes this way:\n* Make sure that both *Verify* and *Respond* have the same URL\n* *Verify* should have GET HTTP Method\n* *Respond* should have POST HTTP Method",
+        "height": 177,
+        "width": 405,
+        "color": 3
+      },
+      "id": "5cac1b2f-0838-48e1-a197-fb02383204a3",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        454
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Original Note ",
+        "height": 242.84955752212394,
+        "width": 309.4867256637166
+      },
+      "id": "f4593931-f1e2-4e16-91f7-33886bc98e99",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d7f83d5-7e0b-44a9-9e0f-b217d6ae0d29",
+      "name": "Switch1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1500,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "path": "Knysna-montesorri",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "9b9bff67-1fc3-448e-be92-073b88ce1f42",
+      "name": "Verify",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        420,
+        380
+      ],
+      "webhookId": "f14664f6-6b6a-4933-9d0f-e3c780743248",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Knysna-montesorri",
+        "options": {}
+      },
+      "id": "f31f78ec-611b-4dcf-8d46-ce4a9f7c95d3",
+      "name": "Respond",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        420,
+        740
+      ],
+      "webhookId": "8e04785c-1ac9-4085-9643-022e38a54bb2",
+      "typeVersion": 1.1
+    }
+  ],
+  "connections": {
+    "Is message?": {
+      "main": [
+        [
+          {
+            "node": "Echo the message back",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Echo the message back": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond": {
+      "main": [
+        [
+          {
+            "node": "Is message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:13.010Z",
+      "createdAt": "2024-09-21T19:53:13.010Z",
+      "id": "eRW7d7ykLq2q1q5B",
+      "name": "montessori"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateId": "2162",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

@@ -1,0 +1,136 @@
+{
+  "id": "3Ia0wRukSEpxQs8m",
+  "name": "Keep Supabase Alive",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## KeepAlive\n### This workflow just pings my Supabase projects to keep them from hibernating",
+        "height": 140,
+        "width": 280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        -420
+      ],
+      "id": "46f38114-c76a-4535-b1e1-a0d196b0d7f2",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        -280
+      ],
+      "id": "c8e165c5-0de8-48d5-b72f-b833bf5fa749",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT now();\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -80,
+        -480
+      ],
+      "id": "3e23d704-bcfc-426f-84f1-7b044cae1ec9",
+      "name": "Capoyeti Paid Account",
+      "credentials": {
+        "postgres": {
+          "id": "5g89SinPuuPmFGm2",
+          "name": "CleverAssets Capoyeti"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT now();\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -80,
+        -280
+      ],
+      "id": "88867124-1189-4520-b0cd-a3de9f42a3e7",
+      "name": "Visagility Free Account",
+      "credentials": {
+        "postgres": {
+          "id": "c6cMmO9vrAFSRx1t",
+          "name": "Clever Assets Visagility"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT now();\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -80,
+        -60
+      ],
+      "id": "b74d65a8-be54-486e-8d9c-62ed15178d60",
+      "name": "CleverAssets Google Free",
+      "credentials": {
+        "postgres": {
+          "id": "eMHqe3tBWaf672Q3",
+          "name": "CleverAssets Google Account Free"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Capoyeti Paid Account",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Visagility Free Account",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CleverAssets Google Free",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {},
+  "pinData": {}
+}

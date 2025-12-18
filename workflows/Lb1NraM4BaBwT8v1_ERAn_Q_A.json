@@ -1,0 +1,398 @@
+{
+  "id": "Lb1NraM4BaBwT8v1",
+  "name": "ERAn Q&A",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "id": "c357ac17-300c-49d5-8f7c-72d55ae4bce2",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        820,
+        560
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "cde63cd0-d3be-4606-b121-764d7b733c63",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        980,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "id": "c4ea868c-a42f-45c2-8949-fc788f73e176",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        740
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "7b6dfa74-afb8-4514-96e5-d4eb6d376512",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        940
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Updates required\nThis is really close to being able to be used for the full flow (from ERA) - but might want to do a simpler bot for the full implementation?"
+      },
+      "id": "03eddc22-6327-47a0-aede-1915234b25b0",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## To Do\nConnect Telegram",
+        "color": 3
+      },
+      "id": "bbf2b06b-c266-47d9-ae40-42e974192870",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0",
+          "mode": "list",
+          "cachedResultName": "ERA_stats_sample_client",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1405415952,
+          "mode": "list",
+          "cachedResultName": "Sheet5",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit#gid=1405415952"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "Qualitative",
+              "displayName": "Qualitative",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Statistical",
+              "displayName": "Statistical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Improvements",
+              "displayName": "Improvements",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c10857a1-3573-43b6-a865-00aac2ff08ce",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1640,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "CloverGuru",
+        "description": "Call this tool to extract wisdom from the CLOVER database"
+      },
+      "id": "fd2a1321-2ef2-448a-b373-3faf25c14a99",
+      "name": "CLOVER Database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "eran",
+          "mode": "list",
+          "cachedResultName": "eran"
+        },
+        "options": {}
+      },
+      "id": "78616be8-e2e4-49a9-ac3d-4edcd3661a59",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        740
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input content from the \"output\" field\nlet content = $json[\"output\"];  // Fetches the content from the field named \"output\"\n\n// Define the delimiter for the sections (e.g., '==='), ensuring it captures section titles properly\nlet delimiter = /===\\s*(.*?)\\s*===/g;\n\n// Debug: Log the entire content before processing\nconsole.log(\"Original Content:\", content);\n\n// Split the content using the delimiter and keep the matched section titles\nlet sections = content.split(delimiter).filter(Boolean);  // Filter out empty strings\n\n// Debug: Log the sections array after splitting\nconsole.log(\"Sections After Split:\", sections);\n\n// Prepare a mapping for section titles\nlet sectionMap = {\n  \"Qualitative Insights\": \"\",\n  \"Statistical Analysis\": \"\",\n  \"Opportunities to Improve\": \"\"  // Ensures \"Options to Improve\" is mapped properly\n};\n\n// Loop through the sections and update the map with content\nfor (let i = 0; i < sections.length; i += 2) {\n  let sectionTitle = sections[i].trim();  // Get the title (without '===')\n  let sectionContent = sections[i + 1] ? sections[i + 1].trim() : \"\";  // Get the content that follows\n  \n  // Capitalise the first letter of each word in the section title\n  let formattedTitle = sectionTitle.toLowerCase().replace(/\\b\\w/g, c => c.toUpperCase());\n  \n  // Handle the case where \"Options to Improve\" is mapped to \"Opportunities to Improve\"\n  if (formattedTitle === \"Options To Improve\") {\n    formattedTitle = \"Opportunities to Improve\";\n  }\n\n  // Debug: Log the formatted title and corresponding content\n  console.log(\"Formatted Title:\", formattedTitle);\n  console.log(\"Corresponding Content:\", sectionContent);\n\n  // Check if the formatted title exists in the sectionMap\n  if (sectionMap.hasOwnProperty(formattedTitle)) {\n    sectionMap[formattedTitle] = sectionContent;  // Assign the content to the proper section, including H2/H3 headers\n  }\n}\n\n// Debug: Log the final section map\nconsole.log(\"Final Section Map:\", sectionMap);\n\n// Return the output fields for Google Sheets\nreturn {\n  json: {\n    Qualitative: sectionMap[\"Qualitative Insights\"].trim(),   // Clean up the extra spaces, includes H2/H3 headers\n    Statistical: sectionMap[\"Statistical Analysis\"].trim(),   // Clean up the extra spaces, includes H2/H3 headers\n    Improvements: sectionMap[\"Opportunities to Improve\"].trim()  // Clean up the extra spaces, includes H2/H3 headers\n  }\n};\n"
+      },
+      "id": "d3d51c24-64f5-4077-b828-c8f98b1376b9",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ab6d6ec4-75ed-4b2a-b9a5-491957a93d19",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        360
+      ],
+      "webhookId": "b50d76a5-f9a6-4563-81ba-08a676f35eb3"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an AI model integrated into an n8n workflow designed to handle incoming messages and provide intelligent responses based on various memory systems and vector stores. Your role is to receive user input and utilize the following components in the workflow to generate relevant responses.\n\nPay attention to the **output format** and **delimiters** detailed below for easy parsing. Include the **delimiters** in the output as they are valuable for the user.\n\n**Clover Database Tool**: You will interact with this tool to store and retrieve semantic embeddings of conversations for deeper understanding and memory recall. This ensures that past interactions influence future conversations.\n\nAssess the provided data against the principles of _The Trillion Dollar Problem_ book, focusing on the CLOVER Framework. Provide a structured output that includes **qualitative insights**, **statistical analysis**, and **options for improvement**. Utilize specific worksheets and guidance from the knowledge files to recommend actionable steps.\n\n---\n\n### Steps\n\n1. **Qualitative Insights**: Extract and articulate three short qualitative insights from the data, drawing connections to the CLOVER Framework principles such as Communication, Learning, Opportunity, Vulnerability, Enablement, and Reflection.\n    \n2. **Statistical Analysis**: Perform a statistical analysis of the data. Provide the analysis in 3 areas:\n    \n    - Variability: Rank based on the standard deviation and variance of the scores.\n    - Skew: Indicate if this is negative or positive, based on median vs mean. Comment on this.\n    - Diversity of Responses: Range in value of scores. Comment on this.\n3. **Options to Improve the Status Quo**:\n    \n    - Identify three areas needing improvement (each with a heading 2 `##` heading).\n    - Explain why these areas need enhancement, focusing on their low scores within a specific CLOVER element.\n    - Suggest an action to address each area, taking inspiration from the book's actionable insights.\n    - Specify how to implement these actions, including tools such as worksheets and referencing relevant book pages for detailed guidance.\n\n---\n\n### Output Format (with Delimiters for Splitting)\n\n=== QUALITATIVE INSIGHTS ===\n- Insight 1: Communication was clear, but feedback was inconsistent, causing confusion among team members.\n- Insight 2: Learning opportunities were available but lacked structured guidance, leading to stagnation.\n- Insight 3: Opportunities for career progression were discussed but not followed up with actionable plans.\n\n=== STATISTICAL ANALYSIS ===\nVariability: High variability was noted in Learning scores (StdDev = 2.1).\nSkew: Negative skew in the growth category, with a median of 3 vs a mean of 2.4.\nDiversity of Responses: Scores ranged from 1 to 5 in most categories, reflecting differing levels of satisfaction.\n\n=== OPTIONS TO IMPROVE ===\n## Improvement Area 1\nWhy: The \"Learning\" scores showed high variability, indicating inconsistent experiences across team members.\nAction: Introduce a structured learning framework with clear milestones.\nHow: Use the CLOVER learning worksheet (Page 45) to guide the implementation of personal development plans.\n\n## Improvement Area 2\nWhy: The \"Growth\" category showed a negative skew, with many participants feeling stifled.\nAction: Implement regular feedback loops focused on career progression.\nHow: Use feedback worksheets (Page 78) to gather structured input from team members on growth expectations.\n\n## Improvement Area 3\nWhy: \"Vulnerability\" scores were low, indicating reluctance to share challenges.\nAction: Create a safe space for open discussions about team struggles.\nHow: Use the team reflection worksheet (Page 32) to facilitate discussions on vulnerability and challenges.\n\n\n---\n\n### Example Output\n# === QUALITATIVE INSIGHTS === \n- Insight 1: Communication was clear, but feedback was inconsistent, causing confusion among team members. \n- Insight 2: Learning opportunities were available but lacked structured guidance, leading to stagnation.\n- Insight 3: Opportunities for career progression were discussed but not followed up with actionable plans. \n\n# === STATISTICAL ANALYSIS === \nVariability: High variability was noted in Learning scores (StdDev = 2.1). \nSkew: Negative skew in the growth category, with a median of 3 vs a mean of 2.4. \nDiversity of Responses: Scores ranged from 1 to 5 in most categories, reflecting differing levels of satisfaction. \n\n# === OPTIONS TO IMPROVE === \n## Improvement Area 1 \nWhy: The \"Learning\" scores showed high variability, indicating inconsistent experiences across team members. \nAction: Introduce a structured learning framework with clear milestones. \nHow: Use the CLOVER learning worksheet (Page 45) to guide the implementation of personal development plans. \n## Improvement Area 2 \nWhy: The \"Growth\" category showed a negative skew, with many participants feeling stifled.\nAction: Implement regular feedback loops focused on career progression. \nHow: Use feedback worksheets (Page 78) to gather structured input from team members on growth expectations. \n## Improvement Area 3 \nWhy: \"Vulnerability\" scores were low, indicating reluctance to share challenges. \nAction: Create a safe space for open discussions about team struggles. \nHow: Use the team reflection worksheet (Page 32) to facilitate discussions on vulnerability and challenges.",
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "b09de98c-76c4-4692-bef9-e3eaec3fd5d2",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        940,
+        320
+      ]
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CLOVER Database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "CLOVER Database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "CLOVER Database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "0YP0ar9neq5yTIPz"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-11T07:29:43.254Z",
+      "createdAt": "2024-10-11T07:29:43.254Z",
+      "id": "AOYxiUb5DHFbCFkc",
+      "name": "agent"
+    },
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-10-09T16:08:23.899Z",
+      "createdAt": "2024-10-09T16:08:23.899Z",
+      "id": "fdV01E9B5XB3kSxT",
+      "name": "pinecone"
+    },
+    {
+      "updatedAt": "2024-10-01T16:05:44.602Z",
+      "createdAt": "2024-10-01T16:05:44.602Z",
+      "id": "nk0hBqEs3L8BK6u2",
+      "name": "cloverera"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

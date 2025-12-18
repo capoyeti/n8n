@@ -1,0 +1,1277 @@
+{
+  "id": "wN8NY36iNP3ktxle",
+  "name": "RealEstate CRM Get Showday leads",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        140
+      ],
+      "id": "1691f5bd-8b90-4ee9-aae1-d801cf9cd0b3",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const lastContact = item.json[\"Last Contact\"];\n  let newDate;\n\n  if (lastContact) {\n    const original = new Date(lastContact);\n    original.setDate(original.getDate() + 1);\n    newDate = original.toISOString(); // Full ISO string\n  } else {\n    const today = new Date();\n    today.setDate(today.getDate() + 1);\n    newDate = today.toISOString().split(\"T\")[0];\n  }\n\n  return {\n    json: {\n      id: item.json.id, // assuming you include record ID in the initial fetch\n      \"Last Contact\": newDate\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        140
+      ],
+      "id": "282d48b5-2a90-4519-8ce9-137ea9c36520",
+      "name": "Add one day"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appuOrpuSwH8YMhfc",
+          "mode": "list",
+          "cachedResultName": "Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblipCC5LQ3y1vmyT",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc/tblipCC5LQ3y1vmyT"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        140
+      ],
+      "id": "35eb6095-ee5e-442a-888d-ad5cb5501220",
+      "name": "get all leads",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "qFi8DBtz5BeYVJnS",
+          "name": "CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appuOrpuSwH8YMhfc",
+          "mode": "list",
+          "cachedResultName": "Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblipCC5LQ3y1vmyT",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc/tblipCC5LQ3y1vmyT"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Last Contact": "={{ $json['Last Contact'] }}",
+            "Notes": "=This is a new date  {{ $json['Last Contact'] }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Prospect",
+                  "value": "Prospect"
+                },
+                {
+                  "name": "Lead",
+                  "value": "Lead"
+                },
+                {
+                  "name": "Client",
+                  "value": "Client"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Agent",
+              "displayName": "Agent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property",
+              "displayName": "Property",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "4x4 Step",
+              "displayName": "4x4 Step",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Step 1",
+                  "value": "Step 1"
+                },
+                {
+                  "name": "Step 2",
+                  "value": "Step 2"
+                },
+                {
+                  "name": "Step 3",
+                  "value": "Step 3"
+                },
+                {
+                  "name": "Step 4",
+                  "value": "Step 4"
+                },
+                {
+                  "name": "Completed",
+                  "value": "Completed"
+                },
+                {
+                  "name": "Paused",
+                  "value": "Paused"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Referred Name",
+              "displayName": "Referred Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contact",
+              "displayName": "Last Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Advance Step Button",
+              "displayName": "Advance Step Button",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "agent name (from Agent)",
+              "displayName": "agent name (from Agent)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        140
+      ],
+      "id": "b8c9046f-56bc-4878-bb71-a335f25be88f",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "qFi8DBtz5BeYVJnS",
+          "name": "CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "ead6936a-742d-4092-bd06-7721d5b2b319",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        340
+      ],
+      "id": "ff84f646-3675-4a4d-a7c4-79d50300e246",
+      "name": "Webhook",
+      "webhookId": "ead6936a-742d-4092-bd06-7721d5b2b319"
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appuOrpuSwH8YMhfc",
+          "mode": "list",
+          "cachedResultName": "Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblipCC5LQ3y1vmyT",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc/tblipCC5LQ3y1vmyT"
+        },
+        "id": "={{ $json.query.recordId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        500,
+        340
+      ],
+      "id": "86d9800a-818b-4f93-acaa-e0731406951f",
+      "name": "Airtable1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "qFi8DBtz5BeYVJnS",
+          "name": "CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Your new home at {{ $json['Property Name (from Properties)'][0] }}",
+        "message": "=Hi {{ $json['Full Name'] }}\n\nWe're excited that you're looking at {{ $json['Property Name (from Properties)'][0] }} and have many other properties that you could consider.\n\nLook our for our next message that will give you more insight.\n\n</br>\n</br>\nPS - here's an overview of our last chat:\n---\n{{ $json.Notes }}\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        820,
+        340
+      ],
+      "id": "14b356d5-8de5-4a62-9a8e-0ace3160c3d9",
+      "name": "Gmail",
+      "webhookId": "54c9c54d-8b51-418d-af39-32b9e759dab9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UHT3DR6OjiDawuYi",
+          "name": "CleverAssets Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Submit Show Day Attendees",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Attendees",
+              "fieldType": "file",
+              "multipleFiles": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        200,
+        580
+      ],
+      "id": "1f5641d4-2758-41c6-b0d2-ab3f336fa07f",
+      "name": "On form submission",
+      "webhookId": "ab334e4c-40a8-4fdf-b34f-eecac606e086"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        820,
+        580
+      ],
+      "id": "10a43107-dbb3-45f2-b3d7-d67b9726f93b",
+      "name": "Wait",
+      "webhookId": "65503bb4-1723-44ee-a61f-f7c9c12c11f3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bc41da1a-1baf-4ce3-bca7-8cdb8d617c71",
+              "leftValue": "={{ $('Wait').item.json.status }}",
+              "rightValue": "SUCCESS",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        580
+      ],
+      "id": "2a70dbe5-1e2b-4872-a789-247da11c207f",
+      "name": "If Parsing Successful"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.llamaindex.ai/api/parsing/job/{{ $('Submit Job for Parsing').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1060,
+        580
+      ],
+      "id": "353e9e1e-bafa-4e78-8784-5b490bf9a9eb",
+      "name": "Check Parsing Progress",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xIM0srGzuvY5Fgvz",
+          "name": "LlamaParse Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloud.llamaindex.ai/api/parsing/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "Attendees"
+            },
+            {
+              "name": "premium_mode",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        540,
+        580
+      ],
+      "id": "93934b6d-5df9-4a2b-8526-e005626cdb34",
+      "name": "Submit Job for Parsing",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xIM0srGzuvY5Fgvz",
+          "name": "LlamaParse Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.llamaindex.ai/api/parsing/job/{{ $('Submit Job for Parsing').item.json.id }}/result/markdown",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1580,
+        560
+      ],
+      "id": "dc4b9c41-510a-4b37-bdfa-e36e615221f6",
+      "name": "Download Markdown (Parsed) Document",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xIM0srGzuvY5Fgvz",
+          "name": "LlamaParse Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.markdown }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"property\": {\n    \"type\": \"string\",\n    \"description\": \"The address or name of the property being visited\"\n  },\n  \"attendees\": {\n    \"type\": \"array\",\n    \"description\": \"A list of people who visited the property\",\n    \"items\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"first_name\": {\n          \"type\": \"string\",\n          \"description\": \"The first name of the attendee\"\n        },\n        \"last_name\": {\n          \"type\": \"string\",\n          \"description\": \"The last name of the attendee\"\n        },\n        \"mobile_number\": {\n          \"type\": \"string\",\n          \"description\": \"The attendee's cellphone number\"\n        },\n        \"email\": {\n          \"type\": \"string\",\n          \"description\": \"The attendee's email address, if given\"\n        },\n        \"comments\": {\n          \"type\": \"string\",\n          \"description\": \"Any additional notes or comments from the attendee\"\n        }\n      }\n    }\n  }\n}\n",
+        "options": {
+          "systemPromptTemplate": "You are a data cleaner and extractor. Your job is to convert markdown containing attendee information into structured JSON.\n\n1. Extract the property name from the text if provided.\n2. Parse the markdown table into attendee records.\n3. Split the full name into first name and last name.\n4. Normalize mobile numbers:\n   - Replace any alphabetic characters that may be OCR errors with numeric characters (e.g., \"S\" → \"5\", \"O\" → \"0\", \"I\" → \"1\").\n   - Format mobile numbers in international format if possible (e.g., \"+27\" for South African numbers).\n5. Leave the email field empty if not given, but include it in the output.\n6. Reformat the \"comments\" field to proper sentence case:\n   - Capitalize the first letter of the sentence.\n   - Convert the rest of the text to lowercase, unless proper nouns or acronyms are used.\n\nRespond with JSON following the exact schema provided. Make sure to explicity and consistently ONLY use the JSON output. NEVER deviate from this output\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        40
+      ],
+      "id": "e8343342-266b-442f-9df5-bc8a340402a4",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1700,
+        180
+      ],
+      "id": "4a2af68b-6a74-4725-aee9-76fc56dc3472",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "base",
+        "operation": "getSchema",
+        "base": {
+          "__rl": true,
+          "value": "appuOrpuSwH8YMhfc",
+          "mode": "list",
+          "cachedResultName": "Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc"
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1760,
+        320
+      ],
+      "id": "008ef0b6-439c-4b8d-b2a1-288009210d8f",
+      "name": "Get Real Estate Schema",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "qFi8DBtz5BeYVJnS",
+          "name": "CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee7011fe-f851-4ddb-a731-ffb42e067e86",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "c8e6cc2a-a879-4730-ae1f-b861e1bf7ac4",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "8cd99bd9-bfd2-4af2-8288-08dde7587f54",
+              "name": "primaryFieldId",
+              "value": "={{ $json.primaryFieldId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1980,
+        340
+      ],
+      "id": "5a517330-aefe-4bab-bde5-4c04e8a2681d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appuOrpuSwH8YMhfc",
+          "mode": "list",
+          "cachedResultName": "Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblKGPJrqmOrqUfyk",
+          "mode": "list",
+          "cachedResultName": "Show Days",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc/tblKGPJrqmOrqUfyk"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "firstName": "={{ $json.first_name }}",
+            "lastName": "={{ $json.last_name }}",
+            "mobileNumber": "={{ $json.mobile_number }}",
+            "email": "={{ $json.email }}",
+            "comments": "={{ $json.comments }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "firstName",
+              "displayName": "firstName",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lastName",
+              "displayName": "lastName",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mobileNumber",
+              "displayName": "mobileNumber",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "comments",
+              "displayName": "comments",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Name",
+              "displayName": "Property Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "17 NICHOLWAY CRESCENT",
+                  "value": "17 NICHOLWAY CRESCENT"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Show Day Date",
+              "displayName": "Show Day Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Linked Lead",
+              "displayName": "Linked Lead",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone (from Linked Lead)",
+              "displayName": "Phone (from Linked Lead)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Linked Property",
+              "displayName": "Linked Property",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Name (from Linked Property)",
+              "displayName": "Property Name (from Linked Property)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Agent (optional)",
+              "displayName": "Agent (optional)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2560,
+        680
+      ],
+      "id": "472942b6-e32a-483c-a03e-5bc5c156d7d5",
+      "name": "Airtable2",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "qFi8DBtz5BeYVJnS",
+          "name": "CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.attendees",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        560
+      ],
+      "id": "9ddd091d-a4a0-430c-a1f5-b871878ddb1a",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d9f1f49e-3e44-4742-b024-aed8407eddfb",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2480,
+        360
+      ],
+      "id": "21957948-b779-4a1d-923f-58f5e06479fc",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $('Split Out').item.json.first_name }}, thanks for visiting {{ $('AI Agent').item.json.output.property }}",
+        "message": "=Hi there, {{ $json.first_name }}\n\nThanks for stopping by the show day at {{ $('AI Agent').item.json.output.property }} — we hope you enjoyed the visit!\n\nIf you have any questions about the property, would like to arrange a second viewing, or want to explore similar options, we’re here to help.\n\nFeel free to reach out anytime, or explore more listings at https://www.choicenet.co.za/.\n\nWarm regards,\n",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Choice Properties"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2980,
+        260
+      ],
+      "id": "48f27d7d-433c-467f-baa6-79bd080ad3dc",
+      "name": "Gmail1",
+      "webhookId": "29336cfa-f1e7-40f2-b5dc-81ef21cacd1e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UHT3DR6OjiDawuYi",
+          "name": "CleverAssets Gmail"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Process the markdown text below and generate JSON output\n\n {{ $json.markdown }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a data cleaner and extractor. Your job is to convert markdown containing attendee information into structured JSON.\n\n1. Extract the property name from the text if provided.\n2. Parse the markdown table into attendee records.\n3. Split the full name into first name and last name.\n4. Normalize mobile numbers:\n   - Replace any alphabetic characters that may be OCR errors with numeric characters (e.g., \"S\" → \"5\", \"O\" → \"0\", \"I\" → \"1\").\n   - Format mobile numbers in international format if possible (e.g., \"+27\" for South African numbers).\n5. Leave the email field empty if not given, but include it in the output.\n6. Reformat the \"comments\" field to proper sentence case:\n   - Capitalize the first letter of the sentence.\n   - Convert the rest of the text to lowercase, unless proper nouns or acronyms are used.\n\nRespond with JSON following the exact schema provided. Make sure to explicity and consistently ONLY use the JSON output. NEVER deviate from this output\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1780,
+        560
+      ],
+      "id": "7fdb0b81-f875-462e-b30c-b7fd6dc6b2e6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1740,
+        820
+      ],
+      "id": "479772e5-0385-49b4-9d88-73c9b5fe8b85",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"property\": {\n    \"type\": \"string\",\n    \"description\": \"The address or name of the property being visited\"\n  },\n  \"attendees\": {\n    \"type\": \"array\",\n    \"description\": \"A list of people who visited the property\",\n    \"items\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"first_name\": {\n          \"type\": \"string\",\n          \"description\": \"The first name of the attendee\"\n        },\n        \"last_name\": {\n          \"type\": \"string\",\n          \"description\": \"The last name of the attendee\"\n        },\n        \"mobile_number\": {\n          \"type\": \"string\",\n          \"description\": \"The attendee's cellphone number\"\n        },\n        \"email\": {\n          \"type\": \"string\",\n          \"description\": \"The attendee's email address, if given\"\n        },\n        \"comments\": {\n          \"type\": \"string\",\n          \"description\": \"Any additional notes or comments from the attendee\"\n        }\n      }\n    }\n  }\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2100,
+        840
+      ],
+      "id": "c53e6351-d802-488f-bc81-6b31137bbdc6",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "386844535",
+        "message": "=Hi Chad,\n\nI want to send a \"Thanks for attending\" 👍🏼 emails.",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2720,
+        80
+      ],
+      "id": "639bb696-cdcd-475e-a137-ea45525163b6",
+      "name": "Telegram",
+      "webhookId": "443709c7-6c48-4179-98d3-528aaacabcbc",
+      "credentials": {
+        "telegramApi": {
+          "id": "dRV9yt9zJzQCl5zi",
+          "name": "Visible Projects"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "get all leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get all leads": {
+      "main": [
+        [
+          {
+            "node": "Add one day",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add one day": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Airtable1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Check Parsing Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Parsing Successful": {
+      "main": [
+        [
+          {
+            "node": "Download Markdown (Parsed) Document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Parsing Progress": {
+      "main": [
+        [
+          {
+            "node": "If Parsing Successful",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Job for Parsing": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Markdown (Parsed) Document": {
+      "main": [
+        [
+          {
+            "node": "Get Real Estate Schema",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Submit Job for Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        []
+      ]
+    },
+    "Get Real Estate Schema": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Airtable2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Edit Fields": [
+      {
+        "json": {
+          "id": "tblv5CxRvZnAxGNzD",
+          "name": "Agents",
+          "primaryFieldId": "fldVPfsqsiNBx5aKm"
+        }
+      },
+      {
+        "json": {
+          "id": "tbly9GbVw3A65SoFR",
+          "name": "Properties",
+          "primaryFieldId": "fldO2A9Tj4g5X1Ytn"
+        }
+      },
+      {
+        "json": {
+          "id": "tblipCC5LQ3y1vmyT",
+          "name": "Leads",
+          "primaryFieldId": "fldyIVizVK5NBcpBl"
+        }
+      },
+      {
+        "json": {
+          "id": "tbltfoQ92IgsahDWW",
+          "name": "Outreach Templates",
+          "primaryFieldId": "fldodlAAGG8sAThIE"
+        }
+      },
+      {
+        "json": {
+          "id": "tblKGPJrqmOrqUfyk",
+          "name": "Show Days",
+          "primaryFieldId": "fldKXjxsNfrNc6Qeu"
+        }
+      }
+    ]
+  }
+}

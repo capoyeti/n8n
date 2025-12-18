@@ -1,0 +1,24 @@
+{
+  "id": "70W28FPy7q9JzbUy",
+  "name": "Course Updates",
+  "active": false,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Johannesburg",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-05T17:05:04.175Z",
+      "createdAt": "2024-09-05T17:05:04.175Z",
+      "id": "0si0ZKOoLVVrpAu5",
+      "name": "FPA"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

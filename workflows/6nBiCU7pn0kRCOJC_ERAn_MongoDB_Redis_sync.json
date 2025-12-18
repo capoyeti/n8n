@@ -1,0 +1,55 @@
+{
+  "id": "6nBiCU7pn0kRCOJC",
+  "name": "ERAn MongoDB Redis sync",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "338a6ac1-5f14-4d55-81f0-9d423cf0eae3",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        700,
+        360
+      ]
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-29T09:12:53.855Z",
+      "createdAt": "2024-10-29T09:12:53.855Z",
+      "id": "NDCjqdxBOtMSQW5J",
+      "name": "clover-db"
+    },
+    {
+      "updatedAt": "2024-10-01T16:05:44.602Z",
+      "createdAt": "2024-10-01T16:05:44.602Z",
+      "id": "nk0hBqEs3L8BK6u2",
+      "name": "cloverera"
+    },
+    {
+      "updatedAt": "2024-10-16T08:12:02.534Z",
+      "createdAt": "2024-10-16T08:12:02.534Z",
+      "id": "puahS84vmVgBJKiT",
+      "name": "redis"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

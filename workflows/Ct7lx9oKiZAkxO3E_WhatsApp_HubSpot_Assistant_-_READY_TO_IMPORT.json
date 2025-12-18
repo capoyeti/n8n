@@ -1,0 +1,762 @@
+{
+  "id": "Ct7lx9oKiZAkxO3E",
+  "name": "WhatsApp HubSpot Assistant - READY TO IMPORT",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "id": "1887a7f4-4488-4e3b-bc32-b9a22693edbb",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        120
+      ],
+      "webhookId": "whatsapp-hubspot-assistant",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "qrRIBJfrJWq6yaXI",
+          "name": "CleverBot (on VPC Business)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "messages",
+        "options": {}
+      },
+      "id": "ab0e3ec0-a938-411b-ab69-f05d813ccca2",
+      "name": "Split Out Messages",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        16,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.type == 'audio' && Boolean($json.audio) }}",
+                    "rightValue": ""
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.type == 'image' && Boolean($json.image) }}",
+                    "rightValue": ""
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Image"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Text"
+        }
+      },
+      "id": "b810eb28-f580-433b-be49-df726d3c50ca",
+      "name": "Route Message Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        240,
+        104
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.audio.id }}"
+      },
+      "id": "18fac952-8341-4638-ba9d-53dfe9e9b994",
+      "name": "Get Audio URL",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -176
+      ],
+      "webhookId": "082f3c0b-2f09-455c-9993-f1670210ee09",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "4e66cf71-1a17-4def-90e8-e08596343065",
+      "name": "Download Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        688,
+        -176
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "6ce3fd41-0751-4b8f-8ced-72c7bdd7013f",
+      "name": "Transcribe Audio",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.5,
+      "position": [
+        976,
+        -176
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg-text",
+              "name": "message_text",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "id": "msg-type",
+              "name": "message_type",
+              "type": "string",
+              "value": "audio"
+            },
+            {
+              "id": "from-field",
+              "name": "from",
+              "type": "string",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75d474cf-dc8a-4fcf-9928-1c68971bd3ea",
+      "name": "Format Audio Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.image.id }}"
+      },
+      "id": "24e2f917-40df-4ae1-8c9d-75cf733846aa",
+      "name": "Get Image URL",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        464,
+        120
+      ],
+      "webhookId": "79b4051b-6ff3-4bcf-acbf-c1442fbb6570",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "cc904aec-2937-47b6-96e9-729789efb9ce",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        688,
+        120
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Describe this image in detail and extract any visible text. If there's a question in the caption, answer it.",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary"
+            }
+          ]
+        }
+      },
+      "id": "e6f2b2ad-4805-4c5a-9b0c-50ebbee85d81",
+      "name": "Describe Image",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        912,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b910a19c-8759-4bef-8739-11c3e6bcb38d",
+      "name": "OpenAI Vision Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        984,
+        240
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "img-text",
+              "name": "message_text",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "id": "img-type",
+              "name": "message_type",
+              "type": "string",
+              "value": "image"
+            },
+            {
+              "id": "img-caption",
+              "name": "message_caption",
+              "type": "string",
+              "value": "={{ $('Route Message Type').item.json.image.caption || '' }}"
+            },
+            {
+              "id": "img-from",
+              "name": "from",
+              "type": "string",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b3bbabfc-036b-49ee-b05b-6ba3c58a4c70",
+      "name": "Format Image Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "txt-text",
+              "name": "message_text",
+              "type": "string",
+              "value": "={{ $json.text.body }}"
+            },
+            {
+              "id": "txt-type",
+              "name": "message_type",
+              "type": "string",
+              "value": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "146e0702-a1ea-4b75-be76-d843237b2169",
+      "name": "Format Text Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        976,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "txt-from",
+              "name": "from",
+              "type": "string",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c36a390e-10d6-44f0-bce5-5ae010185ad1",
+      "name": "Add From Field",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * HubSpot Query Tool for n8n AI Agent\n *\n * This tool allows the AI agent to query HubSpot CRM for contacts, companies, and deals.\n * Implements LangChain Tool interface for use in n8n AI Agent node.\n *\n * Usage: Place this in a Code node as a LangChain Tool\n */\n\n// Tool implementation for n8n Code node\nconst hubspotQueryTool = {\n  name: \"hubspot_query\",\n  description: `Query HubSpot CRM for contacts, companies, and deals.\n\nOperations:\n- search_contacts: Find contacts by name, email, or phone. Query format: \"john@example.com\" or \"John Doe\"\n- get_contact: Get full contact details. Query format: contact ID or email\n- list_contacts: List contacts with filters. Query format: \"lifecycle:customer\" or \"createdate:this_week\"\n- search_companies: Find companies by name or domain. Query format: \"Acme Corp\" or \"acme.com\"\n- get_company: Get company details. Query format: company ID\n- list_companies: List companies with filters\n- search_deals: Find deals by name, amount, or stage. Query format: \"Website Redesign\" or \"amount:>100000\"\n- get_deal: Get deal details. Query format: deal ID\n- list_deals: List deals with filters. Query format: \"dealstage:closedwon\"\n\nReturns formatted text with contact/company/deal information.`,\n\n  schema: {\n    type: \"object\",\n    properties: {\n      operation: {\n        type: \"string\",\n        enum: [\n          \"search_contacts\",\n          \"get_contact\",\n          \"list_contacts\",\n          \"search_companies\",\n          \"get_company\",\n          \"list_companies\",\n          \"search_deals\",\n          \"get_deal\",\n          \"list_deals\"\n        ],\n        description: \"The HubSpot operation to perform\"\n      },\n      query: {\n        type: \"string\",\n        description: \"Search term, ID, email, or filter criteria\"\n      },\n      limit: {\n        type: \"number\",\n        description: \"Maximum number of results (default: 10)\",\n        default: 10\n      }\n    },\n    required: [\"operation\", \"query\"]\n  }\n};\n\n/**\n * Main execution function\n * Called by AI Agent with parsed input\n */\nasync function executeHubSpotQuery(input) {\n  const { operation, query, limit = 10 } = input;\n\n  // HubSpot API base URL\n  const baseUrl = \"https://api.hubapi.com\";\n\n  // Get HubSpot credentials from n8n\n  const credentials = await this.getCredentials('hubspotAppToken');\n  const accessToken = credentials.appToken;\n\n  const headers = {\n    'Authorization': `Bearer ${accessToken}`,\n    'Content-Type': 'application/json'\n  };\n\n  try {\n    switch (operation) {\n      case 'search_contacts':\n        return await searchContacts(baseUrl, headers, query, limit);\n\n      case 'get_contact':\n        return await getContact(baseUrl, headers, query);\n\n      case 'list_contacts':\n        return await listContacts(baseUrl, headers, query, limit);\n\n      case 'search_companies':\n        return await searchCompanies(baseUrl, headers, query, limit);\n\n      case 'get_company':\n        return await getCompany(baseUrl, headers, query);\n\n      case 'list_companies':\n        return await listCompanies(baseUrl, headers, query, limit);\n\n      case 'search_deals':\n        return await searchDeals(baseUrl, headers, query, limit);\n\n      case 'get_deal':\n        return await getDeal(baseUrl, headers, query);\n\n      case 'list_deals':\n        return await listDeals(baseUrl, headers, query, limit);\n\n      default:\n        return `Unknown operation: ${operation}`;\n    }\n  } catch (error) {\n    return `HubSpot API Error: ${error.message}`;\n  }\n}\n\n/**\n * Search for contacts by name, email, or phone\n */\nasync function searchContacts(baseUrl, headers, query, limit) {\n  const searchUrl = `${baseUrl}/crm/v3/objects/contacts/search`;\n\n  const searchBody = {\n    filterGroups: [{\n      filters: [\n        { propertyName: \"email\", operator: \"CONTAINS_TOKEN\", value: query },\n        { propertyName: \"firstname\", operator: \"CONTAINS_TOKEN\", value: query },\n        { propertyName: \"lastname\", operator: \"CONTAINS_TOKEN\", value: query },\n        { propertyName: \"phone\", operator: \"CONTAINS_TOKEN\", value: query }\n      ]\n    }],\n    properties: [\"firstname\", \"lastname\", \"email\", \"phone\", \"lifecyclestage\", \"createdate\"],\n    limit: limit\n  };\n\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: searchUrl,\n    headers: headers,\n    body: searchBody\n  });\n\n  if (!response.results || response.results.length === 0) {\n    return `No contacts found matching \"${query}\"`;\n  }\n\n  let result = `Found ${response.results.length} contact(s):\\n\\n`;\n\n  response.results.forEach((contact, index) => {\n    const props = contact.properties;\n    result += `${index + 1}. **${props.firstname || ''} ${props.lastname || ''}**\\n`;\n    result += `   • Email: ${props.email || 'N/A'}\\n`;\n    result += `   • Phone: ${props.phone || 'N/A'}\\n`;\n    result += `   • Lifecycle: ${props.lifecyclestage || 'N/A'}\\n`;\n    result += `   • ID: ${contact.id}\\n`;\n    result += `   • Created: ${props.createdate ? new Date(props.createdate).toLocaleDateString() : 'N/A'}\\n\\n`;\n  });\n\n  return result;\n}\n\n/**\n * Get detailed contact information\n */\nasync function getContact(baseUrl, headers, query) {\n  let contactId = query;\n\n  // If query looks like an email, search first\n  if (query.includes('@')) {\n    const searchResult = await searchContacts(baseUrl, headers, query, 1);\n    // Extract ID from search result (simplified)\n    const idMatch = searchResult.match(/ID: (\\d+)/);\n    if (!idMatch) {\n      return searchResult; // Return search result if no contact found\n    }\n    contactId = idMatch[1];\n  }\n\n  const contactUrl = `${baseUrl}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,lifecyclestage,createdate,hs_lead_status,hubspot_owner_id,company,jobtitle,city,state,country`;\n\n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: contactUrl,\n    headers: headers\n  });\n\n  const props = response.properties;\n\n  let result = `**Contact Details**\\n\\n`;\n  result += `**Name:** ${props.firstname || ''} ${props.lastname || ''}\\n`;\n  result += `**Email:** ${props.email || 'N/A'}\\n`;\n  result += `**Phone:** ${props.phone || 'N/A'}\\n`;\n  result += `**Job Title:** ${props.jobtitle || 'N/A'}\\n`;\n  result += `**Company:** ${props.company || 'N/A'}\\n`;\n  result += `**Lifecycle Stage:** ${props.lifecyclestage || 'N/A'}\\n`;\n  result += `**Lead Status:** ${props.hs_lead_status || 'N/A'}\\n`;\n  result += `**Location:** ${[props.city, props.state, props.country].filter(Boolean).join(', ') || 'N/A'}\\n`;\n  result += `**Owner ID:** ${props.hubspot_owner_id || 'N/A'}\\n`;\n  result += `**Created:** ${props.createdate ? new Date(props.createdate).toLocaleDateString() : 'N/A'}\\n`;\n  result += `**Contact ID:** ${response.id}\\n`;\n\n  return result;\n}\n\n/**\n * List contacts with filters\n */\nasync function listContacts(baseUrl, headers, query, limit) {\n  // Parse filter from query (e.g., \"lifecycle:customer\" or \"createdate:this_week\")\n  const filterMatch = query.match(/(\\w+):(.+)/);\n\n  if (!filterMatch) {\n    return \"Please provide a filter in format 'property:value' (e.g., 'lifecyclestage:customer')\";\n  }\n\n  const [_, property, value] = filterMatch;\n\n  const searchUrl = `${baseUrl}/crm/v3/objects/contacts/search`;\n\n  const searchBody = {\n    filterGroups: [{\n      filters: [{\n        propertyName: property,\n        operator: \"EQ\",\n        value: value\n      }]\n    }],\n    properties: [\"firstname\", \"lastname\", \"email\", \"lifecyclestage\", \"createdate\"],\n    limit: limit\n  };\n\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: searchUrl,\n    headers: headers,\n    body: searchBody\n  });\n\n  if (!response.results || response.results.length === 0) {\n    return `No contacts found with ${property}=${value}`;\n  }\n\n  let result = `Found ${response.results.length} contact(s) with ${property}=${value}:\\n\\n`;\n\n  response.results.forEach((contact, index) => {\n    const props = contact.properties;\n    result += `${index + 1}. ${props.firstname || ''} ${props.lastname || ''} (${props.email || 'no email'})\\n`;\n  });\n\n  return result;\n}\n\n/**\n * Search for companies\n */\nasync function searchCompanies(baseUrl, headers, query, limit) {\n  const searchUrl = `${baseUrl}/crm/v3/objects/companies/search`;\n\n  const searchBody = {\n    filterGroups: [{\n      filters: [\n        { propertyName: \"name\", operator: \"CONTAINS_TOKEN\", value: query },\n        { propertyName: \"domain\", operator: \"CONTAINS_TOKEN\", value: query }\n      ]\n    }],\n    properties: [\"name\", \"domain\", \"city\", \"state\", \"country\", \"industry\", \"createdate\"],\n    limit: limit\n  };\n\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: searchUrl,\n    headers: headers,\n    body: searchBody\n  });\n\n  if (!response.results || response.results.length === 0) {\n    return `No companies found matching \"${query}\"`;\n  }\n\n  let result = `Found ${response.results.length} company(ies):\\n\\n`;\n\n  response.results.forEach((company, index) => {\n    const props = company.properties;\n    result += `${index + 1}. **${props.name || 'Unnamed'}**\\n`;\n    result += `   • Domain: ${props.domain || 'N/A'}\\n`;\n    result += `   • Industry: ${props.industry || 'N/A'}\\n`;\n    result += `   • Location: ${[props.city, props.state, props.country].filter(Boolean).join(', ') || 'N/A'}\\n`;\n    result += `   • ID: ${company.id}\\n`;\n    result += `   • Created: ${props.createdate ? new Date(props.createdate).toLocaleDateString() : 'N/A'}\\n\\n`;\n  });\n\n  return result;\n}\n\n/**\n * Get detailed company information\n */\nasync function getCompany(baseUrl, headers, companyId) {\n  const companyUrl = `${baseUrl}/crm/v3/objects/companies/${companyId}?properties=name,domain,city,state,country,industry,createdate,phone,numberofemployees,annualrevenue`;\n\n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: companyUrl,\n    headers: headers\n  });\n\n  const props = response.properties;\n\n  let result = `**Company Details**\\n\\n`;\n  result += `**Name:** ${props.name || 'N/A'}\\n`;\n  result += `**Domain:** ${props.domain || 'N/A'}\\n`;\n  result += `**Industry:** ${props.industry || 'N/A'}\\n`;\n  result += `**Phone:** ${props.phone || 'N/A'}\\n`;\n  result += `**Employees:** ${props.numberofemployees || 'N/A'}\\n`;\n  result += `**Revenue:** ${props.annualrevenue || 'N/A'}\\n`;\n  result += `**Location:** ${[props.city, props.state, props.country].filter(Boolean).join(', ') || 'N/A'}\\n`;\n  result += `**Created:** ${props.createdate ? new Date(props.createdate).toLocaleDateString() : 'N/A'}\\n`;\n  result += `**Company ID:** ${response.id}\\n`;\n\n  return result;\n}\n\n/**\n * List companies with filters\n */\nasync function listCompanies(baseUrl, headers, query, limit) {\n  const filterMatch = query.match(/(\\w+):(.+)/);\n\n  if (!filterMatch) {\n    return \"Please provide a filter in format 'property:value' (e.g., 'industry:Technology')\";\n  }\n\n  const [_, property, value] = filterMatch;\n\n  const searchUrl = `${baseUrl}/crm/v3/objects/companies/search`;\n\n  const searchBody = {\n    filterGroups: [{\n      filters: [{\n        propertyName: property,\n        operator: \"EQ\",\n        value: value\n      }]\n    }],\n    properties: [\"name\", \"domain\", \"industry\"],\n    limit: limit\n  };\n\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: searchUrl,\n    headers: headers,\n    body: searchBody\n  });\n\n  if (!response.results || response.results.length === 0) {\n    return `No companies found with ${property}=${value}`;\n  }\n\n  let result = `Found ${response.results.length} company(ies) with ${property}=${value}:\\n\\n`;\n\n  response.results.forEach((company, index) => {\n    const props = company.properties;\n    result += `${index + 1}. ${props.name || 'Unnamed'} (${props.domain || 'no domain'})\\n`;\n  });\n\n  return result;\n}\n\n/**\n * Search for deals\n */\nasync function searchDeals(baseUrl, headers, query, limit) {\n  const searchUrl = `${baseUrl}/crm/v3/objects/deals/search`;\n\n  // Check if query is a numeric amount search (e.g., \">100000\" or \"amount:>100000\")\n  const amountMatch = query.match(/(?:amount:)?([><]=?)(\\d+)/);\n\n  let searchBody;\n\n  if (amountMatch) {\n    const [_, operator, amount] = amountMatch;\n    let hubspotOperator = \"GT\"; // Greater than\n    if (operator === \"<\") hubspotOperator = \"LT\";\n    if (operator === \">=\") hubspotOperator = \"GTE\";\n    if (operator === \"<=\") hubspotOperator = \"LTE\";\n    if (operator === \"=\") hubspotOperator = \"EQ\";\n\n    searchBody = {\n      filterGroups: [{\n        filters: [{\n          propertyName: \"amount\",\n          operator: hubspotOperator,\n          value: amount\n        }]\n      }],\n      properties: [\"dealname\", \"amount\", \"dealstage\", \"closedate\", \"createdate\", \"pipeline\"],\n      limit: limit\n    };\n  } else {\n    searchBody = {\n      filterGroups: [{\n        filters: [\n          { propertyName: \"dealname\", operator: \"CONTAINS_TOKEN\", value: query },\n          { propertyName: \"dealstage\", operator: \"CONTAINS_TOKEN\", value: query }\n        ]\n      }],\n      properties: [\"dealname\", \"amount\", \"dealstage\", \"closedate\", \"createdate\", \"pipeline\"],\n      limit: limit\n    };\n  }\n\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: searchUrl,\n    headers: headers,\n    body: searchBody\n  });\n\n  if (!response.results || response.results.length === 0) {\n    return `No deals found matching \"${query}\"`;\n  }\n\n  let result = `Found ${response.results.length} deal(s):\\n\\n`;\n  let totalValue = 0;\n\n  response.results.forEach((deal, index) => {\n    const props = deal.properties;\n    const amount = parseFloat(props.amount) || 0;\n    totalValue += amount;\n\n    result += `${index + 1}. **${props.dealname || 'Unnamed Deal'}**\\n`;\n    result += `   • Amount: R${amount.toLocaleString()}\\n`;\n    result += `   • Stage: ${props.dealstage || 'N/A'}\\n`;\n    result += `   • Pipeline: ${props.pipeline || 'N/A'}\\n`;\n    result += `   • Close Date: ${props.closedate ? new Date(props.closedate).toLocaleDateString() : 'N/A'}\\n`;\n    result += `   • ID: ${deal.id}\\n\\n`;\n  });\n\n  result += `**Total Pipeline Value:** R${totalValue.toLocaleString()}\\n`;\n\n  return result;\n}\n\n/**\n * Get detailed deal information\n */\nasync function getDeal(baseUrl, headers, dealId) {\n  const dealUrl = `${baseUrl}/crm/v3/objects/deals/${dealId}?properties=dealname,amount,dealstage,closedate,createdate,pipeline,hubspot_owner_id,description`;\n\n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: dealUrl,\n    headers: headers\n  });\n\n  const props = response.properties;\n  const amount = parseFloat(props.amount) || 0;\n\n  let result = `**Deal Details**\\n\\n`;\n  result += `**Deal Name:** ${props.dealname || 'N/A'}\\n`;\n  result += `**Amount:** R${amount.toLocaleString()}\\n`;\n  result += `**Stage:** ${props.dealstage || 'N/A'}\\n`;\n  result += `**Pipeline:** ${props.pipeline || 'N/A'}\\n`;\n  result += `**Close Date:** ${props.closedate ? new Date(props.closedate).toLocaleDateString() : 'N/A'}\\n`;\n  result += `**Created:** ${props.createdate ? new Date(props.createdate).toLocaleDateString() : 'N/A'}\\n`;\n  result += `**Owner ID:** ${props.hubspot_owner_id || 'N/A'}\\n`;\n  result += `**Description:** ${props.description || 'N/A'}\\n`;\n  result += `**Deal ID:** ${response.id}\\n`;\n\n  return result;\n}\n\n/**\n * List deals with filters\n */\nasync function listDeals(baseUrl, headers, query, limit) {\n  const filterMatch = query.match(/(\\w+):(.+)/);\n\n  if (!filterMatch) {\n    return \"Please provide a filter in format 'property:value' (e.g., 'dealstage:closedwon')\";\n  }\n\n  const [_, property, value] = filterMatch;\n\n  const searchUrl = `${baseUrl}/crm/v3/objects/deals/search`;\n\n  const searchBody = {\n    filterGroups: [{\n      filters: [{\n        propertyName: property,\n        operator: \"EQ\",\n        value: value\n      }]\n    }],\n    properties: [\"dealname\", \"amount\", \"dealstage\"],\n    limit: limit\n  };\n\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: searchUrl,\n    headers: headers,\n    body: searchBody\n  });\n\n  if (!response.results || response.results.length === 0) {\n    return `No deals found with ${property}=${value}`;\n  }\n\n  let result = `Found ${response.results.length} deal(s) with ${property}=${value}:\\n\\n`;\n  let totalValue = 0;\n\n  response.results.forEach((deal, index) => {\n    const props = deal.properties;\n    const amount = parseFloat(props.amount) || 0;\n    totalValue += amount;\n\n    result += `${index + 1}. ${props.dealname || 'Unnamed'} - R${amount.toLocaleString()} (${props.dealstage})\\n`;\n  });\n\n  result += `\\n**Total:** R${totalValue.toLocaleString()}\\n`;\n\n  return result;\n}\n\n// Export for n8n Code node\nreturn await executeHubSpotQuery($input.item.json);\n"
+      },
+      "id": "5f5bdae5-9606-445a-846b-14b900a4f868",
+      "name": "HubSpot Query Tool",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User sent a {{ $json.message_type }} message:\\n\\nMessage: {{ $json.message_text }}\\n{{ $json.message_caption ? 'Caption: ' + $json.message_caption : '' }}",
+        "options": {
+          "systemMessage": "You are a HubSpot CRM assistant available via WhatsApp. Help users query their HubSpot contacts, companies, and deals using natural language.\\n\\nYou have access to a HubSpot query tool that can:\\n- Search for contacts by name, email, or phone\\n- Get detailed contact information\\n- Search for companies by name or domain\\n- Get detailed company information\\n- Search for deals by name, amount, or stage\\n- Get detailed deal information\\n- List objects with filters\\n- Calculate pipeline values\\n\\nWhen a user asks about HubSpot data:\\n1. Identify what they're looking for (contact, company, or deal)\\n2. Use the hubspot_query tool with the appropriate operation\\n3. Present the results in a clear, friendly format\\n4. Offer to provide more details or related information\\n\\nBe conversational and helpful. If the query is ambiguous, ask for clarification.\\n\\nExamples:\\n- \\\"Find contact john@example.com\\\" → use search_contacts\\n- \\\"Show me all customers\\\" → use list_contacts with lifecycle filter\\n- \\\"What deals are over R100k?\\\" → use search_deals with amount filter\\n- \\\"Tell me about Acme Corp\\\" → use search_companies"
+        }
+      },
+      "id": "b83c426e-adac-438c-8589-ef2bddae6f57",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1968,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "3e6414e1-2267-46f2-baed-0e86a01163a2",
+      "name": "OpenAI Agent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        336
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=whatsapp-hubspot-{{ $json.from }}"
+      },
+      "id": "8e78345c-790b-40d7-b794-ec05641ce17c",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        2032,
+        336
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5b4c19f4-3b68-4859-a529-ef6a091627ad",
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "775412688997246",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "9394705a-07f9-4b37-9f16-367d319dd09e",
+      "name": "Send WhatsApp Response",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        2368,
+        112
+      ],
+      "webhookId": "46717ae0-2a81-45e9-b2f8-32c4963d7667",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/530419866820084/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"status\": \"read\",\n  \"message_id\": \"{{ $json.messages[0].id }}\",\n  \"typing_indicator\": {\n    \"type\": \"text\"\n  }\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        416
+      ],
+      "id": "a15f868d-4983-4154-aa77-629db193134a",
+      "name": "Trigger typing Animation",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xIM0srGzuvY5Fgvz",
+          "name": "LlamaParse Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1552,
+        112
+      ],
+      "id": "78f125dc-21f9-470a-8118-146d9ea968ee",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Split Out Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Messages": {
+      "main": [
+        [
+          {
+            "node": "Route Message Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Message Type": {
+      "main": [
+        [
+          {
+            "node": "Get Audio URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio URL": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Format Audio Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Audio Message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image URL": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Describe Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe Image": {
+      "main": [
+        [
+          {
+            "node": "Format Image Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Vision Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Describe Image",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Image Message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Format Text Message": {
+      "main": [
+        [
+          {
+            "node": "Add From Field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add From Field": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Agent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "0YP0ar9neq5yTIPz"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {
+    "AI Agent": [
+      {
+        "json": {
+          "output": "It seems like your message didn't come through clearly. Could you please provide more details about what you're looking for? Whether it's a contact, company, or deal in HubSpot, I'm here to help!"
+        }
+      }
+    ]
+  }
+}

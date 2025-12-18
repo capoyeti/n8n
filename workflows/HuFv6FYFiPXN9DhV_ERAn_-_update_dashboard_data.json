@@ -1,0 +1,370 @@
+{
+  "id": "HuFv6FYFiPXN9DhV",
+  "name": "ERAn - update dashboard data",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "946f52db-28b4-46d0-8f38-6810eea12934",
+              "name": "Average",
+              "value": "={{(Number($json[\"Communication\"]) + Number($json[\"Learning\"]) + Number($json[\"Opportunity\"]) + Number($json[\"Vulnerability\"]) + Number($json[\"Enablement\"]) + Number($json[\"Reflection\"])) / 6}}\n",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "b46e4556-f653-437b-8740-339abd963960",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  \"submittedAt\": $json[\"submittedAt\"],\n  \"formMode\": $json[\"formMode\"],\n  \"Month of Query\": $json[\"Month of Query\"],\n  \"Communication\": $json[\"Communication\"],\n  \"Learning\": $json[\"Learning\"],\n  \"Opportunity\": $json[\"Opportunity\"],\n  \"Vulnerability\": $json[\"Vulnerability\"],\n  \"Enablement\": $json[\"Enablement\"],\n  \"Reflection\": $json[\"Reflection\"],\n  \"Average\": $json[\"Average\"],\n  \"Previous Score\": $json[\"Total\"]\n};"
+      },
+      "id": "e69974c9-0487-4d5c-a9c1-022600718626",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0",
+          "mode": "list",
+          "cachedResultName": "ERA_stats_sample_client",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 495136300,
+          "mode": "list",
+          "cachedResultName": "n8n_data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit#gid=495136300"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Month": "={{ $json['Month of Query'] ? $json['Month of Query'] : $json.submittedAt.substring(0, 7) }}",
+            "Communication": "={{ $json.Communication }}",
+            "Learning": "={{ $json.Learning }}",
+            "Vulnerability": "={{ $json.Vulnerability }}",
+            "Opportunity": "={{ $json.Opportunity }}",
+            "Enablement": "={{ $json.Enablement }}",
+            "Total": "={{ $json.Average }}",
+            "Reflection": "={{ $json.Reflection }}",
+            "Submitted  At": "={{ $json.submittedAt }}",
+            "FormMode": "={{ $json.formMode }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Submitted  At",
+              "displayName": "Submitted  At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FormMode",
+              "displayName": "FormMode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Month",
+              "displayName": "Month",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Communication",
+              "displayName": "Communication",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Learning",
+              "displayName": "Learning",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Opportunity",
+              "displayName": "Opportunity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Vulnerability",
+              "displayName": "Vulnerability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Enablement",
+              "displayName": "Enablement",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reflection",
+              "displayName": "Reflection",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Previous Score",
+              "displayName": "Previous Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "08bb2603-7684-4d91-a3b0-ed0ab30e3954",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1460,
+        340
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "path": "ab34f4ef-b3b0-4d53-9404-5cf34583de43",
+        "formTitle": "Update CLOVER Scores",
+        "formDescription": "Create new 'summary' scores for a dashboard report",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Communication",
+              "fieldType": "number",
+              "placeholder": "0-100",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Learning",
+              "fieldType": "number",
+              "placeholder": "0-100",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Opportunity",
+              "fieldType": "number",
+              "placeholder": "0-100",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Vulnerability",
+              "fieldType": "number",
+              "placeholder": "0-100",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Enablement",
+              "fieldType": "number",
+              "placeholder": "0-100",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Reflection",
+              "fieldType": "number",
+              "placeholder": "0-100",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Month of Query",
+              "fieldType": "date",
+              "formatDate": "dd/mm/yyyy"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "232695ef-6ce3-4afc-9b96-f613ebdf1c3e",
+      "name": "Submit ERA data",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        340
+      ],
+      "webhookId": "ab34f4ef-b3b0-4d53-9404-5cf34583de43",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "GVVqgKmORZQzVntk",
+          "name": "summit"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0",
+          "mode": "list",
+          "cachedResultName": "ERA_stats_sample_client",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 495136300,
+          "mode": "list",
+          "cachedResultName": "n8n_data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit#gid=495136300"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "J2"
+            }
+          }
+        }
+      },
+      "id": "c1f1e86c-4378-4ae4-af50-50ebf38cb1cf",
+      "name": "Previous entry",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        960,
+        540
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit ERA data": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-14T05:26:56.019Z",
+      "createdAt": "2024-10-14T05:26:56.019Z",
+      "id": "Ci6lAjEIcj8m3cpv",
+      "name": "testing"
+    },
+    {
+      "updatedAt": "2024-10-01T16:05:44.602Z",
+      "createdAt": "2024-10-01T16:05:44.602Z",
+      "id": "nk0hBqEs3L8BK6u2",
+      "name": "cloverera"
+    },
+    {
+      "updatedAt": "2024-10-13T06:13:26.588Z",
+      "createdAt": "2024-10-13T06:13:26.588Z",
+      "id": "w64Zis9eA06qNORe",
+      "name": "ERAn"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

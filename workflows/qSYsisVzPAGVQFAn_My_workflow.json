@@ -1,0 +1,69 @@
+{
+  "id": "qSYsisVzPAGVQFAn",
+  "name": "My workflow",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f26c2455-bf0b-4fa2-ba24-c47aac00b02c",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        780,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1u4gVOxzuZ_nSz7Zgbhin-NjEES7Sjbh4",
+            "mode": "list",
+            "cachedResultName": "House and budget",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1u4gVOxzuZ_nSz7Zgbhin-NjEES7Sjbh4"
+          }
+        },
+        "options": {}
+      },
+      "id": "6c351c4f-6dd7-4bdf-9d19-d3c42a9c5c9f",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1060,
+        320
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9Li8NNfcRaRSLphW",
+          "name": "Google Drive account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

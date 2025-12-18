@@ -1,0 +1,479 @@
+{
+  "id": "jYkWY0P2Rx4hr6tz",
+  "name": "🍀 Clover_SentimentScraper",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "8c8aa4ff-7ccb-473a-b4b5-5e5e58220731",
+      "name": "Daily Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "companies-list",
+              "name": "companies",
+              "value": [
+                "Microsoft",
+                "Google",
+                "Apple",
+                "Amazon",
+                "Meta",
+                "Tesla",
+                "Netflix",
+                "Uber",
+                "Airbnb",
+                "Salesforce",
+                "Zoom",
+                "Slack",
+                "HubSpot",
+                "Stripe",
+                "Shopify",
+                "Atlassian",
+                "Canva",
+                "Figma",
+                "Notion",
+                "Airtable",
+                "Monday.com",
+                "Asana",
+                "Trello",
+                "GitHub",
+                "GitLab",
+                "Vercel",
+                "Netlify",
+                "Twilio",
+                "SendGrid",
+                "Mailchimp"
+              ],
+              "type": "array"
+            },
+            {
+              "id": "base-glassdoor-url",
+              "name": "base_glassdoor_url",
+              "value": "https://www.glassdoor.com/Reviews/",
+              "type": "string"
+            },
+            {
+              "id": "base-indeed-url",
+              "name": "base_indeed_url",
+              "value": "https://www.indeed.com/cmp/",
+              "type": "string"
+            },
+            {
+              "id": "user-agent",
+              "name": "user_agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+              "type": "string"
+            },
+            {
+              "id": "scraped-at",
+              "name": "scraped_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a6516425-c64e-4a6c-89e9-226b11ecf2aa",
+      "name": "Set Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        140,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "companies",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "197b5608-2983-4be6-a8b5-b797173c42f0",
+      "name": "Split Out Companies",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        360,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "glassdoor-url",
+              "name": "glassdoor_url",
+              "value": "={{ $json.base_glassdoor_url }}{{ $json.company.replace(/\\s+/g, '-').toLowerCase() }}-reviews",
+              "type": "string"
+            },
+            {
+              "id": "indeed-url",
+              "name": "indeed_url",
+              "value": "={{ $json.base_indeed_url }}{{ $json.company.replace(/\\s+/g, '-').toLowerCase() }}/reviews",
+              "type": "string"
+            },
+            {
+              "id": "current-source",
+              "name": "current_source",
+              "value": "glassdoor",
+              "type": "string"
+            },
+            {
+              "id": "current-url",
+              "name": "current_url",
+              "value": "={{ $json.glassdoor_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "1ee3209b-2a24-49c9-8315-337bde7d93c9",
+      "name": "Prepare URLs",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        580,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.current_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "={{ $json.user_agent }}"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "DNT",
+              "value": "1"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Upgrade-Insecure-Requests",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "9adaaca4-59dc-4034-a00f-328b27db183e",
+      "name": "Fetch Company Reviews",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract review text from HTML using regex patterns\nconst inputData = $input.all()[0].json;\nconst html = inputData.body || inputData.data || '';\n\nif (!html) {\n  return [{\n    json: {\n      company: inputData.company,\n      source: inputData.current_source,\n      scraped_at: inputData.scraped_at,\n      error: 'No HTML content received',\n      review_texts: []\n    }\n  }];\n}\n\nconst reviewTexts = [];\n\n// Extract review text blocks from HTML\nif (inputData.current_source === 'glassdoor') {\n  // Look for review content patterns\n  const reviewBlocks = html.match(/<div[^>]*class=\"[^\"]*review[^\"]*\"[^>]*>[\\s\\S]*?<\\/div>/gi) || [];\n  \n  for (const block of reviewBlocks.slice(0, 10)) {\n    const textContent = block.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();\n    \n    if (textContent && textContent.length > 100) {\n      reviewTexts.push(textContent.substring(0, 1000)); // Limit for sentiment analysis\n    }\n  }\n}\n\nreturn [{\n  json: {\n    company: inputData.company,\n    source: inputData.current_source,\n    scraped_at: inputData.scraped_at,\n    review_texts: reviewTexts,\n    reviews_found: reviewTexts.length\n  }\n}];"
+      },
+      "id": "25e3b6d8-1139-4922-b80e-68711c75458b",
+      "name": "Extract Review Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1020,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "review_texts",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "6a9eebd0-4b9e-4a8d-bc05-1788e07d42a0",
+      "name": "Split Out Review Texts",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.review_text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "rightType": "any"
+              }
+            },
+            {
+              "leftValue": "={{ $json.review_text.length }}",
+              "rightValue": 50,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "babe6301-aca5-4135-9d4d-5396111152ed",
+      "name": "Filter Valid Reviews",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1460,
+        -20
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "257cab61-ae67-4dfa-90c1-67560a775b21",
+      "name": "Sentiment Analysis",
+      "type": "n8n-nodes-langchain.sentimentAnalysis",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I9c6XXbkM7WpuTZ73IJ6zfaFb9z3by9B9RPmipcOl2Y",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "sentiment_results",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "company": "={{ $json.company }}",
+            "source": "={{ $json.source }}",
+            "date_scraped": "={{ $json.scraped_at }}",
+            "review_text": "={{ $json.review_text }}",
+            "sentiment": "={{ $json.sentiment }}",
+            "sentiment_score": "={{ $json.sentimentScore }}",
+            "confidence": "={{ $json.confidence }}"
+          }
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "a668bb4e-289d-4bd0-b792-8c7a6d8662a1",
+      "name": "Save Sentiment Results",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1900,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "delay-seconds",
+              "name": "delay_seconds",
+              "value": "={{ Math.floor(Math.random() * 3) + 3 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "b56e4a6e-ec61-49b9-8b35-85cac2483e37",
+      "name": "Random Delay",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2120,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.delay_seconds }}"
+      },
+      "id": "65e16185-0751-4c68-8d4e-0e693bbd1e8f",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2340,
+        -20
+      ],
+      "webhookId": "659b9641-ba91-4671-bd89-6e2d71078761"
+    }
+  ],
+  "connections": {
+    "Daily Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Configuration": {
+      "main": [
+        [
+          {
+            "node": "Split Out Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Companies": {
+      "main": [
+        [
+          {
+            "node": "Prepare URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare URLs": {
+      "main": [
+        [
+          {
+            "node": "Fetch Company Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Company Reviews": {
+      "main": [
+        [
+          {
+            "node": "Extract Review Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Review Text": {
+      "main": [
+        [
+          {
+            "node": "Split Out Review Texts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Review Texts": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Sentiment Results": {
+      "main": [
+        [
+          {
+            "node": "Random Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random Delay": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-07-08T13:55:03.390Z",
+      "createdAt": "2025-07-08T13:55:03.390Z",
+      "id": "g6i3r7VWeby0WaOU",
+      "name": "employee-sentiment"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

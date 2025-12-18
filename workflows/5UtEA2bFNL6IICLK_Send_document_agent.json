@@ -1,0 +1,39 @@
+{
+  "id": "5UtEA2bFNL6IICLK",
+  "name": "Send document agent",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2f17ce9e-a3de-471b-9a6a-67d22fed0aa6",
+      "name": "Execute Workflow Trigger"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-11T07:29:43.254Z",
+      "createdAt": "2024-10-11T07:29:43.254Z",
+      "id": "AOYxiUb5DHFbCFkc",
+      "name": "agent"
+    },
+    {
+      "updatedAt": "2024-12-09T15:49:02.402Z",
+      "createdAt": "2024-12-09T15:49:02.402Z",
+      "id": "xy2Md7Nrlit7HyB7",
+      "name": "modular"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

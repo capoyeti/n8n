@@ -1,0 +1,329 @@
+{
+  "id": "jKrDXi5t1fuT9DIl",
+  "name": "ERA Redis Init and Health Check",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "cbc4fe2d-4ef2-4cfe-b713-f7109026b7cd",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        280,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "collection": "Answers-detail-view",
+        "options": {}
+      },
+      "id": "1350a717-fc30-44ee-958f-c396e76773b2",
+      "name": "MongoDB1",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.1,
+      "position": [
+        500,
+        640
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "8QwyGwLF27JfTWmN",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Redis Test Node\n\n// Helper function to get node results\nfunction getNodeOutput(nodeName, items) {\n    const nodeData = items[0]?.json;\n    return {\n        success: nodeData !== undefined,\n        data: nodeData\n    };\n}\n\n// Main test function\nfunction testRedisSetup(items) {\n    try {\n        const tests = [];\n        \n        // Test 1: Redis Info Connection\n        const redisInfo = getNodeOutput('Redis', items);\n        tests.push({\n            name: 'Redis Connection',\n            success: redisInfo.success,\n            details: {\n                version: redisInfo.data?.redis_version,\n                mode: redisInfo.data?.redis_mode\n            }\n        });\n        \n        // Test 2: Stats Setup\n        const statsSetup = getNodeOutput('Redis2', items);\n        tests.push({\n            name: 'Stats Configuration',\n            success: statsSetup.success,\n            details: statsSetup.data\n        });\n        \n        return {\n            status: 'complete',\n            tests: tests,\n            allPassed: tests.every(t => t.success),\n            timestamp: new Date().toISOString()\n        };\n        \n    } catch (error) {\n        console.error('Test error:', error);\n        return {\n            status: 'error',\n            error: error.toString(),\n            details: error.message || 'No additional details'\n        };\n    }\n}\n\n// Execute tests\nconst testResults = testRedisSetup(items);\n\nreturn [{\n    json: testResults\n}];"
+      },
+      "id": "0ba9941b-e337-440d-8fe9-2be2b6e52950",
+      "name": "redis_testing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Redis_init verification node\n\n// Verify our initialization worked by checking the previous nodes' output\nfunction checkNode(nodeName, items) {\n    try {\n        const nodeOutput = items[0]?.json;\n        return {\n            success: nodeOutput !== undefined,\n            data: nodeOutput\n        };\n    } catch (error) {\n        return {\n            success: false,\n            error: error.message\n        };\n    }\n}\n\n// Get previous node data\nconst redisInfo = checkNode('Redis', items);\nconst statsSetup = checkNode('Redis2', items); // Assuming Redis2 is your stats setup node\n\n// Build verification results\nconst verificationResults = {\n    connection: redisInfo.success,\n    redis_version: redisInfo.data?.redis_version,\n    stats_setup: statsSetup.success,\n    timestamp: new Date().toISOString()\n};\n\n// Check if all critical elements are verified\nconst allVerified = verificationResults.connection && \n                   verificationResults.stats_setup;\n\nreturn [{\n    json: {\n        status: allVerified ? 'success' : 'incomplete',\n        message: allVerified ? \n            'Redis initialization verified' : \n            'Redis initialization incomplete',\n        verification: verificationResults,\n        redisInitialized: allVerified\n    }\n}];"
+      },
+      "id": "f4d6b13e-ec11-4c30-bea2-15b78316789d",
+      "name": "Redis_init",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        180
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "396416a3-263d-423e-a081-d919024386ee",
+      "name": "Redis",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        560,
+        180
+      ],
+      "credentials": {
+        "redis": {
+          "id": "5QUYzD0UFgWBSjh0",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "era:initialized",
+        "value": "true"
+      },
+      "id": "34e4d353-b001-4584-ae14-45b1ce562b5f",
+      "name": "Redis1",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        800,
+        -100
+      ],
+      "credentials": {
+        "redis": {
+          "id": "5QUYzD0UFgWBSjh0",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "era:stats",
+        "value": "{\"total_responses\": \"0\", \"processed_responses\": \"0\"}",
+        "keyType": "hash"
+      },
+      "id": "a1c07be7-95b3-4a20-9dd4-ee5125fb1830",
+      "name": "Redis2",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        800,
+        120
+      ],
+      "credentials": {
+        "redis": {
+          "id": "5QUYzD0UFgWBSjh0",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "era:initialized",
+        "value": "true"
+      },
+      "id": "bd14cd74-60d4-41f2-acde-338d8ee719c3",
+      "name": "Redis3",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        800,
+        560
+      ],
+      "credentials": {
+        "redis": {
+          "id": "5QUYzD0UFgWBSjh0",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "era:answers",
+        "value": "[\"init\"]",
+        "keyType": "sets"
+      },
+      "id": "a6536ffd-dbe8-4e07-ad77-f724f47da294",
+      "name": "Redis4",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        800,
+        320
+      ],
+      "credentials": {
+        "redis": {
+          "id": "5QUYzD0UFgWBSjh0",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "e1699047-78f2-4b13-84e5-b819281b99f3",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Purpose\nThis workflows runs every hour to check health and status of the Redis database.\nThis database is the fast store where Mongo data is written to so ERA Dashboards and queries are fast and easy to chat with",
+        "height": 435,
+        "width": 280
+      },
+      "id": "b7e03157-f028-4262-85f5-89cbe8f49398",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis_init": {
+      "main": [
+        [
+          {
+            "node": "redis_testing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis1": {
+      "main": [
+        [
+          {
+            "node": "Redis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis2": {
+      "main": [
+        [
+          {
+            "node": "Redis4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis4": {
+      "main": [
+        [
+          {
+            "node": "Redis3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis3": {
+      "main": [
+        [
+          {
+            "node": "Redis_init",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "redis_testing": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-29T09:12:53.855Z",
+      "createdAt": "2024-10-29T09:12:53.855Z",
+      "id": "NDCjqdxBOtMSQW5J",
+      "name": "clover-db"
+    },
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-10-01T16:05:44.602Z",
+      "createdAt": "2024-10-01T16:05:44.602Z",
+      "id": "nk0hBqEs3L8BK6u2",
+      "name": "cloverera"
+    },
+    {
+      "updatedAt": "2024-10-16T08:12:02.534Z",
+      "createdAt": "2024-10-16T08:12:02.534Z",
+      "id": "puahS84vmVgBJKiT",
+      "name": "redis"
+    }
+  ],
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

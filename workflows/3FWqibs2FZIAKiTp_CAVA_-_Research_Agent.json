@@ -1,0 +1,220 @@
+{
+  "id": "3FWqibs2FZIAKiTp",
+  "name": "CAVA - Research Agent",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "14d9076e-27ea-4846-8b44-f83cf4022b9e",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        620,
+        -260
+      ],
+      "id": "67fda993-8981-4e00-bcdf-e6f6941ea5b1",
+      "name": "Response"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f2a8ff2d-6b59-4ad6-a2e7-8705354f4105",
+              "name": "response",
+              "value": "Error occurred. Please try again.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        620,
+        -20
+      ],
+      "id": "0802cc7f-37a2-46bc-a432-7aeac4498893",
+      "name": "Try Again"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -180,
+        -140
+      ],
+      "id": "90edec2d-a437-4038-b0c6-63c7bd5499d9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query}}",
+        "options": {
+          "systemMessage": "=Current date/time: {{ $now }}\n\n## Core Function\nYou conduct web research using Tavily to find accurate, relevant information.\n\n## Capabilities\n- Perform web searches on any topic\n- Summarize findings from multiple sources\n- Extract key information\n- Compare different perspectives\n- Find recent news and developments\n- Answer factual questions\n\n## Research Guidelines\n1. **Query Formulation**:\n   - Break complex questions into search components\n   - Use precise keywords\n   - Include necessary context\n   - Apply search operators when helpful\n\n2. **Source Evaluation**:\n   - Prioritize authoritative sources\n   - Consider recency for time-sensitive topics\n   - Evaluate source credibility\n   - Note potential biases\n\n3. **Information Synthesis**:\n   - Combine findings from multiple sources\n   - Highlight consensus views\n   - Note significant disagreements\n   - Distinguish facts from opinions\n\n## Response Format\n1. **Direct Answer**: Concise response to the query\n2. **Key Findings**: Important discovered information\n3. **Sources**: Attribution for all information\n4. **Confidence Level**: Indication of information reliability\n\n## Error Handling\n- For ambiguous queries, request clarification\n- For limited results, explain constraints\n- For contradictory information, present multiple perspectives\n\n## Example Response\n\"Based on my research, the latest AI regulation in the EU (Digital Services Act) takes effect June 2023. Key provisions include: 1) Mandatory risk assessments, 2) Transparency requirements, 3) Human oversight mechanisms. Sources: European Commission (official site), MIT Technology Review (May 2023 article).\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        120,
+        -140
+      ],
+      "id": "8a12b87d-5c12-4f2f-a1a4-efad42fa5a17",
+      "name": "Research Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-3-5-sonnet-20241022",
+          "mode": "list",
+          "cachedResultName": "Claude 3.5 Sonnet (New)"
+        },
+        "options": {
+          "maxTokensToSample": 200
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        60,
+        140
+      ],
+      "id": "663aedc5-69ad-4984-bc4e-f5ef8f9616b5",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "XtTH6ukIgX7Hf5om",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the internet",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"api_key\": \"{YOUR-KEY}\",\n    \"query\": \"{searchTerm}\",\n    \"search_depth\": \"basic\",\n    \"include_answer\": true,\n    \"include_raw_content\": true,\n    \"max_results\": 3\n} ",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "searchTerm",
+              "description": "What the user has requested to write a blog about",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        140
+      ],
+      "id": "56604237-fcb9-4897-b01c-6e351ef03d87",
+      "name": "Tavily1"
+    },
+    {
+      "parameters": {
+        "content": "## Research Agent",
+        "height": 280,
+        "width": 460,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        60,
+        -220
+      ],
+      "id": "3a558f20-fdfd-4700-b751-eb733bf754d3",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Try Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

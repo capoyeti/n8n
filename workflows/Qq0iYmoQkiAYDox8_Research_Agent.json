@@ -1,0 +1,184 @@
+{
+  "id": "Qq0iYmoQkiAYDox8",
+  "name": "Research Agent",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=",
+        "options": {
+          "systemMessage": "You are a helpful assistant - answer the users query using the tools at your disposal.\n\nFirst search wikipedia, if you cant find the answers there, use Serp API to find the detail"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        0
+      ],
+      "id": "26bd531d-e665-4e4c-8954-81651451355d",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        660,
+        220
+      ],
+      "id": "8b216d63-6e21-4e59-a7b7-7d397de74354",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "0HJU9jdccXIWgQMt",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "0baa0748-3936-49c5-b750-2f1b1d637f1a",
+      "name": "Execute Workflow Trigger"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        400,
+        220
+      ],
+      "id": "263e8db7-2a29-475b-a9f7-a94658bbd54c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "StTWW03POtmODq8b",
+          "name": "Clever Assets (Mall)"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        520,
+        220
+      ],
+      "id": "8545dc7a-49b9-4746-a4a8-2749353effd9",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "83f8826f-3d88-4c96-897d-17b56c3c88e8",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        0
+      ],
+      "id": "6c6c10e9-ec33-44dc-adca-dd7b46710ffc",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-11T07:29:43.254Z",
+      "createdAt": "2024-10-11T07:29:43.254Z",
+      "id": "AOYxiUb5DHFbCFkc",
+      "name": "agent"
+    },
+    {
+      "updatedAt": "2024-12-09T15:49:02.402Z",
+      "createdAt": "2024-12-09T15:49:02.402Z",
+      "id": "xy2Md7Nrlit7HyB7",
+      "name": "modular"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

@@ -1,0 +1,457 @@
+{
+  "id": "ud6gooJCwxdC7e08",
+  "name": "Follow-up Scheduler - Clever Connections",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Daily 9am SAST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9,
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "get-leads",
+      "name": "Get Leads Needing Follow-up",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "filter-followups",
+      "name": "Filter Due Follow-ups",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Filter leads that need follow-up\n// Criteria:\n// - campaign_status = 'sent' (have been contacted but not responded)\n// - sequence_step < 3 (haven't completed all follow-ups)\n// - next_followup_due <= now\n// - needs_human = FALSE (not flagged for manual handling)\n\nconst now = new Date();\nconst leads = $input.all();\nconst dueLeads = [];\n\nfor (const item of leads) {\n  const lead = item.json;\n  \n  // Skip if not in 'sent' status\n  if (lead.campaign_status !== 'sent') continue;\n  \n  // Skip if already completed all follow-ups\n  const step = parseInt(lead.sequence_step) || 0;\n  if (step >= 3) continue;\n  \n  // Skip if needs human intervention\n  if (lead.needs_human === 'TRUE' || lead.needs_human === true) continue;\n  \n  // Check if follow-up is due\n  if (lead.next_followup_due) {\n    const dueDate = new Date(lead.next_followup_due);\n    if (dueDate > now) continue; // Not due yet\n  } else {\n    // If no due date set, check last_message_sent + 3 days\n    if (lead.last_message_sent) {\n      const lastSent = new Date(lead.last_message_sent);\n      const daysSince = (now - lastSent) / (1000 * 60 * 60 * 24);\n      if (daysSince < 3) continue; // Wait at least 3 days\n    }\n  }\n  \n  dueLeads.push({\n    json: {\n      ...lead,\n      next_step: step + 1\n    }\n  });\n}\n\n// Limit to 50 per day to avoid WhatsApp rate limits\nreturn dueLeads.slice(0, 50);"
+      }
+    },
+    {
+      "id": "check-any-due",
+      "name": "Any Due?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-items",
+              "operator": {
+                "type": "boolean",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.email }}",
+              "rightValue": ""
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "get-templates",
+      "name": "Get Templates",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        -100
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Templates"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "batch-process",
+      "name": "Process in Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      }
+    },
+    {
+      "id": "merge-template",
+      "name": "Merge Lead with Template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Get lead data and find matching template\nconst lead = $('Process in Batches').item.json;\nconst templates = $('Get Templates').all();\n\n// Find template for next step\nconst nextStep = lead.next_step || 2; // Default to step 2 if not set\nconst template = templates.find(t => parseInt(t.json.step) === nextStep);\n\nif (!template) {\n  return [{ json: { error: 'No template found for step ' + nextStep, lead } }];\n}\n\n// Replace placeholders in template\nlet message = template.json.message || '';\nmessage = message.replace(/\\{\\{first_name\\}\\}/g, lead.first_name || 'there');\nmessage = message.replace(/\\{\\{business_name\\}\\}/g, lead.business_name || '');\nmessage = message.replace(/\\{\\{city\\}\\}/g, lead.city || '');\n\nreturn [{\n  json: {\n    lead_id: lead.id,\n    phone: lead.phone_normalized,\n    email: lead.email,\n    first_name: lead.first_name,\n    business_name: lead.business_name,\n    message: message,\n    sequence_step: nextStep,\n    template_name: template.json.name\n  }\n}];"
+      }
+    },
+    {
+      "id": "send-whatsapp",
+      "name": "Send WhatsApp Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://159.223.23.22:8080/message/sendText/n8n-whatsapp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "EVO_ae4f6e1250e3330e5e6bca56532bfa2a"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"text\": \"{{ $json.message }}\"\n}"
+      },
+      "disabled": true
+    },
+    {
+      "id": "log-message",
+      "name": "Log to Messages Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1760,
+        0
+      ],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $runId }}-{{ $itemIndex }}",
+            "lead_id": "={{ $json.lead_id }}",
+            "phone": "={{ $json.phone }}",
+            "direction": "outbound",
+            "content": "={{ $json.message }}",
+            "sentiment": "",
+            "is_automated": "TRUE",
+            "sent_by": "bot",
+            "timestamp": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "update-lead",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1980,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "sequence_step": "={{ $json.sequence_step }}",
+            "last_message_sent": "={{ $now.toISO() }}",
+            "next_followup_due": "={{ $now.plus({ days: 3 }).toISO() }}"
+          }
+        },
+        "matchingColumns": [
+          "email"
+        ]
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "avLdlxroxLV2M4SR",
+          "name": "Google Sheets - Clever Connections"
+        }
+      }
+    },
+    {
+      "id": "wait-rate-limit",
+      "name": "Wait 5 seconds",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        0
+      ],
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "no-followups",
+      "name": "No Follow-ups Due",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        880,
+        100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "5e4bb027-9b11-4665-a78b-c45d3f2af7bf",
+      "name": "Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        150
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Daily 9am SAST": {
+      "main": [
+        [
+          {
+            "node": "Get Leads Needing Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Leads Needing Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Filter Due Follow-ups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Due Follow-ups": {
+      "main": [
+        [
+          {
+            "node": "Any Due?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Due?": {
+      "main": [
+        [
+          {
+            "node": "Get Templates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Follow-ups Due",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Templates": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process in Batches": {
+      "main": [
+        [
+          {
+            "node": "Wait 5 seconds",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge Lead with Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Lead with Template": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Message": {
+      "main": [
+        [
+          {
+            "node": "Log to Messages Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Messages Sheet": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5 seconds": {
+      "main": [
+        []
+      ]
+    },
+    "Manual Test Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Leads Needing Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

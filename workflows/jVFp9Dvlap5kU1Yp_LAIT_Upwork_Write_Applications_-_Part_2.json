@@ -1,0 +1,708 @@
+{
+  "id": "jVFp9Dvlap5kU1Yp",
+  "name": "LAIT Upwork Write Applications - Part 2",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=# Instructions for Writing a Cover Letter and Question Responses\n\nYou will be provided with a job listing from UpWork containing:\n\n1. **UpWork URL** (required)\n2. **Job Title** (required)\n3. **Job Description** (required)\n4. **Question 1** (optional)\n5. **Question 2** (optional)\n6. **Question 3** (optional)\n\n---\n\n### Task 1: Write a Cover Letter (7 Paragraphs)\n- Read and analyze the provided job listing.\n- Write a **7-paragraph cover letter** in a simple, 7th-grade reading level.\n  \n#### Structure:\n1. **Introduction:** Hook the reader with your enthusiasm for the role and why you’re great at what you do. Mention key skills. Avoid: \"I am very excited to apply...\"\n2. **Body Paragraphs (1-5):** Discuss your qualifications, experience, and why you’re a good fit for this specific role and company. Highlight relevant skills and recent work based on the job description.\n3. **Conclusion:** Summarize why you’re perfect for the role. Show eagerness to interview.\n\n#### Notes for the Cover Letter:\n- Use **short sentences** and **simple words**.\n- Avoid passive voice, filler words, or unnecessary details.\n- Keep a **friendly, professional tone**.\n- No personal details—start directly with the cover letter.\n- End with a clear call to action, like scheduling an interview.\n- Ensure the letter is easy to read (Hemingway level) and suitable for a single page.\n\n---\n\n### Task 2: Write Responses to Job Questions\n- If any **optional questions** are provided, write clear and detailed responses for each.\n- Use the same **7th-grade reading level** and **direct approach**.\n\n---\n\n### Response Format:\nReturn each part of the response in a **JSON object** as follows:\n\n```json\n{\n  \"Cover Letter\": \"string (required)\",\n  \"Answer 1\": \"string (optional)\",\n  \"Answer 2\": \"string (optional)\",\n  \"Answer 3\": \"string (optional)\"\n}",
+              "role": "system"
+            },
+            {
+              "content": "=Job Title: {{ $json['Job Listing Title'] }}\nJob Description: {{ $json.Description }}\nQuestion 1: {{ $json.fields['Additional Question #1'] }}\nQuestion 2: {{ $json.fields['Additional Question #2'] }}\nQuestion 3: {{ $json.fields['Additional Question #3'] }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.7,
+          "topP": 0.8
+        }
+      },
+      "id": "5efcaa98-c2c8-4e57-bea1-50fa5b727df7",
+      "name": "UpWork Job Application Writer",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        1640,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appWhoplrVJsldKS9",
+          "mode": "list",
+          "cachedResultName": "Let's Automate It OS",
+          "cachedResultUrl": "https://airtable.com/appWhoplrVJsldKS9"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblorWAEGzO2ObItH",
+          "mode": "list",
+          "cachedResultName": "UpWork Job Applications",
+          "cachedResultUrl": "https://airtable.com/appWhoplrVJsldKS9/tblorWAEGzO2ObItH"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "❓Applied On UpWork": true,
+            "Cover Letter": "={{ $('UpWork Job Application Writer').item.json.message.content['Cover Letter'] }}",
+            "Additional Answer #1": "={{ $('UpWork Job Application Writer').item.json.message.content['Answer 1'] }}",
+            "Additional Answer #2": "={{ $('UpWork Job Application Writer').item.json.message.content['Answer 2'] }}",
+            "Additional Answer #3": "={{ $('UpWork Job Application Writer').item.json.message.content['Answer 3'] }}",
+            "id": "={{ $('Get all records').item.json.id }}",
+            "Apply": false
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Job Listing Title",
+              "displayName": "Job Listing Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Search term",
+              "displayName": "Search term",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Country searched",
+              "displayName": "Country searched",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "CreatedAt",
+              "displayName": "CreatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Job posting recency",
+              "displayName": "Job posting recency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Contract Type",
+              "displayName": "Contract Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Additional Question #1",
+              "displayName": "Additional Question #1",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Additional Question #2",
+              "displayName": "Additional Question #2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Additional Question #3",
+              "displayName": "Additional Question #3",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Apply",
+              "displayName": "Apply",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cover Letter",
+              "displayName": "Cover Letter",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Answer #1",
+              "displayName": "Additional Answer #1",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Answer #2",
+              "displayName": "Additional Answer #2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Answer #3",
+              "displayName": "Additional Answer #3",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Audio View Link",
+              "displayName": "Audio View Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Audio Download Link",
+              "displayName": "Audio Download Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "❓Applied On UpWork",
+              "displayName": "❓Applied On UpWork",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Listing ID",
+              "displayName": "Job Listing ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "fb3dc84c-6e5e-41df-b940-1cb0846bac59",
+      "name": "Post cover letter  to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2020,
+        680
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        680
+      ],
+      "id": "e1a67910-90fd-4955-b809-7e41704edee0",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appWhoplrVJsldKS9",
+          "mode": "list",
+          "cachedResultName": "Let's Automate It OS",
+          "cachedResultUrl": "https://airtable.com/appWhoplrVJsldKS9"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblorWAEGzO2ObItH",
+          "mode": "list",
+          "cachedResultName": "UpWork Job Applications",
+          "cachedResultUrl": "https://airtable.com/appWhoplrVJsldKS9/tblorWAEGzO2ObItH"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1080,
+        680
+      ],
+      "id": "5f2d22a4-05ab-4c61-bb34-e56d28e6c999",
+      "name": "Get all records"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f3146172-9aad-44a1-b71e-e59f91b6c952",
+              "leftValue": "={{ $json.Apply }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7f3fa669-d76a-4330-a8e6-dfdd40ce1df1",
+              "leftValue": "={{ $json['❓Applied On UpWork'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1380,
+        680
+      ],
+      "id": "d5850da7-8e44-489b-bb6b-1f21bfcb1b86",
+      "name": "Apply?"
+    },
+    {
+      "parameters": {
+        "content": "## UpWork Job Application Writer\nUses an AI model to generate unique cover letters based on the extracted content from UpWork job listing. The generated cover letter is tailored for each job listing.\n",
+        "height": 452,
+        "width": 297
+      },
+      "id": "3df2513d-f66a-419a-abc5-bb28e369d0b5",
+      "name": "Sticky Note24",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Monitor Airtable for cover letter requests\nIf the airtable field \"Apply\" is checked then the workflow will trigger\n",
+        "height": 452,
+        "width": 277,
+        "color": 4
+      },
+      "id": "3879857a-7047-4e02-b503-b8d7f2780266",
+      "name": "Sticky Note12",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "base",
+        "options": {}
+      },
+      "id": "0b5f6f2a-eb4e-4b49-a01b-4e5b061598a6",
+      "name": "Airtable1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        460,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "getAll",
+        "projectId": "psdqqm1bzphkodc",
+        "table": "mpagw9n92ran52o",
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "42302766-152f-45f9-82cd-b679d9611462",
+      "name": "NocoDB1",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        560,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Download The Airtable Base HERE 👇\n[**https://airtable.com/appYPPKwvaSrFBvXu/shrtS0vfQGwSeOuaC**](https://airtable.com/appYPPKwvaSrFBvXu/shrtS0vfQGwSeOuaC)\n[![Video Thumbnail](https://storage.googleapis.com/msgsndr/fPZF8TtEOBArQpRVQPgN/media/6796229064e3ccc854f01338.png)](https://airtable.com/appYPPKwvaSrFBvXu/shrtS0vfQGwSeOuaC)\n",
+        "height": 343,
+        "width": 777,
+        "color": 6
+      },
+      "id": "981b0776-d35d-4918-8d29-1dda70406887",
+      "name": "Sticky Note15",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -60,
+        1020
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n1. **Connect Airtable**: Ensure you have an Airtable account and connect it to the workflow.\n\n2. **Configure AI Model**: Authenticate with your OpenAI account to enable cover letter generation.\n\n3. **Set Application Criteria**: Define the criteria for jobs you wish to apply to in Airtable.",
+        "height": 240,
+        "width": 360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -60,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "a8176869-c168-4bc9-8401-87f9888496d0",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "## Tools That Are Interchangeable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n`Airtable` can be swapped with another service like `Google Sheets` or `NocoDB`",
+        "height": 520,
+        "width": 400,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "b76ed074-0ad5-4676-b39c-37459e984edc",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "## What this workflow does\n1. **Monitor Airtable for Application Requests**: Checks if there are any jobs marked for application in Airtable.\n\n2. **Generate Cover Letter**: Uses an AI model to create a unique, job-specific cover letter based on the job listing details.\n\n3. **Store in Airtable**: Saves the generated cover letter along with job details in Airtable, marking the job as applied.\n",
+        "height": 280,
+        "width": 360,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -60,
+        180
+      ],
+      "typeVersion": 1,
+      "id": "6dd536b4-55ba-4477-b5e9-23154a14b2af",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "## Automate UpWork Job Applications with AI\nBuilt for the [**Let's Automate It Community**](https://letsautomateit.biz/community/) by [Robin Tindall](https://za.linkedin.com/in/robin-tindall) & [Darryn Balanco](https://uk.linkedin.com/in/darrynbalanco)\n\n## Part 2 of The Upwork Application Workflow\n`Part 2` of the workflow looks for jobs that you have marked as wanting to apply for. It then creates a cover ketter for the job application and updates the airtable with the cover letter.",
+        "height": 1400,
+        "width": 820,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -20
+      ],
+      "typeVersion": 1,
+      "id": "adc63564-c462-412a-88d7-dc1b072bd4fc",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1O9pfcHoDrdGGK7MmGqLhEQDMBQdv1yqCgCJtGgaxZ9s",
+          "mode": "list",
+          "cachedResultName": "Superhero_Camp_Parent_Intake",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O9pfcHoDrdGGK7MmGqLhEQDMBQdv1yqCgCJtGgaxZ9s/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O9pfcHoDrdGGK7MmGqLhEQDMBQdv1yqCgCJtGgaxZ9s/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        360,
+        820
+      ],
+      "id": "7cb4fc16-035d-4ab3-9b7d-8f3517a594b8",
+      "name": "Google Sheets1"
+    },
+    {
+      "parameters": {
+        "content": "### **Create Personal Access Token:**\nPersonal access tokens grant permission to read and write data via the Airtable API.\n[https://airtable.com/create/tokens](https://airtable.com/create/tokens)\n\n### **Register an OAuth integration:**\nOAuth integrations let users grant your service or application API access to their Airtable data.\n[https://airtable.com/create/oauth](https://airtable.com/create/oauth)",
+        "height": 203,
+        "width": 737,
+        "color": 6
+      },
+      "id": "86309c80-3fb2-42d1-b49c-a976b234f901",
+      "name": "Sticky Note25",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        1140
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Get More Templates Like This 👇\n[**https://letsautomateit.biz/community/**](https://letsautomateit.biz/community/)\n[![Video Thumbnail](https://onlinethinking.io/wp-content/uploads/2024/10/Lets-Automate-It-Community.png)](https://letsautomateit.biz/community/)",
+        "height": 280,
+        "width": 400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        180
+      ],
+      "typeVersion": 1,
+      "id": "ca9bd1b9-0379-4c84-a0e4-900b3b6b39b5",
+      "name": "Sticky Note26"
+    },
+    {
+      "parameters": {
+        "content": "## How to customize this flow\n- **Adjust Cover Letter Content**: Modify the AI prompt to include specific skills or experiences you want highlighted.\n\n- **Set Notification Triggers**: Add notifications to alert you when a new cover letter is generated.\n\n- **Expand Database Fields**: Customize Airtable fields to capture additional job details or personal notes.",
+        "height": 260,
+        "width": 360,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -60,
+        740
+      ],
+      "typeVersion": 1,
+      "id": "21a69ee2-c3d3-4eeb-99b2-246c244a6087",
+      "name": "Sticky Note27"
+    }
+  ],
+  "connections": {
+    "UpWork Job Application Writer": {
+      "main": [
+        [
+          {
+            "node": "Post cover letter  to Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get all records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all records": {
+      "main": [
+        [
+          {
+            "node": "Apply?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply?": {
+      "main": [
+        [
+          {
+            "node": "UpWork Job Application Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-12-12T16:16:28.430Z",
+      "createdAt": "2024-12-12T16:16:28.430Z",
+      "id": "44Ax1hMckPeDCwFC",
+      "name": "airtable"
+    },
+    {
+      "updatedAt": "2025-02-12T17:28:30.735Z",
+      "createdAt": "2025-02-12T17:28:30.735Z",
+      "id": "9FW4Qt4xgJy86IKP",
+      "name": "UpWork"
+    },
+    {
+      "updatedAt": "2025-01-28T13:15:08.738Z",
+      "createdAt": "2025-01-28T13:15:08.738Z",
+      "id": "kNeMs0ztu2vaXmDu",
+      "name": "Lets Automate It"
+    },
+    {
+      "updatedAt": "2025-02-12T17:28:44.022Z",
+      "createdAt": "2025-02-12T17:28:44.022Z",
+      "id": "oaMzQkFOk4oWDwQ1",
+      "name": "AI"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

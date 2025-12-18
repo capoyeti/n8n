@@ -1,0 +1,622 @@
+{
+  "id": "rDctVJNPk7VS81OQ",
+  "name": "Post to LinkedIn on a schedule",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1664,
+        992
+      ],
+      "id": "446c195c-d22a-47f1-a33e-000729e6e564",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"hook\": \"{{ $json.Hook }}\",\n  \"context\": \"{{ $json.context }}\",\n  \"value\": \"{{ $json.value }}\",\n  \"conclusion\": \"{{ $json.conclusion }}\",\n  \"cta\": \"{{ $json.cta }}\",\n  \"hashtags\": \"{{ $json.hashtags }}\"]\n}\n",
+        "options": {
+          "systemMessage": "={{ $json.Prompt }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1696,
+        768
+      ],
+      "id": "62020f3c-ee8b-40b8-bf48-166ecbca0910",
+      "name": "Create LI post"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        768
+      ],
+      "id": "3094b9c0-8378-4a80-9ca6-a85f8882a390",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate random number between 0 and 60\nconst randomMinutes = Math.floor(Math.random() * 61);\n\n// Convert minutes to milliseconds\nconst waitMs = randomMinutes * 60 * 1000;\n\nreturn [\n  {\n    json: {\n      randomMinutes,\n      waitMs\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        768
+      ],
+      "id": "857f80fd-703c-4d62-bfaf-974ba1789925",
+      "name": "Time Randomiser"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.randomMinutes }}",
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1296,
+        768
+      ],
+      "id": "4bf23591-3b71-4736-9d7f-d8307378897a",
+      "name": "Wait a random number of minutes",
+      "webhookId": "aaea4592-46fc-484f-8ff4-0467450d8f67"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "pu5KWg8IJCHEmgRn",
+          "mode": "list",
+          "cachedResultName": "Demo table",
+          "cachedResultUrl": "/projects/2L5ZddhN0hiSryBT/datatables/pu5KWg8IJCHEmgRn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Posted",
+              "condition": "isEmpty"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        768
+      ],
+      "id": "d6969d48-eb66-48d6-991f-bf9ebd50c2a1",
+      "name": "Get next LI Post"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        352
+      ],
+      "id": "1c87ed66-882c-4d53-81ab-89ec216f1dc0",
+      "name": "Set data to ingest"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "pu5KWg8IJCHEmgRn",
+          "mode": "list",
+          "cachedResultName": "Demo table",
+          "cachedResultUrl": "/projects/2L5ZddhN0hiSryBT/datatables/pu5KWg8IJCHEmgRn"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Hook": "={{ $json.Hook }}",
+            "context": "={{ $json.Context }}",
+            "value": "={{ $json.Value }}",
+            "conclusion": "={{ $json.Conclusion }}",
+            "cta": "={{ $json.CTA }}",
+            "hashtags": "={{ $json.Hashtags[0] }}, {{ $json.Hashtags[1] }}, {{ $json.Hashtags[2] }}",
+            "Prompt": "={{ $json.Prompt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Posted",
+              "displayName": "Posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Hook",
+              "displayName": "Hook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "conclusion",
+              "displayName": "conclusion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "cta",
+              "displayName": "cta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hashtags",
+              "displayName": "hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Prompt",
+              "displayName": "Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        352
+      ],
+      "id": "1780b1d3-aa1b-4571-8efd-8cd8e8658a01",
+      "name": "Insert data"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ETqZ2Bj9ctCo3yxt",
+          "mode": "list",
+          "cachedResultName": "Linkedin Post for Ai and Automation",
+          "cachedResultUrl": "/projects/2L5ZddhN0hiSryBT/datatables/ETqZ2Bj9ctCo3yxt"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Hook",
+              "keyValue": "={{ $('Get next LI Post').item.json.Hook }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Posted": "yes"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Posted",
+              "displayName": "Posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Hook",
+              "displayName": "Hook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Context",
+              "displayName": "Context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Value",
+              "displayName": "Value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Conclusion",
+              "displayName": "Conclusion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "CTA",
+              "displayName": "CTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Hashtags",
+              "displayName": "Hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Index",
+              "displayName": "Index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        768
+      ],
+      "id": "870c4b30-5fd2-4491-800f-9b8cf0052734",
+      "name": "Mark as posted"
+    },
+    {
+      "parameters": {
+        "content": "## Insert Post data into the data table \nUse these 2 nodes to inject the elements needed to create the LinkedIn post, into the n8n data table",
+        "height": 304,
+        "width": 400,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        832,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "1ef42484-e7b2-4f8a-9691-d996676d36d0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Set Post Frequency \nThe schedule trigger node uses a cron expression to fire very work day at 9 am. Adjust the cron expression or configure the trigger to fire on a schedule that suits you. ",
+        "height": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        832,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "470058f8-3a45-47df-a053-57d37e85faa1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Optional minute randomiser \nThis code node creates a random number between 1 and 60 everytime the flow runs. The random number is then inserted into the wait node as minutes, so the post is always posted between 9 and 10 but at a random minute. ",
+        "height": 400,
+        "width": 368,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1088,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "452552c0-8674-417d-b0cc-117fcf9721c8",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Retrieve the next post \nThis gets the next row in the data table, that has not yet been used to create a post ",
+        "height": 400,
+        "width": 192,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1472,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "fe62d5d6-4e82-4be9-9ddb-bc39bebaa4ce",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Create the post\nThis AI Agent uses the data from the data table to create the post. It also gets the actual prompt from the same data table. The post expression can be replaced with a hard code prompt if preferred. ",
+        "height": 400,
+        "width": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1680,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "710bd9b8-c809-44d6-9376-3c13e1aae3e7",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Post to LinkedIn\nThe Community node from Blotato is used to push the post to LinkedIn. You will need to create an account at https://blotato.com/?ref=letsautomateit.\n\nAlternativley set up direct posting to Linkedin as shown here https://youtu.be/C6abvTceKsA",
+        "height": 704,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1968,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "c038e74e-7169-4469-8600-ee9d410c2559",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Update the data table \nMark the row as \"posted\"",
+        "height": 384,
+        "width": 224,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2224,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "7d59ee23-3e13-4c10-8b20-d52ddaf4cd6e",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {},
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        832
+      ],
+      "id": "52e6c983-2794-459f-9ef8-67e695481f72",
+      "name": "Post to Personal LinkedIn",
+      "credentials": {}
+    },
+    {
+      "parameters": {},
+      "type": "@blotato/n8n-nodes-blotato.blotato",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        1024
+      ],
+      "id": "e7aa1574-d1e8-468a-ad3d-6342b07d624a",
+      "name": "Post to a LinkedIn Page",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "content": "## Static Prompt LinkedIn Prompt\n*Use this to replace the dynamic prompt expression if you prefer*\n\nYou are an AI agent tasked with crafting LinkedIn text-only posts that maximize engagement and establish the author as a thought leader in AI, automation, and running an AI/automation business.\n\nYour tone must always be educational, authentic, and inspiring.\n\nUse the supplied content as the basis for your post. \n\nPost Requirements\n\nEvery post you generate must follow this proven structure:\n\nHook (first 1–2 lines):\n\nMust grab attention and compel the reader to click “see more.”\n\nFormats: bold statement, thought-provoking question, surprising statistic, or personal story setup.\n\nUse emojis\n\nKeep it under ~25 words, short sentences, with line breaks for punch.\n\nContext or Story Setup (1–2 short paragraphs):\n\nProvide background, scenario, or personal anecdote that connects to the hook.\n\nRelatable, human, and jargon-free. Write as if explaining to a smart colleague.\n\nBuild empathy and set up the insight to follow.\n\nValue Delivery (the core):\n\nDeliver clear, actionable insights.\n\nUse one of these formats depending on the topic:\n\nStory arc (Problem → Solution → Lesson)\n\nList of 3–5 key insights/tips\n\nBefore/After/Bridge narrative\n\nStep-by-step framework\n\nContrarian take with reasoning\n\nEnsure every sentence teaches, informs, or provides a perspective.\n\nUse short paragraphs or bullet points for skimmability.\n\nConclusion with Inspiration:\n\nSummarize the key takeaway in 1–2 sentences.\n\nFrame it positively or forward-looking (vision, encouragement, empowerment).\n\nOptionally add a light emoji for warmth or emphasis.\n\nCall-to-Action (Engagement):\n\nEnd with an open-ended question or reflection prompt.\n\nMake it easy and natural to answer, encouraging comments and discussion.\n\nExample: “Over to you: what’s been your biggest lesson in automating your work?”\n\nHashtags (Optional):\n\nInclude 3–5 relevant hashtags at the end (e.g., #AI #Automation #Leadership).\n\nUse sparingly to avoid clutter.\n\nStyle & Formatting\n\nDo not use use markdown formatting.\n\nDo not use hyphens for example \"—\"\n\nShort paragraphs (max 3–4 lines each).\n\nLots of white space for readability.\n\nBold keywords or numbered lists to emphasize.\n\nConversational, human tone—avoid corporate jargon.\n\nEvery post should teach, inspire, and invite engagement.\n\nCore Principle\n\nYour job is not to sound like a marketer. Your job is to:\n\nEducate with substance (insights, frameworks, lessons, data).\n\nConnect with authenticity (stories, humility, human tone).\n\nInspire with vision (future-oriented, empowering).\n\nSpark conversation (end with a natural question).\n\nExample posts (don't use the headings \"Hook\", \"Context\", \"Vale Delivery\", \"Conclusion with Inspiration\". These are only included in the examples to help you connect understand the post structure)\n\nExample 1\n\nHook:\nAutomation isn’t failing because of the technology.\nIt’s failing because of the way we implement it.\n\nContext:\nWhen I first rolled out RPA (robotic process automation) in a client’s business, the team expected instant results.\nInstead, it created chaos. Bottlenecks moved, errors increased, and morale dropped.\n\nValue Delivery:\nHere’s what I learned after 3 painful months:\n\nStart with simple, repetitive tasks. Big bang automation sounds sexy, but the ROI hides in the mundane.\n\nSecure human buy-in early. No tool works if people don’t trust it.\n\nIterate, don’t impose. Automate, review, refine. Treat it like a living system, not a one-time project.\n\nConclusion with Inspiration:\nAutomation isn’t about replacing people. It’s about freeing them. When we approached it this way, the transformation was dramatic.\n\nExample 1\n\nHook:\nAI won’t “take your job.”\nBut someone using AI might.\n\nContext:\nI talk to a lot of business owners who are anxious about what AI means for them. The truth is, the risk isn’t the technology itself—it’s being left behind by those who adopt it faster.\n\nValue Delivery (3 Insights):\nHere are 3 ways I’ve seen small businesses thrive with AI:\n\nClient communication: Smart chatbots can handle FAQs 24/7, freeing staff to focus on high-value conversations.\n\nContent creation: Instead of staring at a blank screen, owners use AI to draft posts, newsletters, even proposals—cutting prep time by 70%.\n\nDecision support: AI tools surface insights from messy data so leaders make faster, more confident calls.\n\nConclusion with Inspiration:\nYou don’t need to reinvent your business. Start small, experiment, and watch the compound effect.\n\nExample 3\n\nHook:\nBefore automation: 5 days of manual reporting.\nAfter automation: 3 hours.\n\nContext:\nA client of mine spent a whole week each month preparing sales reports.\nIt drained the team and delayed decisions.\n\nValue Delivery:\nWe introduced a simple workflow:\n\nConnected their CRM to a reporting dashboard.\n\nAutomated the data pull and formatting.\n\nScheduled it to refresh every Monday morning.\n\nThe result?\n\nReports ready before the week starts.\n\nManagers focus on strategy instead of spreadsheets.\n\nThe business makes decisions in real time.\n\nConclusion with Inspiration:\nThis wasn’t about “AI magic.” It was about aligning people, process, and tech. That’s where transformation lives.\n\nCTA:\nIf you could automate one part of your week, what would it be?",
+        "height": 3472,
+        "width": 736
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        80,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "56e3c158-0e2c-4f04-87a3-3b52c8375027",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Data Table Setup \n*Column headings*\n\nHook\nValue\nContext\nConclusion\nCTA\nHashtags\nPrompt",
+        "height": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1248,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "ae4324c3-d531-4134-937d-2b5c1dd6f0aa",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## Chat GPT Prompts\n*Get prompt structure\nPlease do deep research and find the best linked post structure that encourages engagement and positions the author as an authority. I need a consistent structure that can be used for every post. Topics will colver AI, Automation and running an ai and automation business. I do not need topics but rather I need style and structure of post that is popular and proven\n\nGet prompt variation\nWhat I want is 5 different prompts, one for each post monday to friday, that will yield different posts,  I want to posts to loosely follow the structure research shows to work, but I need variation on day to basis.\n\nEnsure post structure is covered\nI like these. I am going to give a master prompt and I want you to take the key elements from the master prompt and ensure they are covered in each prompt variation. [Insert hard coded mster prompt]\n\nGet post ideas and link to them to revolving prompts*\nNow please give me the \"raw material\" that these prompts will need in order to produce great posts. This \"raw material\" will be stored in a data table with Hook, Context, Value, Conclusion, CTA, Hashtags, Prompt as column headers. Each row will be fed to an AI Agent who will have that days prompt in order to produce the post. I need 25 rows of data in JSON format that I can use to import the data into the datatable. The posting theme is [insert them for your posts]",
+        "height": 336,
+        "width": 1408,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        80,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "85033a07-fbd7-4a4d-8e7f-2a7787ba12a7",
+      "name": "Sticky Note9"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create LI post",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Time Randomiser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Time Randomiser": {
+      "main": [
+        [
+          {
+            "node": "Wait a random number of minutes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait a random number of minutes": {
+      "main": [
+        [
+          {
+            "node": "Get next LI Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get next LI Post": {
+      "main": [
+        [
+          {
+            "node": "Create LI post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set data to ingest": {
+      "main": [
+        [
+          {
+            "node": "Insert data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

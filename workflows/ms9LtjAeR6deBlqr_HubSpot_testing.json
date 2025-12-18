@@ -1,0 +1,1197 @@
+{
+  "id": "ms9LtjAeR6deBlqr",
+  "name": "HubSpot testing",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "eventsUi": {
+          "eventValues": [
+            {},
+            {
+              "name": "company.creation"
+            },
+            {
+              "name": "deal.creation"
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspotTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6f1f8648-ed56-4015-b384-c8cb209eb39a",
+      "name": "HubSpot Trigger",
+      "webhookId": "4c39828d-0cb3-41c3-a8a6-36741153ed02",
+      "credentials": {
+        "hubspotDeveloperApi": {
+          "id": "xzJ75KWtZL0kgZkC",
+          "name": "CleverAssets n8n internal app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "operation": "get",
+        "contactId": {
+          "__rl": true,
+          "value": "={{ $json.contactId }}",
+          "mode": "id"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [
+        512,
+        0
+      ],
+      "id": "988a4904-612c-4c47-8352-d8fbef8e0f42",
+      "name": "HubSpot",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "3Am0VVCmQKDerBpJ",
+          "name": "CleverAssets n8n App"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.subscriptionType }}",
+                    "rightValue": "company.creation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "7608b6d4-35eb-4c52-b32b-f0f1387cf467"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New Company"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2f2584aa-69b4-4cbc-a15c-961e84ccefd3",
+                    "leftValue": "={{ $json.subscriptionType }}",
+                    "rightValue": "contact.creation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New Contact"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "caae4706-cbe8-4c76-9a53-12843b3075eb",
+                    "leftValue": "={{ $json.subscriptionType }}",
+                    "rightValue": "deal.creation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New Deal"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "11055b6c-a926-4dcd-bdad-7978d005d3b1",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "company",
+        "operation": "get",
+        "companyId": {
+          "__rl": true,
+          "value": "={{ $json.companyId }}",
+          "mode": "id"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [
+        512,
+        -224
+      ],
+      "id": "4427e606-83dd-4979-9dff-886c4ed411d8",
+      "name": "HubSpot1",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "3Am0VVCmQKDerBpJ",
+          "name": "CleverAssets n8n App"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "deal",
+        "operation": "get",
+        "dealId": {
+          "__rl": true,
+          "value": "={{ $json.dealId }}",
+          "mode": "id"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [
+        512,
+        240
+      ],
+      "id": "fbbdab53-3668-4e5c-b971-941b0d8e7320",
+      "name": "HubSpot2",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "3Am0VVCmQKDerBpJ",
+          "name": "CleverAssets n8n App"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "contact-id",
+              "name": "contactId",
+              "type": "string",
+              "value": "={{ $json.vid }}"
+            },
+            {
+              "id": "first-name",
+              "name": "firstName",
+              "type": "string",
+              "value": "={{ $json.properties.firstname.value }}"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $json.properties.email.value }}"
+            },
+            {
+              "id": "full-name",
+              "name": "fullName",
+              "type": "string",
+              "value": "={{ $json.properties.hs_full_name_or_email.value }}"
+            },
+            {
+              "id": "lifecycle-stage",
+              "name": "lifecycleStage",
+              "type": "string",
+              "value": "={{ $json.properties.lifecyclestage.value }}"
+            },
+            {
+              "id": "owner-id",
+              "name": "ownerId",
+              "type": "string",
+              "value": "={{ $json.properties.hubspot_owner_id.value }}"
+            },
+            {
+              "id": "created-date",
+              "name": "createdDate",
+              "type": "string",
+              "value": "={{ new Date(parseInt($json.properties.createdate.value)).toISOString() }}"
+            },
+            {
+              "id": "email-domain",
+              "name": "emailDomain",
+              "type": "string",
+              "value": "={{ $json.properties.hs_email_domain.value }}"
+            },
+            {
+              "id": "current-date",
+              "name": "currentDate",
+              "type": "string",
+              "value": "={{ new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}"
+            },
+            {
+              "id": "proposal-id",
+              "name": "proposalId",
+              "type": "string",
+              "value": "={{ 'PROP-' + Date.now() + '-' + $json.vid }}"
+            },
+            {
+              "id": "service-price",
+              "name": "servicePrice",
+              "type": "string",
+              "value": "R 25,000"
+            },
+            {
+              "id": "delivery-time",
+              "name": "deliveryTime",
+              "type": "string",
+              "value": "30 days"
+            },
+            {
+              "id": "valid-until",
+              "name": "validUntil",
+              "type": "string",
+              "value": "={{ new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}"
+            },
+            {
+              "id": "company-name",
+              "name": "companyName",
+              "type": "string",
+              "value": "={{ $json.properties.hs_email_domain ? $json.properties.hs_email_domain.value.split('.')[0].charAt(0).toUpperCase() + $json.properties.hs_email_domain.value.split('.')[0].slice(1) : 'Your Business' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ad76b830-9b5a-4af6-95c2-c526124774bf",
+      "name": "Extract Contact Info1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1ovYVP8PQ8UcUYgc3t24z31s5CbA3kQEX1IIMMsPNOu0",
+          "mode": "list",
+          "cachedResultName": "Templates for n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ovYVP8PQ8UcUYgc3t24z31s5CbA3kQEX1IIMMsPNOu0/edit?usp=drivesdk"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "id": "39563197-3fe0-4d8f-a47e-cd48057a0787",
+      "name": "Get Proposal Template1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1184,
+        0
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Ck9B8Sv8l6LttcsS",
+          "name": "CleverAssets Google Drive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the template content and contact info\nconst templateContent = $input.first().json.data;\nconst contactInfo = $input.last().json;\n\n// Replace placeholders in the template\nlet proposalContent = templateContent\n  .replace(/{{firstName}}/g, contactInfo.firstName || 'Valued Client')\n  .replace(/{{fullName}}/g, contactInfo.fullName || contactInfo.firstName || 'Valued Client')\n  .replace(/{{email}}/g, contactInfo.email)\n  .replace(/{{companyName}}/g, contactInfo.emailDomain.split('.')[0].charAt(0).toUpperCase() + contactInfo.emailDomain.split('.')[0].slice(1))\n  .replace(/{{currentDate}}/g, contactInfo.currentDate)\n  .replace(/{{proposalId}}/g, contactInfo.proposalId)\n  .replace(/{{contactId}}/g, contactInfo.contactId);\n\n// Add any additional custom replacements here\n// For example, if your template has pricing, services, etc.\nproposalContent = proposalContent\n  .replace(/{{servicePrice}}/g, '$5,000')\n  .replace(/{{deliveryTime}}/g, '2 weeks')\n  .replace(/{{validUntil}}/g, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));\n\nreturn {\n  proposalContent,\n  contactInfo\n};"
+      },
+      "id": "d3d7b6e6-1a1f-4cdd-a26f-a60f377600a0",
+      "name": "Process Proposal Template1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.contactInfo.email }}",
+        "subject": "={{ 'Proposal ' + $json.contactInfo.proposalId + ' - ' + ($json.contactInfo.fullName || $json.contactInfo.firstName) }}",
+        "message": "={{ $json.proposalContent }}",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": []
+          }
+        }
+      },
+      "id": "5a8b5c0b-1176-4445-a5cc-37d6e7c193bc",
+      "name": "Send Proposal Email1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1584,
+        0
+      ],
+      "webhookId": "9faa5d39-2e97-4492-98c0-ebe0aecc9f0d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UHT3DR6OjiDawuYi",
+          "name": "CleverAssets Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $credentials.url }}/rest/v1/engagements",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contact_id",
+              "value": "={{ $('Extract Contact Info1').item.json.contactId }}"
+            },
+            {
+              "name": "contact_email",
+              "value": "={{ $('Extract Contact Info1').item.json.email }}"
+            },
+            {
+              "name": "contact_name",
+              "value": "={{ $('Extract Contact Info1').item.json.fullName }}"
+            },
+            {
+              "name": "engagement_type",
+              "value": "proposal_sent"
+            },
+            {
+              "name": "engagement_date",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "proposal_id",
+              "value": "={{ $('Extract Contact Info1').item.json.proposalId }}"
+            },
+            {
+              "name": "email_subject",
+              "value": "={{ $('Send Proposal Email1').item.json.subject }}"
+            },
+            {
+              "name": "status",
+              "value": "sent"
+            },
+            {
+              "name": "notes",
+              "value": "={{ 'Proposal sent to ' + $('Extract Contact Info1').item.json.email + ' for lifecycle stage: ' + $('Extract Contact Info1').item.json.lifecycleStage }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3d80087e-06c2-4a74-9d10-eff06f7d8c37",
+      "name": "Record Engagement in Supabase1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "AqPIDKfjJshp7lDR",
+          "name": "KnysnaMonte Production"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "success",
+              "name": "success",
+              "type": "boolean",
+              "value": "={{ true }}"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "type": "string",
+              "value": "={{ 'Proposal ' + $('Extract Contact Info1').item.json.proposalId + ' sent successfully to ' + $('Extract Contact Info1').item.json.email }}"
+            },
+            {
+              "id": "engagement_id",
+              "name": "engagementId",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "type": "string",
+              "value": "={{ $json.engagement_date }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "db9d71d8-be96-4052-bf63-e4b9a06e93b4",
+      "name": "Output Result1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1984,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.templateFilename }}",
+        "limit": 1,
+        "filter": {},
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "id": "c2996734-3f4c-4062-8d5f-9aecca641ef1",
+      "name": "Search Template File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1840,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Ck9B8Sv8l6LttcsS",
+          "name": "CleverAssets Google Drive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "fdb05246-8fcc-4a53-b3b6-aebeeb32aece",
+      "name": "Download Template",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Ck9B8Sv8l6LttcsS",
+          "name": "CleverAssets Google Drive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the template content and contact info\nconst templateContent = $('Download Template').item.binary.data.data;\nconst contactInfo = $('Extract Contact Info').item.json;\n\n// Decode the base64 content if needed\nlet decodedTemplate = templateContent;\nif (typeof templateContent === 'string' && templateContent.match(/^[A-Za-z0-9+/]+=*$/)) {\n  decodedTemplate = Buffer.from(templateContent, 'base64').toString('utf-8');\n}\n\n// Replace placeholders in the template\nlet proposalContent = decodedTemplate\n  .replace(/{{firstName}}/g, contactInfo.firstName || 'Valued Client')\n  .replace(/{{fullName}}/g, contactInfo.fullName || contactInfo.firstName || 'Valued Client')\n  .replace(/{{email}}/g, contactInfo.email)\n  .replace(/{{companyName}}/g, contactInfo.companyName)\n  .replace(/{{currentDate}}/g, contactInfo.currentDate)\n  .replace(/{{proposalId}}/g, contactInfo.proposalId)\n  .replace(/{{contactId}}/g, contactInfo.contactId)\n  .replace(/{{servicePrice}}/g, contactInfo.servicePrice)\n  .replace(/{{deliveryTime}}/g, contactInfo.deliveryTime)\n  .replace(/{{validUntil}}/g, contactInfo.validUntil);\n\nreturn {\n  proposalContent,\n  proposalContentMarkdown: proposalContent,\n  contactInfo\n};"
+      },
+      "id": "f1b30eb6-a271-4707-8024-ee5b7a36f05b",
+      "name": "Process Template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Import a markdown to HTML converter\nconst markdownContent = $json.proposalContentMarkdown;\nconst contactInfo = $json.contactInfo;\n\n// Simple markdown to HTML conversion\nfunction markdownToHtml(markdown) {\n  let html = markdown;\n  \n  // Headers\n  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');\n  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');\n  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');\n  \n  // Bold\n  html = html.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');\n  \n  // Lists\n  html = html.replace(/^\\* (.+)$/gim, '<li>$1</li>');\n  html = html.replace(/(<li>.*<\\/li>)/s, '<ul>$1</ul>');\n  html = html.replace(/^- (.+)$/gim, '<li>$1</li>');\n  \n  // Line breaks and paragraphs\n  html = html.split('\\n\\n').map(para => {\n    if (para.trim() && !para.startsWith('<')) {\n      return `<p>${para}</p>`;\n    }\n    return para;\n  }).join('\\n\\n');\n  \n  // Horizontal rules\n  html = html.replace(/^---$/gim, '<hr>');\n  \n  // Links\n  html = html.replace(/\\[([^\\]]+)\\]\\(([^\\)]+)\\)/g, '<a href=\"$2\">$1</a>');\n  \n  // Clean up multiple line breaks\n  html = html.replace(/\\n{3,}/g, '\\n\\n');\n  \n  return html;\n}\n\n// Convert markdown to HTML\nlet htmlContent = markdownToHtml(markdownContent);\n\n// Wrap in a styled HTML template\nconst styledHtml = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n      line-height: 1.6;\n      color: #333;\n      max-width: 800px;\n      margin: 0 auto;\n      padding: 20px;\n      background-color: #f4f4f4;\n    }\n    .container {\n      background-color: white;\n      padding: 40px;\n      border-radius: 10px;\n      box-shadow: 0 0 10px rgba(0,0,0,0.1);\n    }\n    h1 {\n      color: #2c3e50;\n      border-bottom: 3px solid #3498db;\n      padding-bottom: 10px;\n      margin-bottom: 20px;\n    }\n    h2 {\n      color: #34495e;\n      margin-top: 30px;\n      margin-bottom: 15px;\n    }\n    h3 {\n      color: #7f8c8d;\n      margin-top: 20px;\n      margin-bottom: 10px;\n    }\n    p {\n      margin-bottom: 15px;\n    }\n    ul {\n      margin-bottom: 15px;\n    }\n    li {\n      margin-bottom: 5px;\n    }\n    strong {\n      color: #2c3e50;\n    }\n    hr {\n      border: none;\n      border-top: 2px solid #ecf0f1;\n      margin: 30px 0;\n    }\n    .highlight {\n      background-color: #fff3cd;\n      padding: 15px;\n      border-radius: 5px;\n      border-left: 4px solid #ffc107;\n      margin: 20px 0;\n    }\n    .cta-button {\n      display: inline-block;\n      background-color: #3498db;\n      color: white;\n      padding: 12px 30px;\n      text-decoration: none;\n      border-radius: 5px;\n      margin-top: 20px;\n      font-weight: bold;\n    }\n    .footer {\n      margin-top: 40px;\n      padding-top: 20px;\n      border-top: 1px solid #ecf0f1;\n      font-size: 0.9em;\n      color: #7f8c8d;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    ${htmlContent}\n  </div>\n</body>\n</html>\n`;\n\nreturn {\n  htmlContent: styledHtml,\n  plainContent: markdownContent,\n  contactInfo\n};"
+      },
+      "id": "00eccebc-0241-4f8b-a191-023c38cf52dd",
+      "name": "Convert to HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wSNcbxNn7L-QELy2Se2qHFnC9mLQ0SBVITtTjLWFNPQ",
+          "mode": "list",
+          "cachedResultName": "Engagement Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wSNcbxNn7L-QELy2Se2qHFnC9mLQ0SBVITtTjLWFNPQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leases Sent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wSNcbxNn7L-QELy2Se2qHFnC9mLQ0SBVITtTjLWFNPQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "threadId",
+              "displayName": "threadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "labelIds",
+              "displayName": "labelIds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "dedd17b3-015b-4a16-a2a2-60e48cbd45ab",
+      "name": "Record Engagement in Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2928,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "contact-id",
+              "name": "contactId",
+              "type": "string",
+              "value": "={{ $json.vid }}"
+            },
+            {
+              "id": "first-name",
+              "name": "firstName",
+              "type": "string",
+              "value": "={{ $json.properties.firstname.value }}"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $json.properties.email.value }}"
+            },
+            {
+              "id": "full-name",
+              "name": "fullName",
+              "type": "string",
+              "value": "={{ $json.properties.hs_full_name_or_email.value }}"
+            },
+            {
+              "id": "lifecycle-stage",
+              "name": "lifecycleStage",
+              "type": "string",
+              "value": "={{ $json.properties.lifecyclestage.value }}"
+            },
+            {
+              "id": "owner-id",
+              "name": "ownerId",
+              "type": "string",
+              "value": "={{ $json.properties.hubspot_owner_id.value }}"
+            },
+            {
+              "id": "created-date",
+              "name": "createdDate",
+              "type": "string",
+              "value": "={{ new Date(parseInt($json.properties.createdate.value)).toISOString() }}"
+            },
+            {
+              "id": "email-domain",
+              "name": "emailDomain",
+              "type": "string",
+              "value": "={{ $json.properties.hs_email_domain.value }}"
+            },
+            {
+              "id": "current-date",
+              "name": "currentDate",
+              "type": "string",
+              "value": "={{ new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}"
+            },
+            {
+              "id": "proposal-id",
+              "name": "proposalId",
+              "type": "string",
+              "value": "={{ 'PROP-' + Date.now() + '-' + $json.vid }}"
+            },
+            {
+              "id": "service-price",
+              "name": "servicePrice",
+              "type": "string",
+              "value": "R 25,000"
+            },
+            {
+              "id": "delivery-time",
+              "name": "deliveryTime",
+              "type": "string",
+              "value": "30 days"
+            },
+            {
+              "id": "valid-until",
+              "name": "validUntil",
+              "type": "string",
+              "value": "={{ new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}"
+            },
+            {
+              "id": "company-name",
+              "name": "companyName",
+              "type": "string",
+              "value": "={{ $json.properties.hs_email_domain ? $json.properties.hs_email_domain.value.split('.')[0].charAt(0).toUpperCase() + $json.properties.hs_email_domain.value.split('.')[0].slice(1) : 'Your Business' }}"
+            },
+            {
+              "id": "template-filename",
+              "name": "templateFilename",
+              "type": "string",
+              "value": "={{ $json.properties.hs_email_domain.value.split('.')[0] + '_lease-template.md' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c4e112bd-0dcf-46e8-8d55-2cf704f5beea",
+      "name": "Extract Contact Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.contactInfo.email }}",
+        "subject": "={{ 'Proposal ' + $json.contactInfo.proposalId + ' - ' + ($json.contactInfo.fullName || $json.contactInfo.firstName) }}",
+        "message": "={{ $json.htmlContent }}",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": []
+          }
+        }
+      },
+      "id": "f9ca4afb-1b76-488a-82c5-ae8193949f9d",
+      "name": "Send Proposal Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2688,
+        384
+      ],
+      "webhookId": "9faa5d39-2e97-4492-98c0-ebe0aecc9f0d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UHT3DR6OjiDawuYi",
+          "name": "CleverAssets Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        800
+      ],
+      "id": "ed92c47b-1741-4a2c-b4fd-adca9cc7e53e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wSNcbxNn7L-QELy2Se2qHFnC9mLQ0SBVITtTjLWFNPQ",
+          "mode": "list",
+          "cachedResultName": "Engagement Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wSNcbxNn7L-QELy2Se2qHFnC9mLQ0SBVITtTjLWFNPQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leases Sent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wSNcbxNn7L-QELy2Se2qHFnC9mLQ0SBVITtTjLWFNPQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "contact_id": "={{ $('Extract Contact Info').item.json.contactId }}",
+            "contact_email": "={{ $('Extract Contact Info').item.json.email }}",
+            "contact_name": "={{ $('Extract Contact Info').item.json.firstName }}",
+            "engagement_date": "={{ new Date($('Extract Contact Info').item.json.createdDate).toLocaleString(\"en-ZA\", {\n  weekday: \"short\",\n  year: \"numeric\",\n  month: \"short\",\n  day: \"numeric\",\n  hour: \"2-digit\",\n  minute: \"2-digit\",\n  hour12: false\n}) }}",
+            "proposal_id": "={{ $('Extract Contact Info').item.json.proposalId }}",
+            "template_used": "={{ $('Extract Contact Info').item.json.templateFilename }}",
+            "lifecycle_stage": "={{ $('Extract Contact Info').item.json.lifecycleStage }}",
+            "service_price": "={{ $('Extract Contact Info').item.json.servicePrice }}",
+            "valid_until": "={{ $('Extract Contact Info').item.json.validUntil }}",
+            "timestamp": "={{ new Date($now).toLocaleString(\"en-ZA\", { weekday: \"short\", year: \"numeric\", month: \"short\", day: \"numeric\", hour: \"2-digit\", minute: \"2-digit\", hour12: false }) }}",
+            "email_subject": "={{ 'Proposal ' + $('Extract Contact Info').item.json.proposalId + ' - ' + $('Extract Contact Info').item.json.fullName || $('Extract Contact Info').item.json.firstName}}",
+            "status": "Draft"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "contact_id",
+              "displayName": "contact_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "contact_email",
+              "displayName": "contact_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "contact_name",
+              "displayName": "contact_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "engagement_type",
+              "displayName": "engagement_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "engagement_date",
+              "displayName": "engagement_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_id",
+              "displayName": "proposal_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email_subject",
+              "displayName": "email_subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "template_used",
+              "displayName": "template_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lifecycle_stage",
+              "displayName": "lifecycle_stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "service_price",
+              "displayName": "service_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "valid_until",
+              "displayName": "valid_until",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e2910a25-2803-4c18-910c-ca4f8119c38f",
+      "name": "Record Engagement in Sheets1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2944,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "HubSpot Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HubSpot1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HubSpot",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HubSpot2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot1": {
+      "main": [
+        [
+          {
+            "node": "Extract Contact Info1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot": {
+      "main": [
+        [
+          {
+            "node": "Extract Contact Info1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Contact Info1": {
+      "main": [
+        [
+          {
+            "node": "Get Proposal Template1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Proposal Template1": {
+      "main": [
+        [
+          {
+            "node": "Process Proposal Template1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Proposal Template1": {
+      "main": [
+        [
+          {
+            "node": "Send Proposal Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Proposal Email1": {
+      "main": [
+        [
+          {
+            "node": "Record Engagement in Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Engagement in Supabase1": {
+      "main": [
+        [
+          {
+            "node": "Output Result1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Template File": {
+      "main": [
+        [
+          {
+            "node": "Download Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Template": {
+      "main": [
+        [
+          {
+            "node": "Process Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Template": {
+      "main": [
+        [
+          {
+            "node": "Convert to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to HTML": {
+      "main": [
+        [
+          {
+            "node": "Send Proposal Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Contact Info": {
+      "main": [
+        [
+          {
+            "node": "Search Template File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Proposal Email": {
+      "main": [
+        [
+          {
+            "node": "Record Engagement in Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot2": {
+      "main": [
+        [
+          {
+            "node": "Extract Contact Info1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

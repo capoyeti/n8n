@@ -1,0 +1,29 @@
+{
+  "id": "DAk0MCvmq3NypwKD",
+  "name": "Keyword and Blog MCP",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "8c447b76-7eef-433e-af66-e9cf75fa0203"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -100
+      ],
+      "id": "9aa2bc7d-00da-4942-bf95-41808deb20a7",
+      "name": "MCP Server Trigger",
+      "webhookId": "8c447b76-7eef-433e-af66-e9cf75fa0203"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

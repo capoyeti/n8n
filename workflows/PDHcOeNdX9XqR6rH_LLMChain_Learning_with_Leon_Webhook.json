@@ -1,0 +1,215 @@
+{
+  "id": "PDHcOeNdX9XqR6rH",
+  "name": "LLMChain Learning with Leon (Webhook)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "654f8ae7-b71b-441f-a48b-f7a4e7dc3385",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "model": "llama3-70b-8192",
+        "options": {}
+      },
+      "id": "e4e84149-94bf-41e3-a3d7-d3fa312a2492",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        740
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "TeMrq8iV1WCfXr5T",
+          "name": "Groq (n8n testing)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "66726faa-4c90-4213-b893-439309a2a86f",
+              "name": "chatInput",
+              "value": "I'm really interested in sending my daughter to the high school",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9da06d6f-0931-4f31-ad3f-2bc5317d8220",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1240,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"document_type\": {\n      \"type\": \"string\",\n      \"enum\": [\"fees\", \"preschool\", \"middle_school\", \"high_school\"]\n    }\n  },\n  \"required\": [\"document_type\"]\n}"
+      },
+      "id": "52ba37f3-415e-4d6d-82f6-921830c839e9",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1660,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"doc_sent\": \"{{ $json.output.document_type }}\"\n}",
+        "options": {}
+      },
+      "id": "0785bb2c-4112-4d0f-add6-7d50c6ce03dc",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1880,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "doc_request",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c60baa98-6ef3-4d23-a5da-9faa35553566",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        520
+      ],
+      "webhookId": "116b7437-415f-436a-9d6b-3213282dea81"
+    },
+    {
+      "parameters": {
+        "content": "## Educational\nUsed Postman to test flow for age of student and what school they would go to for document send"
+      },
+      "id": "3c21ef9d-61aa-4ad8-9659-42e858b64801",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        660,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.Request }}",
+        "hasOutputParser": true
+      },
+      "id": "5ea9c037-a553-457f-bae5-58c5fbc3e5de",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        1460,
+        520
+      ],
+      "notesInFlow": false
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-16T05:08:39.647Z",
+      "createdAt": "2024-10-16T05:08:39.647Z",
+      "id": "aC2EwCxrIVQiVjRG",
+      "name": "Leon van zyl"
+    },
+    {
+      "updatedAt": "2024-09-22T09:22:16.227Z",
+      "createdAt": "2024-09-22T09:22:16.227Z",
+      "id": "zCNXykr6R58WQcpy",
+      "name": "webhook"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

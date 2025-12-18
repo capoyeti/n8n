@@ -1,0 +1,2044 @@
+{
+  "id": "B9KskWoK2qwom7vD",
+  "name": "Parked Clever Mall ChatBot (Whats App)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "c2fd7be2-c0d4-4af2-8ed4-6a218067e9a0",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        4256,
+        224
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "5a7e97b6-2e76-41b5-ba29-11f9ba74e51a",
+      "credentials": {
+        "telegramApi": {
+          "id": "bYFmZz96wR9Hekkv",
+          "name": "CleverMall_Bot"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "={{ $('AI Agent').item.json.output.replace(/&/g, \"&amp;\").replace(/>/g, \"&gt;\").replace(/</g, \"&lt;\").replace(/\"/g, \"&quot;\") }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "0fff6697-cafe-44ec-94fc-f3293fbf9382",
+      "name": "Correct errors",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        4624,
+        432
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "3aa7b7c2-9b70-4469-b852-b8f83b3e3a7f",
+      "credentials": {
+        "telegramApi": {
+          "id": "bYFmZz96wR9Hekkv",
+          "name": "CleverMall_Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "database",
+        "description": "Details about the shopping Mall and all the stores within it"
+      },
+      "id": "2aec4fd4-dd5e-4245-bb0a-de9427d64d4c",
+      "name": "database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "d9e99816-c0d7-43b0-909e-3abfe41efdf3",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        1152
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "6d6c5d28-e33c-4259-b71d-27af81eca52c",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        960
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "a83fc886-fa86-4e59-a850-59c4a40a4a37",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        816,
+        -656
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "id": "59a8fd63-e6de-4c65-97e8-0a5376cf10df",
+      "name": "Telegram2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        -496
+      ],
+      "webhookId": "5e435f8d-273f-400b-b48d-22e44e8ae037",
+      "credentials": {
+        "telegramApi": {
+          "id": "bYFmZz96wR9Hekkv",
+          "name": "CleverMall_Bot"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "751d86f4-f939-4244-b8a0-02b8cf837f5e",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5120,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9701ee1f-3736-43be-9844-355ff0865972",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        512
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "a48088b4-e2d5-481f-957c-bcad792a197d",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        -784
+      ],
+      "webhookId": "1f19ca61-c1d0-4121-aad5-ff6dac3d548c",
+      "credentials": {
+        "telegramApi": {
+          "id": "bYFmZz96wR9Hekkv",
+          "name": "CleverMall_Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "chat_with_{{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "id": "100d8c0b-b1e0-4965-a7c5-e46be6f156cb",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        1712,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "clever-assets",
+          "mode": "list",
+          "cachedResultName": "clever-assets"
+        },
+        "options": {
+          "pineconeNamespace": "cleverMall-rag"
+        }
+      },
+      "id": "0015c070-197e-478c-b0dd-4ac519a09b3f",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        960
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User sent a {{ $json.message_type }} message:\\n\\nMessage: {{ $json.message_text }}\\n{{ $json.message_caption ? 'Caption: ' + $json.message_caption : '' }}",
+        "options": {
+          "systemMessage": "=# CleverMall AI Assistant - Enhanced System Prompt\n\nYou are the CleverMall AI Assistant. Always greet users naturally using their first name: {{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}\n\n**Current Date:** {{ $now }} \n**Default Timezone:** South African Standard Time (GMT+2)\n\n---\n\n## 🎯 CORE DECISION MATRIX\n\n**For any user request, follow this exact decision tree:**\n\n### 1. MALL/STORE INFORMATION QUERIES\n- **When:** Questions about shops, store hours, mall layout, tenant details, policies\n- **Action:** Use **\"database\"** tool FIRST\n- **Examples:** \"What shops are in the mall?\", \"When does Store X close?\", \"Tell me about the food court\"\n\n### 2. PEOPLE/CONTACT OPERATIONS\n**ALWAYS start with contact lookup for ANY people-related task:**\n\n#### Step A: Contact Discovery\n- **\"Get Contact information\"** - Search for specific person by name\n- **\"List all contacts\"** - When you need to see all available contacts or if specific search fails\n\n#### Step B: Contact Actions (only after Step A)\n- **\"Gmail\"** - Send emails (requires email from contact lookup)\n- **\"Make appointments in Calendar\"** - Schedule meetings (requires contact details)\n- **\"Get Appointments from Calendar\"** - Check availability\n- **\"Add Contact\"** - Create new contact (when person not found and you have their details)\n\n### 3. DOCUMENT SHARING\n- **\"Get document URL for sending\"** - Retrieve document links for sharing\n- **Never attach documents - always share links**\n- **Never assume which document to send - always ask for user confirmation**\n- **Show all available documents when request is unclear**\n\n### 4. EXTERNAL INFORMATION\n- **\"Research Agent\"** - For questions not answered by database tool\n- **\"Calculator\"** - Mathematical computations\n\n---\n\n## 🔧 TOOL USAGE SPECIFICATIONS\n\n### ⚠️ IMPORTANT: Field Name Configuration\n**Before using contact tools, ensure your n8n nodes use the exact field names from your Airtable:**\n- Check your Airtable Contacts table column headers\n- Update n8n node configurations to match exactly\n- Common mismatches: \"Mobile\" vs \"Phone\", \"Email\" vs \"Email Address\"\n\n### DATABASE TOOL\n```\nTool: \"database\"\nUse for: Mall information, store details, tenant data, policies\nParameters: None required - it uses vector search automatically\nAlways try this FIRST for mall-related questions\n```\n\n### CONTACT MANAGEMENT TOOLS\n\n#### Get Contact Information\n```\nTool: \"Get Contact information\"\nParameters: { \"name\": \"exact_person_name\" }\nReturns: [UPDATE WITH YOUR ACTUAL FIELD NAMES]\nUse: Before any email/meeting action\nNote: Check your Airtable to confirm exact field names\n```\n\n#### List All Contacts\n```\nTool: \"List all contacts\"  \nParameters: None\nReturns: All contacts with available fields from your Airtable\nUse: When specific contact search fails or user asks \"who can I contact?\"\n```\n\n#### Add Contact\n```\nTool: \"Add Contact\"\nRequired Parameters: { \n  \"name\": \"person_name\",\n  \"emailAddress\": \"email@domain.com\", \n  \"phoneNumber\": \"+27XXXXXXXXX\" \n}\nUse: Only when contact doesn't exist and user provides details\nNote: Parameter names must match your Airtable field names exactly\n```\n\n### COMMUNICATION TOOLS\n\n#### Gmail\n```\nTool: \"Gmail\"\nRequired Parameters: {\n  \"email_address\": \"from_contact_lookup\",\n  \"Subject\": \"clear_subject_line\",\n  \"emailBody\": \"message_content + signature\"\n}\nCRITICAL: Always end emails with:\n\"Warm regards,\nCleverMall Management Team\"\n```\n\n#### Calendar Management\n```\nTool: \"Get Appointments from Calendar\"\nParameters: {\n  \"oneDayBefore\": \"YYYY-MM-DDTHH:MM:SS+02:00\",\n  \"oneDayAfter\": \"YYYY-MM-DDTHH:MM:SS+02:00\"\n}\n\nTool: \"Make appointments in Calendar\"\nParameters: {\n  \"startDateTime\": \"YYYY-MM-DDTHH:MM:SS+02:00\",\n  \"endDateTime\": \"YYYY-MM-DDTHH:MM:SS+02:00\",\n  \"summary\": \"meeting_title\",\n  \"description\": \"meeting_details\",\n  \"attendeeList\": \"email1@domain.com,email2@domain.com\"\n}\n```\n\n### DOCUMENT SHARING\n```\nTool: \"Get document URL for sending\"\nParameters: None required\nReturns: Limited list of document names and URLs (max 5)\nCRITICAL PROCESS:\n1. Only call this tool when user specifically requests a document\n2. After getting results, analyze user's request against available documents\n3. If multiple documents returned, show ALL options and ask user to choose\n4. NEVER auto-select the first document in the list\n5. If no clear match, ask user to be more specific about which document they need\n```\n\n---\n\n## ⚠️ CRITICAL RULES\n\n### Contact Information Rules\n1. **NEVER invent email addresses or phone numbers**\n2. **NO \"example.com\" or fake emails**\n3. **Always check contacts database before asking for details**\n4. **If contact missing, ask user to provide real email/phone**\n\n### Document Selection Rules\n1. **NEVER automatically select documents without user confirmation**\n2. **Always show available document options when request is unclear**\n3. **Match documents specifically to user's stated need**\n4. **If no clear match, ask for clarification rather than defaulting**\n\n### Tool Execution Order\n1. **People Operations:** Contact lookup → Action tool\n2. **Mall Questions:** Database tool → Research tool (if needed)\n3. **Document Sharing:** Get document URL → Include in email/response\n\n### Response Formatting\n- Clean, simple output without HTML artifacts\n- Proper markdown formatting\n- Professional tone matching business context\n- Include relevant contact details when found\n\n---\n\n## 🔄 EXAMPLE WORKFLOWS\n\n### Scenario: \"Send John the mall directory\"\n```\n1. Use \"Get Contact information\" with name=\"John\"\n2. If found: Use \"Get document URL for sending\" \n3. Use \"Gmail\" with John's email, subject about directory, include document link\n4. If not found: Use \"List all contacts\" to show options OR ask for John's email\n```\n\n### Scenario: \"What stores sell electronics?\"\n```\n1. Use \"database\" tool to search for electronics stores\n2. Provide comprehensive answer from database results\n3. If database doesn't have info, use \"Research Agent\"\n```\n\n### Scenario: \"Schedule meeting with Sarah tomorrow 2pm\"\n```\n1. Use \"Get Contact information\" with name=\"Sarah\"\n2. Use \"Get Appointments from Calendar\" to check availability\n3. Use \"Make appointments in Calendar\" with Sarah's email and specified time\n4. Confirm booking with user\n```\n\n---\n\n**Remember:** Be decisive, action-oriented, and always prioritize accurate information from your tools over assumptions. When in doubt, ask for clarification rather than guessing."
+        }
+      },
+      "id": "ce06619a-e3b5-4a82-b69a-c1c7b64d3fed",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1888,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblnbG5vo8mFD3BZ0",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tblnbG5vo8mFD3BZ0"
+        },
+        "filterByFormula": "={Name} = \"{{ $fromAI('name') }}\"",
+        "options": {
+          "fields": [
+            "Email",
+            "Mobile",
+            "Notes",
+            "Job Title"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        624
+      ],
+      "id": "3b04f07d-8c09-4579-84b9-e0d9513ae989",
+      "name": "Get Contact information",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "jO5P27PvyEErPtGX",
+          "name": "Airtable Personal Access Token account CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('email_address') }}",
+        "subject": "={{ $fromAI('Subject') }}",
+        "emailType": "text",
+        "message": "={{ $fromAI('emailBody') }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "CleverMall Management team"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        2160,
+        560
+      ],
+      "id": "16a4543a-f351-41b6-b68a-fb788b577b4b",
+      "name": "Gmail",
+      "webhookId": "b3eea975-d653-4755-aba0-e9355fa10f66",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QF7l9tuBbTaWOH86",
+          "name": "gmail api (n8n and related project)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "687276c40bf5743df474fb3edff1019d924265158a8271fde94abdc76d4a9fd0@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "CleverMall Events"
+        },
+        "start": "={{ $fromAI('startDateTime') }}",
+        "end": "={{ $fromAI('endDateTime') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI('attendeeList') }}"
+          ],
+          "description": "={{ $fromAI('description') }}",
+          "summary": "={{ $fromAI('summary') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        2384,
+        592
+      ],
+      "id": "56ace9ae-6326-45e4-80be-a5c055562b62",
+      "name": "Make appointments in Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2WyKcCWBhILiJqvx",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "687276c40bf5743df474fb3edff1019d924265158a8271fde94abdc76d4a9fd0@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "CleverMall Events"
+        },
+        "returnAll": true,
+        "options": {
+          "timeMin": "={{ $fromAI('oneDayBefore','one day before the day the user requested') }}",
+          "timeMax": "={{ $fromAI('oneDayAfter','one day after the day the user requested') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        2048,
+        784
+      ],
+      "id": "052a1fb5-e699-4a8c-a4a7-0bb55697269b",
+      "name": "Get Appointments from Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2WyKcCWBhILiJqvx",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Research_Agent",
+        "description": "Call this tool to search the internet and answer the users question.",
+        "workflowId": {
+          "__rl": true,
+          "value": "Qq0iYmoQkiAYDox8",
+          "mode": "list",
+          "cachedResultName": "Research Agent"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2192,
+        784
+      ],
+      "id": "87b9bf02-b7c7-4aeb-b179-dabfed60d98a",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8b143a29-c71d-46eb-89fd-7f0529177c89",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        96,
+        -784
+      ],
+      "id": "6cd50c8d-4ce2-4c20-96df-0876c72ff2bc",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "34ca9e2a-c867-436a-9a22-4503b467bca9",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        -768
+      ],
+      "id": "60cc7462-3045-4923-a8ef-039a4b548068",
+      "name": "Set 'Text'"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        -1184
+      ],
+      "id": "058c7515-d86f-4014-907b-f1408cb82837",
+      "name": "Download Voice File",
+      "webhookId": "3281a52d-e8f2-4a9b-b337-e256eb5d037c",
+      "credentials": {
+        "telegramApi": {
+          "id": "bYFmZz96wR9Hekkv",
+          "name": "CleverMall_Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        816,
+        -1184
+      ],
+      "id": "e9e59472-71f9-4b21-9fbe-6be0bdc7070d",
+      "name": "Transcribe recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "StTWW03POtmODq8b",
+          "name": "Clever Assets (Mall)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/flq6f7yk4E4fJM5XTYuZ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "sk_5bfe4d76c2832dbfb5c1e8ccf0e0f731a6b64f13ae7fb7e8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ JSON.stringify($json.message.content).replace(/(^\\\"|\\\"$)/g, ``) }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4368,
+        -432
+      ],
+      "id": "eb62502d-ff41-4101-871d-c6fb2571da0a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {
+          "fileName": "={{ $('Switch').item.json.update_id }}.mpeg"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4624,
+        -432
+      ],
+      "id": "a68ab9ad-d73e-4bdd-a0a7-dd1193e4f9e2",
+      "name": "Send Audio File",
+      "webhookId": "f9b6feee-a978-4fd7-a7c2-9c48876ac3d0",
+      "credentials": {
+        "telegramApi": {
+          "id": "bYFmZz96wR9Hekkv",
+          "name": "CleverMall_Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Summarise this incoming information: {{ $json.output }}\n\nOutput only plain text. There should be no formatting or symbols. ",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        3920,
+        -432
+      ],
+      "id": "75a2d296-909e-4783-a32c-6561cb8245cb",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "StTWW03POtmODq8b",
+          "name": "Clever Assets (Mall)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Disconnected\n- All preceding audio files are played when playing any one.\n- Also, the logic for when to send an audio file should be improved, it shouldn't be for every query.\n ",
+        "height": 600,
+        "width": 1120
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3696,
+        -768
+      ],
+      "id": "60c31c68-fa12-4a0f-be29-bdea794e9fc1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        2384,
+        800
+      ],
+      "id": "7d1ca5d9-8e67-4bee-83a1-5c129366f0a9",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblnbG5vo8mFD3BZ0",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tblnbG5vo8mFD3BZ0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $fromAI('name') }}",
+            "Email": "={{ $fromAI('emailAddress') || '' }}",
+            "Mobile": "={{ $fromAI('phoneNumber') || '' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Todo",
+                  "value": "Todo"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Mobile",
+              "displayName": "Mobile",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        992
+      ],
+      "id": "108589d1-a3d3-4f46-872f-fb162cdf87cd",
+      "name": "Add Contact",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "jO5P27PvyEErPtGX",
+          "name": "Airtable Personal Access Token account CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblnbG5vo8mFD3BZ0",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tblnbG5vo8mFD3BZ0"
+        },
+        "options": {
+          "fields": [
+            "Name",
+            "Email",
+            "Notes",
+            "Job Title",
+            "Contact"
+          ],
+          "view": {
+            "__rl": true,
+            "value": "viws70YJxkksqd6x4",
+            "mode": "list",
+            "cachedResultName": "Grid view",
+            "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tblnbG5vo8mFD3BZ0/viws70YJxkksqd6x4"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        2128,
+        992
+      ],
+      "id": "696ba7eb-b479-4f4e-a445-1d8105802b5c",
+      "name": "List all contacts",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "jO5P27PvyEErPtGX",
+          "name": "Airtable Personal Access Token account CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "2f54e3b3-62df-4dbf-abbc-30fdf42436c2",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1696,
+        -880
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "id": "b9349838-adf3-4595-9645-01c39714672c",
+      "name": "Telegram3",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        -976
+      ],
+      "webhookId": "4dc31bc9-f185-4020-86be-4088c4f44571",
+      "credentials": {
+        "telegramApi": {
+          "id": "bYFmZz96wR9Hekkv",
+          "name": "CleverMall_Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZFSwEVTAa9MAgJ-PZjjNApU-FQ-jk_rLvLFQ5DwF8eo",
+          "mode": "list",
+          "cachedResultName": "CleverMall Execution",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZFSwEVTAa9MAgJ-PZjjNApU-FQ-jk_rLvLFQ5DwF8eo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZFSwEVTAa9MAgJ-PZjjNApU-FQ-jk_rLvLFQ5DwF8eo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Workflow": "={{ $workflow.name }}",
+            "Text": "={{ $('Telegram Trigger').item.json.message.text }}",
+            "First Name": "={{ $('Telegram Trigger').item.json.message.chat.first_name }}",
+            "Last Name": "={{ $('Telegram Trigger').item.json.message.chat.last_name }}",
+            "Date": "={{ new Date($('Telegram Trigger').item.json.message.date * 1000).toISOString() }}",
+            "Result": "={{ $json.result.text }}",
+            "ChatBot": "={{ $json.result.from.username }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Workflow",
+              "displayName": "Workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ChatBot",
+              "displayName": "ChatBot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Text",
+              "displayName": "Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Result",
+              "displayName": "Result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        4464,
+        16
+      ],
+      "id": "b733ac14-4f9f-485b-a619-6ef8d7dc659e",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        -640
+      ],
+      "id": "6e2d8355-da48-433c-a91d-b4d538318b9e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Audio Length \nCareful - this is limited to 25MB. \nHow to work around this?",
+        "height": 340
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        -1152
+      ],
+      "id": "2f782d9e-8f9f-4436-b76b-6b0a836d95cc",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbljTX8ctlcW5mJsZ",
+          "mode": "list",
+          "cachedResultName": "Documents",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tbljTX8ctlcW5mJsZ"
+        },
+        "filterByFormula": "=",
+        "options": {
+          "fields": [
+            "url",
+            "Name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        2304,
+        960
+      ],
+      "id": "d6c3b735-835d-4133-97b7-2a3a44e53958",
+      "name": "Get document URL for sending",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "jO5P27PvyEErPtGX",
+          "name": "Airtable Personal Access Token account CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "mode": "list",
+          "value": null
+        },
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        -1136
+      ],
+      "id": "b56ab79c-158f-431b-9f76-1155252d68f8",
+      "name": "Convert text to speech",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "nLAdnb5HzdvH6wSu",
+          "name": "ElevenLabs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "id": "9afd2216-6ea4-4ff3-9456-5c4d0fe668a8",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        288
+      ],
+      "webhookId": "b22ce656-f5ad-4885-ae9b-aee6bac854bf",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "qrRIBJfrJWq6yaXI",
+          "name": "CleverBot (on VPC Business)"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "messages",
+        "options": {}
+      },
+      "id": "b69ae372-dbe6-47e3-8272-468592c6ef73",
+      "name": "Split Out Messages",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.type == 'audio' && Boolean($json.audio) }}",
+                    "rightValue": ""
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.type == 'image' && Boolean($json.image) }}",
+                    "rightValue": ""
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Image"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Text"
+        }
+      },
+      "id": "1ec363c4-47a8-479e-8647-45573f3e9458",
+      "name": "Route Message Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -32,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.audio.id }}"
+      },
+      "id": "14e33022-0988-49c8-bd69-41ce9b882d12",
+      "name": "Get Audio URL",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -16
+      ],
+      "webhookId": "96ec637d-45ba-4adb-903f-295b0186afc3",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "d8ac2a65-1fc8-4ba8-b0bf-03d969b789af",
+      "name": "Download Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        -16
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "b1490600-eaa2-4de3-9e03-a25c0f78c10a",
+      "name": "Transcribe Audio",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.5,
+      "position": [
+        704,
+        -16
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg-text",
+              "name": "message_text",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "id": "msg-type",
+              "name": "message_type",
+              "type": "string",
+              "value": "audio"
+            },
+            {
+              "id": "from-field",
+              "name": "from",
+              "type": "string",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b165907c-17ad-4653-a0cd-b9dacb5963c0",
+      "name": "Format Audio Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.image.id }}"
+      },
+      "id": "d7f68b29-7b01-41fa-a810-5859a43bd83c",
+      "name": "Get Image URL",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        192,
+        288
+      ],
+      "webhookId": "5ecd3091-b275-4464-9bed-4248d97ccfc9",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "56885185-fc50-44c2-9bc9-cf970763dd35",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        288
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Describe this image in detail and extract any visible text. If there's a question in the caption, answer it.",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary"
+            }
+          ]
+        }
+      },
+      "id": "0a6b3168-3ade-4982-9087-9149547302f7",
+      "name": "Describe Image",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "153709db-0d28-4b6e-a42e-4a6cee49525b",
+      "name": "OpenAI Vision Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        720,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "img-text",
+              "name": "message_text",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "id": "img-type",
+              "name": "message_type",
+              "type": "string",
+              "value": "image"
+            },
+            {
+              "id": "img-caption",
+              "name": "message_caption",
+              "type": "string",
+              "value": "={{ $('Route Message Type').item.json.image.caption || '' }}"
+            },
+            {
+              "id": "img-from",
+              "name": "from",
+              "type": "string",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "314f2736-fbf0-46a5-a1ac-63fa7405a4b1",
+      "name": "Format Image Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "txt-text",
+              "name": "message_text",
+              "type": "string",
+              "value": "={{ $json.text.body }}"
+            },
+            {
+              "id": "txt-type",
+              "name": "message_type",
+              "type": "string",
+              "value": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "40b7f63d-2388-48e5-af4f-1ecfb452556d",
+      "name": "Format Text Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "txt-from",
+              "name": "from",
+              "type": "string",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f1b023b0-e267-4a22-aaf4-1d2a168804b8",
+      "name": "Add From Field",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/530419866820084/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"status\": \"read\",\n  \"message_id\": \"{{ $json.messages[0].id }}\",\n  \"typing_indicator\": {\n    \"type\": \"text\"\n  }\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        576
+      ],
+      "id": "b3884f46-a7bd-4ac1-a9cc-7d743412ed2a",
+      "name": "Trigger typing Animation",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xIM0srGzuvY5Fgvz",
+          "name": "LlamaParse Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "775412688997246",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "281549f1-441b-4557-8b20-812dbf720fd6",
+      "name": "Send WhatsApp Response",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        2368,
+        352
+      ],
+      "webhookId": "9964ceda-7ee1-4aa8-9410-99769c148b74",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "whaIKOY8We9Odqw8",
+          "name": "CleverBot - Visible Business Exp 1 Nov 2025"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Correct errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correct errors": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact information": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make appointments in Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Appointments from Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Download Voice File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set 'Text'",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Voice File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe recording": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 'Text'": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Audio File": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Contact": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List all contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        []
+      ]
+    },
+    "Telegram3": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get document URL for sending": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Split Out Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Messages": {
+      "main": [
+        [
+          {
+            "node": "Route Message Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Message Type": {
+      "main": [
+        [
+          {
+            "node": "Get Audio URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio URL": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Format Audio Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image URL": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Describe Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe Image": {
+      "main": [
+        [
+          {
+            "node": "Format Image Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Vision Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Describe Image",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Text Message": {
+      "main": [
+        [
+          {
+            "node": "Add From Field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Audio Message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Image Message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add From Field": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "0YP0ar9neq5yTIPz"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-09-24T18:08:43.910Z",
+      "createdAt": "2024-09-24T18:08:43.910Z",
+      "id": "Tej2PW2VcNzkvBHB",
+      "name": "chatbot"
+    },
+    {
+      "updatedAt": "2024-10-09T16:08:23.899Z",
+      "createdAt": "2024-10-09T16:08:23.899Z",
+      "id": "fdV01E9B5XB3kSxT",
+      "name": "pinecone"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:19.299Z",
+      "createdAt": "2024-09-21T19:53:19.299Z",
+      "id": "sKkwnItsSnVITUWx",
+      "name": "telegram"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

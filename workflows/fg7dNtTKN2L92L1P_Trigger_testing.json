@@ -1,0 +1,290 @@
+{
+  "id": "fg7dNtTKN2L92L1P",
+  "name": "Trigger testing",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "operation": "getAll",
+        "returnAll": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        -40
+      ],
+      "id": "3b82a15d-01f0-4a12-a0be-292a52f585f4",
+      "name": "HubSpot",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "apwcEJmBMrTVkqbI",
+          "name": "VisibleProjects demo account - contacts"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        -40
+      ],
+      "id": "1cf0d953-f1cd-4a93-ba5e-286b99ebec34",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "landlords",
+          "mode": "list",
+          "cachedResultName": "landlords"
+        },
+        "limit": 5,
+        "where": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        80,
+        140
+      ],
+      "id": "5db9921c-26d1-45e1-9b67-71cc7f468192",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "5g89SinPuuPmFGm2",
+          "name": "CleverAssets Capoyeti"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        340,
+        140
+      ],
+      "id": "2260db04-3547-4d88-bd68-30e7355fcaf3",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "f2b6ebe5116cb7ece2a3b6a2fb24f02b709e1b93b25426defb19c92d4fc6a440@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Choice Properties"
+        },
+        "triggerOn": "eventCancelled",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -400
+      ],
+      "id": "fb4a90be-4281-4e71-8298-01a69554f08c",
+      "name": "event cancelled",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2WyKcCWBhILiJqvx",
+          "name": "Google Calendar account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "f2b6ebe5116cb7ece2a3b6a2fb24f02b709e1b93b25426defb19c92d4fc6a440@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Choice Properties"
+        },
+        "triggerOn": "eventUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -800
+      ],
+      "id": "a12f75d2-cbd9-4a78-b39f-d1086eab8037",
+      "name": "event updated",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2WyKcCWBhILiJqvx",
+          "name": "Google Calendar account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -140,
+        -600
+      ],
+      "id": "1ed3df2c-1898-443e-b15c-3e0b8a9ab044",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "f2b6ebe5116cb7ece2a3b6a2fb24f02b709e1b93b25426defb19c92d4fc6a440@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Choice Properties"
+        },
+        "triggerOn": "eventCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -600
+      ],
+      "id": "e3241e8b-c05b-4bf4-9b04-af2635211f75",
+      "name": "event created",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2WyKcCWBhILiJqvx",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "HubSpot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "Postgres": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "event updated": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "event cancelled": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "event created": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-03-11T12:01:08.321Z",
+      "createdAt": "2025-03-11T12:01:08.321Z",
+      "id": "6GPjrSmyD74slFYl",
+      "name": "calendar"
+    },
+    {
+      "updatedAt": "2024-09-22T09:22:10.301Z",
+      "createdAt": "2024-09-22T09:22:10.301Z",
+      "id": "SavswhRoanPg9GEn",
+      "name": "hubspot"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

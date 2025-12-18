@@ -1,0 +1,945 @@
+{
+  "id": "9i8xuZJnWvu5n8ay",
+  "name": "KM - New WA Chatbot",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -720
+      ],
+      "id": "3ffaeb7b-c3d3-471c-8843-971f81fc4cfc",
+      "name": "WhatsApp Trigger",
+      "webhookId": "ae44909c-960d-45e3-8661-48260cec407d",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "C0PHySie4szglHRW",
+          "name": "KnysnaMontessori WA Trigger"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        -96
+      ],
+      "id": "3050c513-e21d-40bb-8b19-87ba04ea3437",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "450053168194790",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "={{ $('AI Agent1').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        992,
+        -720
+      ],
+      "id": "bc619d2e-435f-4e0d-a811-3eea90e39a78",
+      "name": "WhatsApp Business Cloud",
+      "webhookId": "edd3bd69-f816-4234-981f-16b4560e323b",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "hJvWjVO9wuuLl16N",
+          "name": "WhatsApp for KM (Never Expire)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "8a765e57-8e39-4547-a99a-0458df2b75f4",
+              "operator": {
+                "type": "boolean",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.messages[0].text.body }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "looseTypeValidation": true
+        }
+      },
+      "id": "7d63aa7f-4783-4f00-99b6-72bb5d6dc0d9",
+      "name": "Is message?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -160,
+        -720
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        -720
+      ],
+      "id": "9e9e5063-2459-4ddf-bc8a-5c8ca4826307",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "name": "send_docs",
+        "description": "Call this tool to send documents",
+        "workflowId": {
+          "__rl": true,
+          "value": "4p2orbFUHh585uvG",
+          "mode": "list",
+          "cachedResultName": "KM New WA Send Docs - live"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "chatInput",
+              "stringValue": "={{ $json.messages[0].text.body }}"
+            },
+            {
+              "name": "WA_ID",
+              "stringValue": "={{ $json.messages[0].from }}"
+            },
+            {
+              "name": "personName",
+              "stringValue": "={{ $json.contacts[0].profile.name }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -96
+      ],
+      "id": "065a1c7b-b20c-4aee-a696-2f48d89e86fb",
+      "name": "Send Document Tool"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        -96
+      ],
+      "id": "4b53c2dd-e70a-48e3-b1cd-a93ab0dce168",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "n8n WhatsApp Bot (Knysna Montessori)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "contacts",
+          "mode": "list",
+          "cachedResultName": "contacts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone_number": "={{ '+' + $json.messages[0].from }}",
+            "name": "={{ $json.contacts[0].profile.name || 'Unknown Contact' }}",
+            "role": "parent",
+            "is_active": true,
+            "last_contact_time": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "phone_number"
+          ],
+          "schema": [
+            {
+              "id": "phone_number",
+              "displayName": "phone_number",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "role",
+              "displayName": "role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "is_active",
+              "displayName": "is_active",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "last_contact_time",
+              "displayName": "last_contact_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        60,
+        -720
+      ],
+      "id": "a29d268d-9c32-459f-989c-3cc29f3621dc",
+      "name": "Upsert Contact",
+      "credentials": {
+        "postgres": {
+          "id": "GRYEr7nHs0WrX1WR",
+          "name": "Knysna Montessori Prod (knysnamontes@gmail.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## WhatsApp Number \n### +27 71 261 7421",
+        "height": 304,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        -864
+      ],
+      "id": "4839978c-1342-414f-8466-f04ba1be62c3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "WhatsApp-debugcall",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c8971986-8b6c-4905-966f-8880669d18c8",
+      "name": "Webhook - WhatsApp Debug",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -704,
+        -192
+      ],
+      "webhookId": "eeb6f8db-2e19-4d89-97d9-d6d820870c44"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract WhatsApp message data\nconst body = $input.item.json;\n\n// Log the incoming payload for debugging\nconsole.log('Received webhook payload:', JSON.stringify(body, null, 2));\n\n// Handle WhatsApp Business API format\nif (body.entry && body.entry[0] && body.entry[0].changes) {\n  const change = body.entry[0].changes[0];\n  \n  if (change.value && change.value.messages) {\n    const message = change.value.messages[0];\n    const contact = change.value.contacts[0];\n    \n    return {\n      json: {\n        success: true,\n        messageId: message.id,\n        fromPhone: message.from,\n        senderName: contact.profile.name,\n        messageText: message.text ? message.text.body : '',\n        messageType: message.type,\n        timestamp: new Date().toISOString(),\n        rawPayload: body\n      }\n    };\n  }\n}\n\n// If not WhatsApp format, still return the data\nreturn { \n  json: {\n    success: true,\n    message: 'Webhook received',\n    receivedData: body,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "753ec692-2333-4371-ab8f-d3cc9fa814c5",
+      "name": "Extract Message Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -464,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "66b30f74-e8e0-4944-ac6c-c2c8e2f2a9b8",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        320
+      ],
+      "id": "f7477628-d2c2-4251-8cc0-eda7ce693cb0",
+      "name": "Embeddings OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "n8n WhatsApp Bot (Knysna Montessori)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "topN": 4
+      },
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        224,
+        320
+      ],
+      "id": "661d548c-2a33-4fa2-8778-2011b12553a2",
+      "name": "Reranker Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "kyHu7eF8XVnECuHR",
+          "name": "Github Capoyeti Trial account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use RAG to look up information in the knowledgebase.",
+        "tableName": "documents_pg",
+        "topK": 25,
+        "useReranker": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        112
+      ],
+      "id": "eacf2251-f298-4c99-8088-2cbced037187",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "GRYEr7nHs0WrX1WR",
+          "name": "Knysna Montessori Prod (knysnamontes@gmail.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "messages",
+          "mode": "list",
+          "cachedResultName": "messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "content": "={{ $('WhatsApp Trigger').item.json.messages[0].text.body }}",
+            "from_phone_number": "={{ '+' + $('WhatsApp Trigger').item.json.messages[0].from }}",
+            "to_phone_number": "+27712617421",
+            "message_type": "={{ $('WhatsApp Trigger').item.json.messages[0].type || 'text' }}",
+            "timestamp": "={{ new Date($('WhatsApp Trigger').item.json.messages[0].timestamp * 1000).toISOString() }}",
+            "is_processed": false
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "from_phone_number",
+              "displayName": "from_phone_number",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "to_phone_number",
+              "displayName": "to_phone_number",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "message_type",
+              "displayName": "message_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "is_processed",
+              "displayName": "is_processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "processing_error",
+              "displayName": "processing_error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        280,
+        -720
+      ],
+      "id": "993591dc-bcf7-4096-818d-3f58c8278336",
+      "name": "Log Incoming Message",
+      "credentials": {
+        "postgres": {
+          "id": "GRYEr7nHs0WrX1WR",
+          "name": "Knysna Montessori Prod (knysnamontes@gmail.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "messages",
+          "mode": "list",
+          "cachedResultName": "messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "content": "={{ $json.output }}",
+            "from_phone_number": "+27712617421",
+            "to_phone_number": "={{ '+' + $('WhatsApp Trigger').item.json.messages[0].from }}",
+            "message_type": "text",
+            "timestamp": "={{ $now.toISO() }}",
+            "is_processed": true
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "from_phone_number",
+              "displayName": "from_phone_number",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "to_phone_number",
+              "displayName": "to_phone_number",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "message_type",
+              "displayName": "message_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "is_processed",
+              "displayName": "is_processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "processing_error",
+              "displayName": "processing_error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        768,
+        -720
+      ],
+      "id": "21df2c53-4795-457f-876a-e48434bbfe71",
+      "name": "Log Bot Response",
+      "credentials": {
+        "postgres": {
+          "id": "GRYEr7nHs0WrX1WR",
+          "name": "Knysna Montessori Prod (knysnamontes@gmail.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Given a file ID, fetches the text from the document.",
+        "operation": "executeQuery",
+        "query": "SELECT \n    string_agg(text, ' ') as document_text\nFROM documents_pg\n  WHERE metadata->>'file_id' = $1\nGROUP BY metadata->>'file_id';",
+        "options": {
+          "queryReplacement": "={{ $fromAI('file_id') }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        368,
+        -96
+      ],
+      "id": "2a6652dc-fe9d-47cd-9b8b-f894bce852b6",
+      "name": "Get File Contents",
+      "credentials": {
+        "postgres": {
+          "id": "GRYEr7nHs0WrX1WR",
+          "name": "Knysna Montessori Prod (knysnamontes@gmail.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('WhatsApp Trigger').item.json.messages[0].text.body }}",
+        "options": {
+          "systemMessage": "=You are the Knysna Montessori School WhatsApp assistant.\n\n  You are chatting with {{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}.\n  Today is {{ DateTime.fromISO($now).toLocaleString(DateTime.DATETIME_FULL) }}.\n\n  # Your Primary Function\n  You help parents, guardians, and prospective families with information about Knysna Montessori School. Greet users by name when available.\n\n  # CRITICAL: Always Search First\n  For EVERY question, you MUST:\n  1. FIRST search the RAG knowledge base - even if you're unsure whether the topic is \"school-related\"\n  2. If RAG returns relevant results, provide the answer\n  3. ONLY redirect users if RAG returns no relevant results AND the question is clearly unrelated to the school\n\n  Many school-related topics are in the knowledge base that you might not expect, including:\n  - School song, motto, history, and traditions\n  - School fees, admissions, and application processes\n  - Terms, hours, calendar, and important dates\n  - Curriculum, Montessori method, and programmes\n  - Staff information and qualifications\n  - Facilities, location, and transport\n  - Uniforms and where to purchase\n  - Events, activities, and extracurricular programmes\n  - Policies, procedures, and school rules\n  - Any other school documents and information\n\n  # When to Redirect (Only After Searching RAG)\n  If RAG returns no results AND the question is clearly off-topic (e.g., celebrity gossip, recipes, personal advice, general knowledge unrelated to education), politely redirect:\n\n  \"I'm the Knysna Montessori School assistant, so I focus on school-related questions. Is there anything about the school I can help you with - perhaps admissions, fees, or our programmes?\"\n\n  # Tools Available\n  - RAG (Postgres PGVector Store): ALWAYS search this first for ANY question\n  - Get File Contents: Retrieve complete document text when RAG gives partial results\n  - send_docs: Send PDF documents (fee schedules, forms, prospectus)\n\n  # Important Guidelines\n  1. SEARCH RAG FIRST - don't pre-judge whether a question is \"in scope\"\n  2. If RAG has the answer, provide it - even for unexpected topics\n  3. If RAG doesn't have the answer, say so honestly - don't make things up\n  4. Use UK English spelling\n  5. Stay courteous and professional\n  6. For urgent matters, remind users to contact the school:\n     - Phone: 044 382 5316 or 044 382 0554\n     - Email: admissions@knysnamontessori.co.za\n     - WhatsApp: 072 696 5184\n\n  # Response Style\n  - Be warm but professional\n  - Keep responses focused and helpful\n  - If unsure, encourage contacting the school directly"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        500,
+        -720
+      ],
+      "id": "9f153535-b0cc-44a9-80db-6acbacffa044",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "content": "## Admin Backend Hook\n**Double click** This is the interface from the admin backend for testing and direct injection purposes",
+        "height": 400,
+        "width": 864
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        -432
+      ],
+      "id": "599c2848-d442-4081-beaa-43e1edefeb3e",
+      "name": "Sticky Note2"
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is message?": {
+      "main": [
+        [
+          {
+            "node": "Upsert Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Incoming Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Business Cloud": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Document Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - WhatsApp Debug": {
+      "main": [
+        [
+          {
+            "node": "Extract Message Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Message Data": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Incoming Message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Bot Response": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Contents": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Log Bot Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "0YP0ar9neq5yTIPz",
+    "availableInMCP": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    },
+    {
+      "updatedAt": "2025-02-13T15:24:37.815Z",
+      "createdAt": "2025-02-13T15:24:37.815Z",
+      "id": "8LvptskQVEFGnlUS",
+      "name": "postgres"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:13.010Z",
+      "createdAt": "2024-09-21T19:53:13.010Z",
+      "id": "eRW7d7ykLq2q1q5B",
+      "name": "montessori"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

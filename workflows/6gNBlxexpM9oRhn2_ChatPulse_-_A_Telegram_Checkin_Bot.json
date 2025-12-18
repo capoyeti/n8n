@@ -1,0 +1,104 @@
+{
+  "id": "6gNBlxexpM9oRhn2",
+  "name": "ChatPulse - A Telegram Checkin Bot",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "898a66b6-1dad-4550-b5fb-c5516d64e608",
+      "name": "Telegram Trigger",
+      "webhookId": "82d64374-5350-4af1-9d18-c44b2e206176",
+      "credentials": {
+        "telegramApi": {
+          "id": "4elWRGwBOPuMNvOl",
+          "name": "ChaddderChatBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Ingest\nGet info - parse structure, validate content",
+        "height": 704,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -160
+      ],
+      "id": "9f1d76d5-f1be-4af8-9328-6923f8738730",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-02-13T15:24:44.659Z",
+      "createdAt": "2025-02-13T15:24:44.659Z",
+      "id": "eMxtBg4qWhWGQemu",
+      "name": "supabase"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:19.299Z",
+      "createdAt": "2024-09-21T19:53:19.299Z",
+      "id": "sKkwnItsSnVITUWx",
+      "name": "telegram"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 771594865,
+          "message": {
+            "message_id": 1,
+            "from": {
+              "id": 386844535,
+              "is_bot": false,
+              "first_name": "Chad",
+              "last_name": "Williams",
+              "username": "chadwilliams",
+              "language_code": "en",
+              "is_premium": true
+            },
+            "chat": {
+              "id": 386844535,
+              "first_name": "Chad",
+              "last_name": "Williams",
+              "username": "chadwilliams",
+              "type": "private"
+            },
+            "date": 1762060196,
+            "text": "/start",
+            "entities": [
+              {
+                "offset": 0,
+                "length": 6,
+                "type": "bot_command"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

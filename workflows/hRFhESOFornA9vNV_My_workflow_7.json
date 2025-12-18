@@ -1,0 +1,66 @@
+{
+  "id": "hRFhESOFornA9vNV",
+  "name": "My workflow 7",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "252f05ab-c69d-4206-94ff-f80d62425894",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        760,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM active_tenants;\n",
+        "options": {}
+      },
+      "id": "1898f057-507b-4051-9daa-471542f2b176",
+      "name": "Postgres",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        980,
+        500
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "eMHqe3tBWaf672Q3",
+          "name": "Clever Mall Database"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

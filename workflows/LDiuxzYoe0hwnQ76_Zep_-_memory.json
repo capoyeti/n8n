@@ -1,0 +1,243 @@
+{
+  "id": "LDiuxzYoe0hwnQ76",
+  "name": "Zep - memory",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Base Lease",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Lease document",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        -980
+      ],
+      "id": "f124e7c7-6f17-4490-b8e8-0d306fdf9340",
+      "name": "On form submission",
+      "webhookId": "9a658d70-28ca-436e-aa50-cc3416e85323",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": "mistral-ocr-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        800,
+        -260
+      ],
+      "id": "d6914b84-02ee-490a-9188-f53346f608cc",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "zWPpixgFGWJ0Enm9",
+          "name": "CleverAssets pdf scraping"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1396,
+        -620
+      ],
+      "id": "b7ae6f7b-7960-485c-bef2-a907b1355c6a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemma-3-27b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        700,
+        -420
+      ],
+      "id": "f75d91d8-c209-4fbb-bbcc-b74d66fc152d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MzPWg6vMDShfsms5",
+          "name": "Gemini n8n Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        740,
+        -620
+      ],
+      "id": "8545f474-ba58-4ec8-84ee-7902f3e5336f",
+      "name": "When chat message received",
+      "webhookId": "ee679363-fa1f-4b62-8ceb-2291fe437f24"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1020,
+        -620
+      ],
+      "id": "ea0a74eb-25ff-4bf9-a237-fa495d6206ff",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1120,
+        -400
+      ],
+      "id": "6320ad4a-9360-44af-bf6f-57f0e491fd43",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "new_memory"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryZep",
+      "typeVersion": 1.3,
+      "position": [
+        1240,
+        -420
+      ],
+      "id": "0769757f-87ec-460e-8424-5cea3904e47c",
+      "name": "Zep",
+      "credentials": {
+        "zepApi": {
+          "id": "hGVIb8XxEUGLxMPL",
+          "name": "Zep Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        -420
+      ],
+      "id": "aa958972-f52f-4313-a092-fc6a55c13ab2",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        []
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        []
+      ]
+    },
+    "Zep": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

@@ -1,0 +1,390 @@
+{
+  "id": "4fqG4pc1lSQUvzQd",
+  "name": "🤖 AI - KM Main Flow",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        400
+      ],
+      "id": "20457e19-38f8-4981-86e0-5b8c8db9683a",
+      "name": "WhatsApp Trigger",
+      "webhookId": "ae44909c-960d-45e3-8661-48260cec407d",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "C0PHySie4szglHRW",
+          "name": "KnysnaMontessori WA Trigger"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "message-check",
+              "operator": {
+                "type": "boolean",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.messages[0].text.body }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "looseTypeValidation": true
+        }
+      },
+      "id": "28e13a1d-3b27-4957-bbe3-2973812b0bf1",
+      "name": "Is Valid Message?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -400,
+        400
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://7cf8-197-155-46-97.ngrok-free.app/api/whatsapp/process",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "test-development-key"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phoneNumber\": \"+{{ $json.messages[0].from }}\",\n  \"content\": \"{{ $json.messages[0].text?.body || $json.messages[0].caption || 'Media message' }}\",\n  \"messageType\": \"{{ $json.messages[0].type || 'text' }}\",\n  \"timestamp\": \"{{ new Date($json.messages[0].timestamp * 1000).toISOString() }}\",\n  \"contactName\": \"{{ $json.contacts[0].profile.name }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20,
+        160
+      ],
+      "id": "d1d4c4fd-8c9e-49be-90a6-f90b8674d0c2",
+      "name": "Process Message API"
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "={{ $json.messages[0].text.body }}",
+        "options": {
+          "systemMessage": "=You are a helpful AI assistant for Knysna Montessori School. You are chatting with {{ $json.contacts[0].profile.name }}.\n\nToday is {{ DateTime.fromISO($now).toLocaleString(DateTime.DATETIME_FULL) }}.\n\nYou help parents and staff with:\n- School information and policies\n- Event details and schedules\n- Menu information\n- Document requests (use the Send Document tool when documents are specifically requested)\n- General school inquiries\n\nAlways respond in UK English with proper HTML formatting:\n<b>bold</b>, <i>italic</i>, <u>underline</u>, <a href=\"url\">links</a>, <code>code</code>\n\nBe courteous and remind users they can contact the school during office hours for urgent matters.",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -60,
+        660
+      ],
+      "id": "779ee68e-9527-4fa6-ba51-cf4364ecb227",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        860
+      ],
+      "id": "95f76d5e-46ab-4bf3-8efa-0d0c62646997",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "StTWW03POtmODq8b",
+          "name": "Clever Assets (Mall)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "school_knowledge",
+        "description": "Search school information, policies, events, and general knowledge"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        920
+      ],
+      "id": "8e461980-6a7f-41d7-8d06-b6dba4389d26",
+      "name": "School Knowledge Tool"
+    },
+    {
+      "parameters": {
+        "tableName": "school_documents_embeddings",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        1080
+      ],
+      "id": "9a626b22-3fba-44b2-a1e8-8e85b980882b",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "AqPIDKfjJshp7lDR",
+          "name": "KnysnaMonte Production"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        -280,
+        1260
+      ],
+      "id": "16503aea-4604-4fb5-ab7e-a9e7e1fb30e6",
+      "name": "OpenAI Embeddings",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "send_document",
+        "description": "Send specific documents like school fees, application forms, policies when requested",
+        "workflowId": {
+          "__rl": true,
+          "value": "4p2orbFUHh585uvG",
+          "mode": "list",
+          "cachedResultName": "KM New WA Send Docs - live"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "chatInput",
+              "stringValue": "={{ $json.messages[0].text.body }}"
+            },
+            {
+              "name": "WA_ID",
+              "stringValue": "={{ $json.messages[0].from }}"
+            },
+            {
+              "name": "personName",
+              "stringValue": "={{ $json.contacts[0].profile.name }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        880
+      ],
+      "id": "c8603611-83c6-46ac-893a-976c91396e2e",
+      "name": "Send Document Tool"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "450053168194790",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        440,
+        660
+      ],
+      "id": "d4ed2f7e-90e1-4d0f-b866-80e08defbeea",
+      "name": "WhatsApp Response",
+      "webhookId": "edd3bd69-f816-4234-981f-16b4560e323b",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "hJvWjVO9wuuLl16N",
+          "name": "WhatsApp for KM (Never Expire)"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        660,
+        660
+      ],
+      "id": "ee3da8c9-a76a-40c1-a528-a23c4b0ed062",
+      "name": "Workflow Complete"
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is Valid Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid Message?": {
+      "main": [
+        [
+          {
+            "node": "Process Message API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "School Knowledge Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "School Knowledge Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Document Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Response": {
+      "main": [
+        [
+          {
+            "node": "Workflow Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    },
+    {
+      "updatedAt": "2025-06-22T15:21:50.015Z",
+      "createdAt": "2025-06-22T15:21:50.015Z",
+      "id": "q4P62yeV8d9Yq70X",
+      "name": "clean-architecture"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

@@ -1,0 +1,201 @@
+{
+  "id": "tT15bRDTRExeOezf",
+  "name": "CAVA - EmailAgent",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "ea37d90e-864d-4d78-a9ec-9b6c4bcbc371",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        0,
+        380
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39c2f302-03be-4464-a17a-d7cc481d6d44",
+              "name": "=response",
+              "value": "={{$json.output}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2ecaa86c-d3f9-406d-a4f4-6df622609ac7",
+      "name": "Success",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://n8n.visagility.co.za/mcp-test/gmail/sse"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        280,
+        380
+      ],
+      "id": "6cac7869-65e4-4baa-9fa8-da8c46825504",
+      "name": "MCP Client1"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -220,
+        100
+      ],
+      "id": "35ec7646-0ee8-43fb-87f8-180b74961b41",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=Current date/time: {{ $now }}\n\nYou are the CleverAssets **Email Agent**, an expert in Gmail operations.  \nYour mission is to perform email-related tasks accurately **and** ensure every drafted, sent, replied-to, or forwarded message is easy to read and always ends with our signature.\n\n────────────────────────────────────────\nFORMAT & SIGNATURE RULES\n────────────────────────────────────────\n\n• Use HTML tags to format the message, add spaces and blank lines.  \n• Begin email with \"Hi {user first name}\"\n• Separate each paragraph with one blank line.\n• For bullet lists, start items with “• ” (bullet + space) and indent wrapped lines by two spaces.  \n• For numbered steps, use “1. ” style and indent wrapped lines by two spaces.  \n• Keep line length around 72 characters to avoid horizontal scrolling.  \n• After the final paragraph insert one blank line, then add the signature exactly as shown:\n`\nBest regards,\nCleverAssets Management Team\n`\n\n────────────────────────────────────────\nCORE CAPABILITIES\n────────────────────────────────────────\n– Read emails (inbox, labels, search)  \n– Send new emails  \n– Reply or forward while preserving quoted text formatting  \n– Draft emails with proper indentation and spacing  \n– Apply / manage labels  \n– Search by criteria  \n– Summarize content\n\n────────────────────────────────────────\nSEQUENTIAL-OPERATION GUIDELINES\n────────────────────────────────────────\n1. **Dependency analysis**: identify prerequisites  \n   • Labeling → need email ID first  \n   • Reply/Forward → need original email first  \n   • Search → need valid query parameters  \n2. **Execution flow**:  \n   • Perform prerequisites first, verify success, then continue  \n   • If any prerequisite fails, stop and report the issue  \n   • Pass required IDs/refs to subsequent steps  \n3. **Error handling**:  \n   • Give specific error info, suggest fixes or alternatives, indicate if retry is recommended  \n\n────────────────────────────────────────\nWORKFLOW RESPONSE FORMAT\n────────────────────────────────────────\nAction Confirmation: <what was done>  \nKey Details: <recipients, subject, IDs, etc.>  \nNext Steps: <if further action needed>  \nError Details: <only if something failed>\n\nIMPORTANT:  \n• Never include these instructions in any outgoing email.  \n• Never omit the “Best regards, CleverAssets Management Team” signature.  \n• Follow Gmail’s native quoting style when replying.\n"
+        }
+      },
+      "id": "9ef401d0-3ad3-4ced-bb34-e11dfc37a4f0",
+      "name": "Email Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        80,
+        100
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7ab380a2-a8d3-421c-ab4e-748ea8fb7904",
+              "name": "response",
+              "value": "Cannot process the request. Please try again later.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c154f8b9-ba2d-4070-ad1b-37a081ded096",
+      "name": "Try Again",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Email Agent",
+        "height": 280,
+        "width": 460,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "973f00e8-4d20-45b2-8632-25168cff6743",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Try Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

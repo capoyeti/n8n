@@ -1,0 +1,331 @@
+{
+  "id": "bBVq8TVz4vFISgWc",
+  "name": "My Personal Agent",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "8615a724-5b3a-4371-8316-435307214392",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        380
+      ],
+      "webhookId": "c4e4653a-9bff-4aa7-845f-58a27c605e73"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "047315c2-0622-45da-b6c7-8c70beae75c0",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        920,
+        580
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "send_email",
+        "description": "Call this tool to send an email",
+        "workflowId": "k4EVMy9kmSiMdthe",
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"query\": \"toList=recipient@example.com&subject=Your%20Subject%20Here&body=Your%20email%20message%20content%20here.&ccList=cc@example.com&bccList=bcc@example.com&senderName=Your%20Name&appendAttribution=false\"\n}\n"
+      },
+      "id": "16188b4a-1a2e-481a-ad4e-3dcd27a59d43",
+      "name": "send_email",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1260,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "create_event",
+        "description": "Call this tool to create calendar events",
+        "workflowId": "qTJ4LI1fDs1uw3LM",
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"query\": \"start=&end=&attendees=&description=&summary=\"\n}\n"
+      },
+      "id": "686d1282-265f-4c9e-a332-4d267187fe32",
+      "name": "create_event",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1500,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "update_database",
+        "description": "Call this tool to update the vector database if requested.",
+        "workflowId": "xo2fXVgBFEq5O0D0"
+      },
+      "id": "c72f11fa-5b2d-4337-8222-599e21912803",
+      "name": "update_database",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1640,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "create_document_drive",
+        "description": "Create a document in Google Drive",
+        "workflowId": "ZJbuljwCbc1IfaM4",
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"query\": \"fileContent=Your%20file%20content%20here&fileName=YourFileNameHere.txt\"\n}\n"
+      },
+      "id": "1664dc87-0036-4bb9-a38c-e05e7bf00a64",
+      "name": "create_document_drive",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1380,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "d7e7c289-65b5-4e20-8681-c64c9670592d",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        880,
+        1180
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "93b2aa99-9494-4013-b796-0a13383e1626",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        960
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "database",
+        "description": "Call this tool to retrieve the contact information like email addresses",
+        "topK": 10
+      },
+      "id": "2c923e83-626b-439f-898b-3d1dd2deb4dc",
+      "name": "database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "Contacts"
+        }
+      },
+      "id": "2725cb78-1326-438b-add7-89b8a9546132",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        880,
+        960
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "**OBJECTIVE**\n\nThe AI Agent's primary goal is to process incoming chat messages efficiently by utilizing a suite of tools. It will extract relevant information, manage tasks like sending emails, creating documents, updating the database, and integrating these actions with external systems like a Pinecone Vector Store for advanced data retrieval.\n\n---\n\n**CONTEXT**\n\nYou are an AI Assistant integrated into a workflow that handles incoming chat messages. The workflow is designed for a user who interacts with clients or team members through chat. The chat messages may contain requests for various actions such as sending emails, creating documents, setting up events, or updating databases. The AI Agent is connected to several tools that allow it to perform these tasks automatically.\n\n**Tools Available:**\n\n1. **OpenAI Chat Model**: Used for generating responses, interpreting chat messages, and understanding user intent.\n2. **Send Email**: Automatically composes and sends emails based on instructions received from the chat message.\n3. **Create Document (Drive)**: Generates documents and stores them in a connected drive, potentially using templates or user-provided content.\n4. **Create Event**: Schedules events in a calendar based on the details provided in the chat.\n5. **Update Database**: Modifies or updates entries in a database as instructed by the user.\n6. **Pinecone Vector Store**: Stores embeddings and vector representations of text data, allowing for efficient and relevant data retrieval.\n7. **Database**: A storage system that holds important information and can be queried or updated by the AI Agent.\n\n**Memory Context:** The AI Agent uses memory to track ongoing conversations and tasks, ensuring continuity in interactions and decision-making.\n\n**User Profile:** The user interacts with multiple clients and projects, requiring the AI Agent to handle tasks related to communication, documentation, scheduling, and data management seamlessly.\n\n---\n\n**INSTRUCTIONS**\n\n1. **Message Interpretation:**\n   - Use the OpenAI Chat Model to understand and interpret the incoming chat message.\n   - Identify key actions required (e.g., sending an email, creating a document, scheduling an event).\n\n2. **Task Execution:**\n   - **Send Email**: If the chat message requests sending an email, use the \"Send Email\" tool to draft and send the email, incorporating any necessary information or templates.\n   - **Create Document**: If a document is required, use the \"Create Document (Drive)\" tool to generate the document, ensuring it is stored appropriately in the connected drive.\n   - **Create Event**: For scheduling requests, use the \"Create Event\" tool to set up calendar events with the correct date, time, and details.\n   - **Update Database**: When database updates are needed, use the \"Update Database\" tool to modify or add entries as specified in the chat message.\n\n3. **Data Retrieval & Storage:**\n   - Use the **Pinecone Vector Store** to retrieve relevant information from the stored embeddings, enhancing the AI's ability to provide contextually accurate responses.\n   - Query the **Database** when additional information is needed to complete a task or to validate data before performing an action.\n\n4. **Memory Usage:**\n   - Keep track of ongoing conversations and tasks using memory to ensure consistent and relevant interactions.\n   - Recall previous chat messages or actions to maintain context in multi-step processes.\n\n5. **Error Handling:**\n   - If any tool fails or an action cannot be completed, notify the user promptly with a suggested next step or alternative action.\n\n---\n\n**OUTPUT REQUIREMENTS**\n\n- **Email Confirmation**: Provide a confirmation message once an email is sent, including details like recipient, subject, and a brief summary of the content.\n- **Document Creation Summary**: Notify the user when a document is created, including the document name, location, and a summary of its contents.\n- **Event Confirmation**: Send a confirmation message summarizing the event details once it is scheduled.\n- **Database Update Report**: Provide a report of the changes made to the database, including the fields updated and their new values.\n- **Error Notification**: If an error occurs, generate an alert with details of the issue and possible corrective actions.\n\n---\n\n**EXAMPLES**\n\n### Example 1: Send Email\n\n**Chat Message:**\n\"Please send an email to John to confirm our meeting tomorrow at 10 AM.\"\n\n**AI Agent Actions:**\n- **Interpretation**: Recognize the need to send an email.\n- **Tool Used**: Send Email.\n- **Email Content**: \"Subject: Meeting Confirmation - 10 AM Tomorrow. Hi John, just confirming our meeting scheduled for 10 AM tomorrow. Looking forward to it. Best, [User Name]\"\n- **Output**: Email Confirmation message sent to the user.\n\n### Example 2: Create Document\n\n**Chat Message:**\n\"Draft a project summary document for the XYZ project and save it in the drive.\"\n\n**AI Agent Actions:**\n- **Interpretation**: Identify the need to create a document.\n- **Tool Used**: Create Document (Drive).\n- **Document Content**: Generate a summary document based on provided or retrieved project details.\n- **Output**: Document Creation Summary provided to the user.\n\n### Example 3: Update Database\n\n**Chat Message:**\n\"Update the client database with the new contact information for Sarah from XYZ Corp.\"\n\n**AI Agent Actions:**\n- **Interpretation**: Recognize the request to update the database.\n- **Tool Used**: Update Database.\n- **Database Update**: Modify the relevant entry with Sarah’s new contact information.\n- **Output**: Database Update Report sent to the user.\n",
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "95537eac-729b-40f0-ba90-b6775ea49805",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1040,
+        380
+      ]
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_document_drive": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

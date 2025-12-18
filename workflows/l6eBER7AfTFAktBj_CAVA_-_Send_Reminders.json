@@ -1,0 +1,146 @@
+{
+  "id": "l6eBER7AfTFAktBj",
+  "name": "CAVA - Send Reminders",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        -280
+      ],
+      "id": "b6183ba9-3faa-46e4-afc5-d19f754dd2c9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appErtFpBiEZfLdMm",
+          "mode": "list",
+          "cachedResultName": "CleverMall",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwbzk4LR62HAnm",
+          "mode": "list",
+          "cachedResultName": "Reminders",
+          "cachedResultUrl": "https://airtable.com/appErtFpBiEZfLdMm/tblXwbzk4LR62HAnm"
+        },
+        "filterByFormula": "AND(   IS_AFTER({ScheduledTime}, NOW()),   IS_BEFORE({ScheduledTime}, DATEADD(NOW(), 15, 'minutes')) )",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        -280
+      ],
+      "id": "dce2906d-db9c-499e-b7f0-839cb67a95af",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "jO5P27PvyEErPtGX",
+          "name": "Airtable Personal Access Token account CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        -280
+      ],
+      "id": "7434a367-403a-45da-b73f-e9b6e6549afe",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "474203415781208",
+        "recipientPhoneNumber": "=+918180985171",
+        "textBody": "=Reminder: {{ $json.Title }}. {{ $json.Notes }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        -260
+      ],
+      "id": "90159506-14a2-4a9c-9eac-bf84960656a0",
+      "name": "WhatsApp Business Cloud1",
+      "webhookId": "7db10a47-a004-44ee-9ca4-4d58743414f0"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "WhatsApp Business Cloud1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Business Cloud1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

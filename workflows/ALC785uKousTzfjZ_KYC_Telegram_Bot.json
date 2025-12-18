@@ -1,0 +1,526 @@
+{
+  "id": "ALC785uKousTzfjZ",
+  "name": "KYC Telegram Bot",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "f3ebd782-42fe-4ef1-9fd2-0d7ef761640b",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1780,
+        720
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "telegramApi": {
+          "id": "48GGSxQBafzkrLON",
+          "name": "KYC-TG"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+        "text": "={{ $('AI Agent').item.json.output.replace(/&/g, \"&amp;\").replace(/>/g, \"&gt;\").replace(/</g, \"&lt;\").replace(/\"/g, \"&quot;\") }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "01d6cb7b-87d7-4460-8a31-1a230f66b45d",
+      "name": "Correct errors",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2380,
+        840
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "telegramApi": {
+          "id": "48GGSxQBafzkrLON",
+          "name": "KYC-TG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "database",
+        "description": "Details about the Knysna Yacht Club"
+      },
+      "id": "a0eba62e-54f3-41bc-998a-d6ea2d176e16",
+      "name": "database",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        1220
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "68990c61-6a72-473c-8d58-42eeeadf3f28",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        960,
+        1520
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "9e23041d-dd9b-4a73-a02f-0460857a9aed",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        1380
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "send_document",
+        "description": "Call this tool to send a document to the user",
+        "workflowId": "m9MtDEXyHjSakPs8",
+        "fields": {
+          "values": [
+            {
+              "name": "chat_id",
+              "stringValue": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "id": "2448f1ac-88c6-4b33-b77f-2f4376c2dcb1",
+      "name": "Send Document Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        1520,
+        860
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "51568e08-85ee-479c-bb76-9a83ca9902c3",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        920,
+        640
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message.text",
+              "value": "={{ $json?.message?.text || \"\" }}"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "3e0d5875-f8b5-4725-901a-b34e2e88f3c2",
+      "name": "PreProcessing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        460,
+        620
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "id": "3310b5dd-d286-49d2-b209-3469bd75af97",
+      "name": "Telegram2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        860
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "48GGSxQBafzkrLON",
+          "name": "KYC-TG"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "6589a565-483c-4c27-bd22-c7b6ab950373",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "name": "Draw_Dalle_image",
+        "description": "Call this tool to request a Dall-E 3 model, when the user asks to draw something. Please send the user request for an image as an inline query string.",
+        "workflowId": "14eb3AwsS8wKYMDO",
+        "fields": {
+          "values": [
+            {
+              "name": "chat_id",
+              "stringValue": "={{ $('Listen for incoming events').first().json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "id": "1f32ea7d-62e0-48a6-adb1-cf868dbba32b",
+      "name": "Dall-E 3 Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        1420,
+        1060
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "kyc",
+          "mode": "list",
+          "cachedResultName": "kyc"
+        },
+        "options": {}
+      },
+      "id": "d5a4a84a-c36a-43d4-b8fa-84733ef0c195",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        1380
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "4YhGmXWhVz5bAAOO",
+          "name": "PineconeApi VisibleProjects"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "49bb6aa5-1cb8-479e-9ffd-d6dd5d81e0f3",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        860
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=chat_with_{{ $('Telegram Trigger').first().json.message.chat.id }}"
+      },
+      "id": "dbcef5c6-5cb4-46b0-b82f-059435f6a15f",
+      "name": "Window Buffer Memory1",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        1280,
+        840
+      ]
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "296f2c18-2960-4668-8acc-e08bc6a5c698",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        620
+      ],
+      "webhookId": "ee645163-f654-47b4-b771-350d15598dbc",
+      "credentials": {
+        "telegramApi": {
+          "id": "48GGSxQBafzkrLON",
+          "name": "KYC-TG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "humanMessage": "TOOLS\n------\nAssistant can ask the user to use tools to look up information that may be helpful in answering the users original question. The tools the human can use are:\n\n{tools}\n\n{format_instructions}\n\nUSER'S INPUT\n--------------------\nHere is the user's input (remember to respond with a markdown code snippet of a json blob with a single action, and NOTHING else):\n\n{{input}}",
+          "systemMessage": "=Today is {{ DateTime.fromISO($now).toLocaleString(DateTime.DATETIME_FULL) }}.\n\nYou are a friendly and helpful AI assistant for the Knysna Yacht Club, and should respond to the user by name {{ $json.message.from.first_name }}\n\nYou answer questions related to the club's constitution, by-laws, recent AGM details, and membership application forms. When a user asks for specific documents like the membership application form, use the Send Document tool.\n\nFor questions about club policies or rules, retrieve responses based on the official documents in the Pinecone vector store database. Avoid making up information—always base responses on the information available in the club documents.\n\nDon't raise any negative comments when responding to general queries and only answer about the Gencom meetings when directly asked to do so.\n\nFor any contact details that aren't available from the vector database, you can use the below:\n\nContact KYC\nPlease use details below to contact us\nContact Form : https://www.knysnayachtclub.com/contact\nemail: secretary@knysnayachtclub.com\nPhone: Office:044 382 5724 Mon-Fri 8h00-13h00\n\nImportant Instructions:\nDatabase Access: Use the vector database tool to answer questions based on official documents in the database.\nDocument Requests: For explicit document requests (e.g., “membership form”), use the Send Document tool.\nFormatting: Respond in general HTML format, using supported tags like <b>bold</b>, <i>italic</i>, <a href=\"http://www.example.com/\">inline URL</a>, and <pre> for fixed-width code blocks.\nClarity and Precision: Provide clear, direct answers based on club information. Do not elaborate beyond the data found in the official documents."
+        }
+      },
+      "id": "4e83163b-679a-459d-8d17-18ca6a7c5195",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1240,
+        640
+      ]
+    }
+  ],
+  "connections": {
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Correct errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correct errors": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "database",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PreProcessing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "database",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "PreProcessing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Document Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-11T07:29:43.254Z",
+      "createdAt": "2024-10-11T07:29:43.254Z",
+      "id": "AOYxiUb5DHFbCFkc",
+      "name": "agent"
+    },
+    {
+      "updatedAt": "2024-10-09T16:08:23.899Z",
+      "createdAt": "2024-10-09T16:08:23.899Z",
+      "id": "fdV01E9B5XB3kSxT",
+      "name": "pinecone"
+    },
+    {
+      "updatedAt": "2024-10-28T11:10:23.774Z",
+      "createdAt": "2024-10-28T11:10:23.774Z",
+      "id": "icqLAEbAXhubIb4d",
+      "name": "KYC"
+    },
+    {
+      "updatedAt": "2024-09-21T19:53:19.299Z",
+      "createdAt": "2024-09-21T19:53:19.299Z",
+      "id": "sKkwnItsSnVITUWx",
+      "name": "telegram"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

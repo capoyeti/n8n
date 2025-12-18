@@ -1,0 +1,57 @@
+{
+  "id": "ppdWcNzVYFEsIo67",
+  "name": "🧰 Facebook bot",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -180
+      ],
+      "id": "e3787051-1c3f-4a95-9b38-0a9d04692192",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "page": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "form": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.facebookLeadAdsTrigger",
+      "typeVersion": 1,
+      "position": [
+        20,
+        -260
+      ],
+      "id": "2e54be82-86de-476b-9251-07984b35e263",
+      "name": "Facebook Lead Ads Trigger",
+      "webhookId": "565416de-b7de-4bf0-956c-7723862a11f7"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-03-10T06:18:20.631Z",
+      "createdAt": "2025-03-10T06:18:20.631Z",
+      "id": "u0UqK6fscVJLaySJ",
+      "name": "facebook"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

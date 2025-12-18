@@ -1,0 +1,908 @@
+{
+  "id": "DYWUQ0DjJ9GQvlcw",
+  "name": "Youtube VPH",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c58984a0-828b-4691-b824-1ed89c3cef5a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\n\n// Calculate 90 days ago\nconst ninetyDaysAgo = new Date();\nninetyDaysAgo.setDate(now.getDate() - 83);\n\n// Calculate 14 days ago\nconst sevenDaysAgo = new Date();\nsevenDaysAgo.setDate(now.getDate() - 3);\n\nreturn [{\n  publishedAfter: ninetyDaysAgo.toISOString(),\n  publishedBefore: sevenDaysAgo.toISOString()\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "f83cf80a-ecc7-4554-a378-60ccbb826a8c",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appI8ZJ9aJoLybuHz",
+          "mode": "list",
+          "cachedResultName": "Youtube VPH",
+          "cachedResultUrl": "https://airtable.com/appI8ZJ9aJoLybuHz"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblqE8nzG52OccnxS",
+          "mode": "list",
+          "cachedResultName": "Youtube Accounts",
+          "cachedResultUrl": "https://airtable.com/appI8ZJ9aJoLybuHz/tblqE8nzG52OccnxS"
+        },
+        "filterByFormula": "{Get Videos}=TRUE()",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "5665c74b-3acf-4af3-93df-ff2fddd01d4a",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://youtube-data-api-v3.p.rapidapi.com/channels?part=id&forHandle={{ $json['Youtube Account'] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "youtube-data-api-v33.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "742ae1f669msha68a7840b2c6437p13ead0jsna895c5a8ca23"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 2,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "7a496908-757b-4745-b13b-e1c7b24cd51d",
+      "name": "Get Accounts"
+    },
+    {
+      "parameters": {
+        "url": "=https://youtube-data-api-v3.p.rapidapi.com/search?part=snippet&channelId={{ $json.items[0].id }}&maxResults=5&order=date&type=video&videoDuration=long&publishedAfter={{ $('Code').item.json.publishedAfter }}&publishedBefore={{ $('Code').item.json.publishedBefore }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "youtube-data-api-v33.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "742ae1f669msha68a7840b2c6437p13ead0jsna895c5a8ca23"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "id": "9ecf35e7-a51a-48fc-8591-fe576ab90196",
+      "name": "Get Videos"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "438d1d25-23bf-447b-9b0f-fee57e71970a",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6957573f-cbed-4cc6-821f-457dddd88205",
+              "name": "videoId",
+              "value": "={{ $json.id.videoId }}",
+              "type": "string"
+            },
+            {
+              "id": "e680f377-47cd-429e-a9c6-e6158f23cd28",
+              "name": "publishedAt",
+              "value": "={{ $json.snippet.publishedAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1344,
+        -160
+      ],
+      "id": "fc5de52d-05a3-4363-af0d-b86ca4cb8d00",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "=https://youtube-data-api-v3.p.rapidapi.com/videos?part=statistics&id={{ $json.videoId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "youtube-data-api-v33.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "742ae1f669msha68a7840b2c6437p13ead0jsna895c5a8ca23"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1632,
+        -160
+      ],
+      "id": "282e2ad0-a079-4e28-97c7-54b6c2eeb453",
+      "name": "Get Video Views"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8a0ffce1-5720-4242-9be0-ec607ee9f560",
+              "name": "videoId",
+              "value": "={{ $('Edit Fields').item.json.videoId }}",
+              "type": "string"
+            },
+            {
+              "id": "893fe3f4-8214-4dd2-9a78-39cd18537960",
+              "name": "publishedAt",
+              "value": "={{ $('Edit Fields').item.json.publishedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "8b073a5e-144d-44e5-8f18-9d5d49c8164d",
+              "name": "views",
+              "value": "={{ $json.items[0].statistics.viewCount }}",
+              "type": "string"
+            },
+            {
+              "id": "d0698fc8-dfa3-4496-b41e-cf20b332c2d4",
+              "name": "likes",
+              "value": "={{ $json.items[0].statistics.likeCount }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1840,
+        -160
+      ],
+      "id": "cd46237c-4883-498e-b652-8a7b0f52036c",
+      "name": "Set Variables"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "videos",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        -160
+      ],
+      "id": "09436b91-b563-4640-a34d-ac1884334fc6",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfor (const video of items[0].json.videos) {\n  const viewCount = parseInt(video.views, 10) || 0;\n\n  // Calculate hours since published\n  const publishedAt = new Date(video.publishedAt);\n  const now = new Date();\n  const hoursSincePublished = (now - publishedAt) / (1000 * 60 * 60); // Convert milliseconds to hours\n\n  // Avoid division by zero\n  const viewsPerHour = hoursSincePublished > 0 ? viewCount / hoursSincePublished : 0;\n\n  results.push({\n    videoId: video.videoId,\n    views: viewCount,\n    viewsPerHour: Math.round(viewsPerHour),\n    publishedAt: video.publishedAt,\n    likes: video.likes || 0,\n  });\n}\n\n// Wrap results in an array with a \"videos\" key so the next node can process it\nreturn [{ videos: results }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        -160
+      ],
+      "id": "8b9daffd-7355-4ea2-b37a-f1d80534464d",
+      "name": "Calculate VPH"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "videos",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        -160
+      ],
+      "id": "60d60e64-fe2a-4705-b804-c2e273612be4",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b091ca56-10c6-4d32-a72c-23670c29bdd7",
+              "leftValue": "={{ $json.viewsPerHour }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2720,
+        -160
+      ],
+      "id": "92609f9f-3941-485d-8720-f2196d4433fd",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "15c30174-84b0-4ead-8432-ef5cc21b6a49",
+              "name": "Channel Id",
+              "value": "={{ $json.snippet.channelId }}",
+              "type": "string"
+            },
+            {
+              "id": "f52a1de0-1d4c-4404-8c9f-a63579145f79",
+              "name": "Channel Title",
+              "value": "={{ $json.snippet.channelTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "a563587c-2cfe-4c67-8a74-41a025485980",
+              "name": "videoId",
+              "value": "={{ $json.id.videoId }}",
+              "type": "string"
+            },
+            {
+              "id": "6fbefba4-467f-4e3f-96f5-d352e221c69e",
+              "name": "Description",
+              "value": "={{ $json.snippet.description }}",
+              "type": "string"
+            },
+            {
+              "id": "3bb88599-e7a8-4384-a58e-87721e732293",
+              "name": "Thumbnail",
+              "value": "={{ $json.snippet.thumbnails.high.url }}",
+              "type": "string"
+            },
+            {
+              "id": "6df4b008-8ac7-419d-837b-aada8b660f5f",
+              "name": "Video Title",
+              "value": "={{ $json.snippet.title }}",
+              "type": "string"
+            },
+            {
+              "id": "8bf2ca08-d6c0-4989-8774-efd25397792f",
+              "name": "Published Time",
+              "value": "={{ $json.snippet.publishedAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        304
+      ],
+      "id": "c2f80826-7657-4160-b682-0e725fd93676",
+      "name": "Set Relevant Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "videoId",
+              "field2": "videoId"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1920,
+        288
+      ],
+      "id": "2547ae48-409b-4c6c-94e7-ddbdf35a4e9a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"images\": [\n    {\n      \"url\": \"{{ $json.Thumbnail }}\"\n    }\n  ],\n  \"links\": [\n    {\n      \"url\": \"https://www.youtube.com/watch?v={{ $json.videoId }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2304,
+        288
+      ],
+      "id": "0ad44840-4f6b-482e-924f-97d711a3170c",
+      "name": "Convert for Airtable"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appI8ZJ9aJoLybuHz",
+          "mode": "list",
+          "cachedResultName": "Youtube VPH",
+          "cachedResultUrl": "https://airtable.com/appI8ZJ9aJoLybuHz"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblyxYThnj00APAkT",
+          "mode": "list",
+          "cachedResultName": "Video List",
+          "cachedResultUrl": "https://airtable.com/appI8ZJ9aJoLybuHz/tblyxYThnj00APAkT"
+        },
+        "filterByFormula": "={Video ID}=\"{{ $('Merge').item.json.videoId }}\"",
+        "options": {
+          "fields": [
+            "Video ID"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2592,
+        224
+      ],
+      "id": "c1ed08c8-13c7-464b-9b7f-e5cdc26bfb4d",
+      "name": "Get Video List",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteRecord",
+        "base": {
+          "__rl": true,
+          "value": "appI8ZJ9aJoLybuHz",
+          "mode": "list",
+          "cachedResultName": "Youtube VPH",
+          "cachedResultUrl": "https://airtable.com/appI8ZJ9aJoLybuHz"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblyxYThnj00APAkT",
+          "mode": "list",
+          "cachedResultName": "Video List",
+          "cachedResultUrl": "https://airtable.com/appI8ZJ9aJoLybuHz/tblyxYThnj00APAkT"
+        },
+        "id": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2800,
+        224
+      ],
+      "id": "1854ec37-8cd5-4129-9d6e-17c2d93c63e8",
+      "name": "Delete Stale Videos",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appI8ZJ9aJoLybuHz",
+          "mode": "list",
+          "cachedResultName": "Youtube VPH",
+          "cachedResultUrl": "https://airtable.com/appI8ZJ9aJoLybuHz"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblyxYThnj00APAkT",
+          "mode": "list",
+          "cachedResultName": "Video List",
+          "cachedResultUrl": "https://airtable.com/appI8ZJ9aJoLybuHz/tblyxYThnj00APAkT"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Account Name": "={{ $('Merge').item.json['Channel Title'] }}",
+            "Thumbnail": "={{ $json.images }}",
+            "Video Title": "={{ $('Merge').item.json['Video Title'] }}",
+            "URL": "={{ $json.links[0].url }}",
+            "Description": "={{ $('Merge').item.json.Description }}",
+            "Likes": "={{ $('Merge').item.json.likes }}",
+            "Views": "={{ $('Merge').item.json.views }}",
+            "VPH": "={{ $('Merge').item.json.viewsPerHour }}",
+            "Published Time": "={{ $('Merge').item.json['Published Time'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Account Name",
+              "displayName": "Account Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Thumbnail",
+              "displayName": "Thumbnail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Video Title",
+              "displayName": "Video Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Watched",
+              "displayName": "Watched",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Views",
+              "displayName": "Views",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "VPH",
+              "displayName": "VPH",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Likes",
+              "displayName": "Likes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Published Time",
+              "displayName": "Published Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created Time",
+              "displayName": "Created Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Channel ID",
+              "displayName": "Channel ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Video ID",
+              "displayName": "Video ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Record ID",
+              "displayName": "Record ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2592,
+        464
+      ],
+      "id": "39f8a147-6de8-4851-b8cf-74bc4118b8c1",
+      "name": "Create New Videos",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tVaQ1sdVsEsGBORY",
+          "name": "All bases access"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Get Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Accounts": {
+      "main": [
+        [
+          {
+            "node": "Get Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Videos": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Relevant Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get Video Views",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Views": {
+      "main": [
+        [
+          {
+            "node": "Set Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Calculate VPH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate VPH": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Relevant Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Convert for Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert for Airtable": {
+      "main": [
+        [
+          {
+            "node": "Get Video List",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create New Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video List": {
+      "main": [
+        [
+          {
+            "node": "Delete Stale Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

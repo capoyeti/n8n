@@ -1,0 +1,625 @@
+{
+  "id": "3BourBdLVIUpwByM",
+  "name": "KM send_document_testing copy",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "llama3-70b-8192",
+        "options": {}
+      },
+      "id": "07caf5f8-0e1c-4569-82d5-80b8625309e6",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        700,
+        820
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "TeMrq8iV1WCfXr5T",
+          "name": "Groq (n8n testing)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Educational\nUsed Postman to test flow for age of student and what school they would go to for document send"
+      },
+      "id": "7908d770-7b66-46e4-aaec-799449b86a87",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        140,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "22bb951d-1631-4234-a196-2216de569802",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "9e4e994d-e64e-4ed9-bdbd-3bd62a394dfe",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        480,
+        80
+      ],
+      "webhookId": "22bb951d-1631-4234-a196-2216de569802"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"doc_type\": {\n      \"type\": \"string\",\n      \"enum\": [\"fee\", \"preschool\", \"middle_school\", \"high_school\", \"application_form\"]\n    }\n  },\n  \"required\": [\"doc_type\"]\n}\n"
+      },
+      "id": "886aa8b5-a11f-4d04-a54b-13ec980ffeea",
+      "name": "Structured Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        900,
+        820
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b990a9dd-186e-49a5-b263-515dec833d3e",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        180,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "873c2413-8fb1-4bb2-9504-d84fb309bd82",
+              "name": "chat_id",
+              "value": "={{ $json.chat_id }}",
+              "type": "number"
+            },
+            {
+              "id": "f95402e5-a76c-4120-a8be-ad99fcb819a4",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2a38896-3789-443b-9df4-ddf9f2efaf6c",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "=Here is the application form.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "745aa32a-d60e-40c2-865a-428de7baa832",
+      "name": "application",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        780
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.chat_id }}",
+        "file": "BQACAgQAAxkBAAMmZv0rHsW-XMzNKZrj0av8p-bayloAAtYVAALbOuhTFq9mKQmpRJM2BA",
+        "additionalFields": {}
+      },
+      "id": "2c280147-3601-4ef0-a1f6-543f67d2e9b8",
+      "name": "Send application form",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1720,
+        780
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "=Here are some details regarding the Pre School",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "075b342b-71a5-4969-94c6-a79d3d6aa922",
+      "name": "preschool",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1460,
+        240
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.chat_id }}",
+        "file": "BQACAgQAAxkBAAM1Zv02cJ313HZGG8qOAmUHH2OmTsEAAukVAALbOuhTXCucJNMVySg2BA",
+        "additionalFields": {}
+      },
+      "id": "f7bc987b-8853-4543-8395-b4ba1e25a1dd",
+      "name": "Send preschool doc",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        240
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "=Here are the school fees",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "34acd78a-0de9-4813-a479-e492b0e8d128",
+      "name": "fees",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1460,
+        40
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.chat_id }}",
+        "file": "BQACAgQAAxkBAAMNZvz6xHI_Y4nIiZ4yARJ_g_kMaScAArEVAALbOuhTD2OnePv2a242BA",
+        "additionalFields": {}
+      },
+      "id": "69433d57-af33-48d5-b36d-59a97fdaaeb6",
+      "name": "Send school fees doc",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        40
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Z2vI9Uxu8Ka2W3Uj",
+          "name": "n8n_vpc_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75fc2d90-8a50-4028-9831-dd02d7953ea7",
+              "name": "response",
+              "value": "Sent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0fd5befa-108a-4466-adf6-fd77723fac93",
+      "name": "Response:Sent",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2000,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are tasked with identifying what type of document or information a user is requesting. The user could be asking about preschool, middle school, high school, fees, or general information. Additionally, they may ask for an application form. Use the following terms for your output: 'fee', 'preschool', 'middle_school', 'high_school', 'application_form'. Do not add '_doc' or any other suffix. Your job is to classify the user's request using the output schema attached."
+            }
+          ]
+        }
+      },
+      "id": "597924f2-b0f9-4551-a5e4-fe4f95453c9c",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        680,
+        580
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.doc_type }}",
+                    "rightValue": "fee",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "fees"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "17b67d8b-56af-49da-9ba3-425fd4872535",
+                    "leftValue": "={{ $json.output.doc_type }}",
+                    "rightValue": "pre_school",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pre_school"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "11a4f37e-20a3-4cd5-b11b-0ef4f04b9b5c",
+                    "leftValue": "={{ $json.output.doc_type }}",
+                    "rightValue": "middle_school",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "middle_school"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8ae6595f-c7cc-48da-8b0b-e96623321208",
+                    "leftValue": "={{ $json.output.doc_type }}",
+                    "rightValue": "high_school",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "high_school"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7583a25e-a34b-401c-bf58-ca197b855d26",
+                    "leftValue": "={{ $json.output.doc_type }}",
+                    "rightValue": "application_form",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "application_form"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fac78670-ddb6-4de4-9208-3097746c16f1",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1040,
+        560
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "id": "3ebc6a8f-a0af-4386-9453-526e52794eca",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2220,
+        460
+      ],
+      "webhookId": "40a68f67-4b76-4e6b-9023-29f92fd8c76f"
+    }
+  ],
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "application": {
+      "main": [
+        [
+          {
+            "node": "Send application form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send application form": {
+      "main": [
+        [
+          {
+            "node": "Response:Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "preschool": {
+      "main": [
+        [
+          {
+            "node": "Send preschool doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fees": {
+      "main": [
+        [
+          {
+            "node": "Send school fees doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send preschool doc": {
+      "main": [
+        [
+          {
+            "node": "Response:Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send school fees doc": {
+      "main": [
+        [
+          {
+            "node": "Response:Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "fees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [],
+        [
+          {
+            "node": "preschool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "node": "application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        []
+      ]
+    },
+    "Response:Sent": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-10-16T13:10:25.573Z",
+      "createdAt": "2024-10-16T13:10:25.573Z",
+      "id": "dQtgiwCaSm2YFQUr",
+      "name": "subagent"
+    },
+    {
+      "updatedAt": "2024-10-09T16:43:18.976Z",
+      "createdAt": "2024-10-09T16:43:18.976Z",
+      "id": "f7EmhD96a1FaZ3H9",
+      "name": "knysna-montessori"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

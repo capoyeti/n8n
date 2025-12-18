@@ -1,0 +1,123 @@
+{
+  "id": "uOb5IpTljhgFzGDn",
+  "name": "🌐 Template: Cloud Webhook Gateway",
+  "active": false,
+  "nodes": [
+    {
+      "id": "trigger-1",
+      "name": "External Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "={{$parameter.httpMethod}}",
+        "path": "gateway/{{$parameter.service}}",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": true
+        }
+      }
+    },
+    {
+      "id": "sticky-1",
+      "name": "Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -200
+      ],
+      "parameters": {
+        "content": "## Cloud Webhook Gateway Template\n\n**Purpose:** Deploy this on n8n Cloud to receive external webhooks and forward to self-hosted.\n\n**Setup:**\n1. Copy this workflow to n8n Cloud\n2. Update SELF_HOSTED_URL to your instance\n3. Add authentication header/secret\n4. Activate on Cloud\n\n**Benefits:**\n- Stable Cloud URL for external services\n- 1 execution on Cloud, unlimited on self-hosted\n- Centralized webhook management",
+        "width": 350,
+        "height": 280
+      }
+    },
+    {
+      "id": "http-1",
+      "name": "Forward to Self-Hosted",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SELF_HOSTED_URL || 'https://n8n.visagility.co.za' }}/webhook/gateway-receiver",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Gateway-Secret",
+              "value": "={{ $env.GATEWAY_SECRET || 'change-me' }}"
+            },
+            {
+              "name": "X-Original-Path",
+              "value": "={{ $request.path }}"
+            },
+            {
+              "name": "X-Original-Method",
+              "value": "={{ $request.method }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ headers: $request.headers, query: $request.query, body: $json, params: $request.params }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "code-1",
+      "name": "Return Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Pass through the response from self-hosted\nconst response = $input.first().json;\n\nreturn {\n  json: response\n};"
+      }
+    }
+  ],
+  "connections": {
+    "External Webhook": {
+      "main": [
+        [
+          {
+            "node": "Forward to Self-Hosted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forward to Self-Hosted": {
+      "main": [
+        [
+          {
+            "node": "Return Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

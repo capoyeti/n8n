@@ -1,0 +1,353 @@
+{
+  "id": "4p2orbFUHh585uvG",
+  "name": "KM New WA Send Docs - live",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a helpful assistant. You have a set of known document keywords and their corresponding URLs stored in an Airtable. The known keywords and their associated Airtable keys are:\n\n'Fees'\n'Preschool'\n'Middle-school'\n'High-School'\n'Application'\n\nGiven the user’s input (a combination of {{ $json.query }} and {{ $json.chatInput }}, determine which of these keywords best matches what they are asking for. Consider synonyms, related terms, and the user’s context. Once you identify the most appropriate keyword, return the corresponding Airtable URL.\n\nFollow this procedure step-by-step:\n\n1. Read the user's input (query + chatInput).\n2. Infer what document they are most likely requesting.\n   - If they mention fees, costs, or school fees → 'Fees'\n   - If they mention preschool or early childhood or young children’s programme → 'Preschool'\n   - If they mention middle school or intermediate level → 'Middle-school'\n   - If they mention high school, secondary level → 'High-School'\n   - If they mention applying, registration, admission → 'Application'\n3. Select the single best matching keyword from the list above.\n4. Use this keyword to lookup the associated url in the airtable document link tool\n5. Return only the URL associated with that keyword as extracted from the airtable lookup. Do not provide additional explanation.\n\nUs\n\nMake sure your final output contains only the URL, nothing else.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        320,
+        -40
+      ],
+      "id": "4febd6cc-c847-4018-bd01-78952f769fe4",
+      "name": "AI Agent",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "450053168194790",
+        "recipientPhoneNumber": "+27798907415",
+        "messageType": "document",
+        "mediaLink": "={{ $json.url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        -100
+      ],
+      "id": "b79ae019-bf52-4827-a71e-211056a2ebcc",
+      "name": "WhatsApp Business Cloud",
+      "webhookId": "ba8b0847-a211-493d-8208-ab7248544d85",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "hJvWjVO9wuuLl16N",
+          "name": "WhatsApp for KM (Never Expire)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app1FIK5puCcJqDkQ",
+          "mode": "list",
+          "cachedResultName": "Knynsa Montessori Documents",
+          "cachedResultUrl": "https://airtable.com/app1FIK5puCcJqDkQ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblATQiChmWaedJSQ",
+          "mode": "list",
+          "cachedResultName": "Public Documents",
+          "cachedResultUrl": "https://airtable.com/app1FIK5puCcJqDkQ/tblATQiChmWaedJSQ"
+        },
+        "filterByFormula": "={Document Name} = \"{{ $fromAI('documentName') }}\"",
+        "options": {
+          "fields": [
+            "URL"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        400,
+        200
+      ],
+      "id": "5cf180be-43df-4970-b5ac-1cf8dd840c20",
+      "name": "document link",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "l4uWCVIoR9mD2u1J",
+          "name": "Airtable Knysna Montessori"
+        }
+      },
+      "notes": "connect this to the table with the mapping of the documents that you need to send to their keywords"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a4dd08f8-82ed-4429-a5bf-f732eceaee55",
+              "leftValue": "={{ $json.url }}",
+              "rightValue": "https://knysna",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        900,
+        -40
+      ],
+      "id": "71ed27e3-99aa-43a1-bc9f-bd31ce1106e4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d566c218-e327-422e-be71-8cf8ac0d21a1",
+              "name": "url",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        -40
+      ],
+      "id": "050bf92c-f73a-4726-884e-449e002790d0",
+      "name": "Has url"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "151f8509-0fbf-46b3-8e5e-54a764230313",
+              "name": "response",
+              "value": "=success",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        -100
+      ],
+      "id": "9d3193ac-446c-4c48-85a9-17fe9e6f4827",
+      "name": "Sent doc"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "722e1c3c-50a4-4c3c-a1ab-5890707905b5",
+              "name": "response",
+              "value": "fail",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        120
+      ],
+      "id": "5480bc67-0f02-489e-b9c9-07c1b7019d8f",
+      "name": "Didn't send doc"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -40
+      ],
+      "id": "0a485214-8544-4b7d-8ca9-b7372742eb65",
+      "name": "Execute Workflow Trigger"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        280,
+        200
+      ],
+      "id": "212b1224-8c86-41d3-b0a9-2ad61aaaa5f9",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "StTWW03POtmODq8b",
+          "name": "Clever Assets (Mall)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Has url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Business Cloud": {
+      "main": [
+        [
+          {
+            "node": "Sent doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "document link": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Didn't send doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has url": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-12-12T16:16:28.430Z",
+      "createdAt": "2024-12-12T16:16:28.430Z",
+      "id": "44Ax1hMckPeDCwFC",
+      "name": "airtable"
+    },
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    },
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "query": "school fees",
+          "chatInput": "Send me the school fees document",
+          "WA_ID": "27798907415",
+          "personName": "Chad Williams"
+        }
+      }
+    ]
+  }
+}

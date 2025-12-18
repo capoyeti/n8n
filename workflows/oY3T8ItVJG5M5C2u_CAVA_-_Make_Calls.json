@@ -1,0 +1,413 @@
+{
+  "id": "oY3T8ItVJG5M5C2u",
+  "name": "CAVA - Make Calls",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "phone"
+            },
+            {
+              "name": "notes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1040,
+        280
+      ],
+      "id": "d64aa8fe-7169-4aaf-94a7-23e44574bb61",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appK3syQTA67pmuQI",
+          "mode": "list",
+          "cachedResultName": "Assistant",
+          "cachedResultUrl": "https://airtable.com/appK3syQTA67pmuQI"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblRuAxNMuEkwjZfL",
+          "mode": "list",
+          "cachedResultName": "PendingCalls",
+          "cachedResultUrl": "https://airtable.com/appK3syQTA67pmuQI/tblRuAxNMuEkwjZfL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Phone": "={{ $json.phone }}",
+            "Notes": "={{ $json.notes }}"
+          },
+          "matchingColumns": [
+            "Phone"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -820,
+        280
+      ],
+      "id": "2e6779ed-8d75-495c-b06a-3d1208441886",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "GIOAKKx6fyfif55G",
+          "name": "Knysna Montessori Chatbot Questions"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/convai/twilio/outbound-call",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agent_id",
+              "value": "agent_01jvts416pebm9nn7bcyaa681g"
+            },
+            {
+              "name": "agent_phone_number_id",
+              "value": "phnum_01jvts2hspetb87hq97fscpx4p"
+            },
+            {
+              "name": "to_number",
+              "value": "={{ $json.fields.Phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -600,
+        280
+      ],
+      "id": "8cfc7162-bfc7-43a2-8365-88ab882579e2",
+      "name": "Initiate Call"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "elevenlabs",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1040,
+        620
+      ],
+      "id": "bd5a1769-2ea4-4284-b09f-ca69629efbd9",
+      "name": "ElevenLabs New Call Webhook",
+      "webhookId": "1daa7f34-2d57-4f53-918d-e1b83167940b"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"type\": \"conversation_initiation_client_data\",\n  \"dynamic_variables\": {\n    \"Name\": \"{{ $json.Name }}\",\n    \"Phone\": \"{{ $json.Contact }}\",\n    \"sub_prompt\": \"{{ $('Get Call Purpose').first().json.Notes }}\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        -140,
+        620
+      ],
+      "id": "c72a7418-7ed3-442d-bba1-22b56179e933",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appK3syQTA67pmuQI",
+          "mode": "list",
+          "cachedResultName": "Assistant",
+          "cachedResultUrl": "https://airtable.com/appK3syQTA67pmuQI"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblpJ5CFKgHSBivr8",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://airtable.com/appK3syQTA67pmuQI/tblpJ5CFKgHSBivr8"
+        },
+        "filterByFormula": "=FIND(\"{{ $('ElevenLabs New Call Webhook').first().json.body.called_number }}\", {Contact}) > 0",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -600,
+        620
+      ],
+      "id": "284b44d9-b60d-4f29-9f9b-3a36478d2eeb",
+      "name": "Fetch Contact Details"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appK3syQTA67pmuQI",
+          "mode": "list",
+          "cachedResultName": "Assistant",
+          "cachedResultUrl": "https://airtable.com/appK3syQTA67pmuQI"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblRuAxNMuEkwjZfL",
+          "mode": "list",
+          "cachedResultName": "PendingCalls",
+          "cachedResultUrl": "https://airtable.com/appK3syQTA67pmuQI/tblRuAxNMuEkwjZfL"
+        },
+        "filterByFormula": "=FIND(\"{{ $json.body.called_number }}\", {Phone}) > 0",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -820,
+        620
+      ],
+      "id": "147d419f-2dcf-44d0-9d48-0900aaafce82",
+      "name": "Get Call Purpose"
+    },
+    {
+      "parameters": {
+        "operation": "deleteRecord",
+        "base": {
+          "__rl": true,
+          "value": "appK3syQTA67pmuQI",
+          "mode": "list",
+          "cachedResultName": "Assistant",
+          "cachedResultUrl": "https://airtable.com/appK3syQTA67pmuQI"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblRuAxNMuEkwjZfL",
+          "mode": "list",
+          "cachedResultName": "PendingCalls",
+          "cachedResultUrl": "https://airtable.com/appK3syQTA67pmuQI/tblRuAxNMuEkwjZfL"
+        },
+        "id": "={{ $('Get Call Purpose').first().json.id }}"
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -360,
+        620
+      ],
+      "id": "0d2357b4-7eea-4d5c-8197-963de291691b",
+      "name": "Remove from pending calls"
+    },
+    {
+      "parameters": {
+        "content": "## Initiate Call",
+        "height": 280,
+        "width": 460,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        200
+      ],
+      "id": "e1d26bdd-fdd3-4328-a0a6-71c208397c05",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Inject Contact name and message to the call",
+        "height": 300,
+        "width": 940,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        540
+      ],
+      "id": "aedf093d-17b7-45a1-b7ed-bcc880670d87",
+      "name": "Sticky Note6"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Initiate Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ElevenLabs New Call Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Call Purpose",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Contact Details": {
+      "main": [
+        [
+          {
+            "node": "Remove from pending calls",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Call Purpose": {
+      "main": [
+        [
+          {
+            "node": "Fetch Contact Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove from pending calls": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "phone": "+918180985555",
+          "notes": "Let Alex know that he'll need to drive the meeting with Green Estate's representative tonight as Priya is out for 2 days."
+        }
+      }
+    ],
+    "ElevenLabs New Call Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.srv783320.hstgr.cloud",
+            "user-agent": "Python/3.12 aiohttp/3.11.16",
+            "content-length": "161",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate",
+            "content-type": "application/json",
+            "x-forwarded-for": "34.67.146.145",
+            "x-forwarded-host": "n8n.srv783320.hstgr.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "4e80209affb3",
+            "x-real-ip": "34.67.146.145"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "caller_id": "+14433755155",
+            "agent_id": "agent_01jvts416pebm9nn7bcyaa681g",
+            "called_number": "+919667225555",
+            "call_sid": "CA5a986570ed5a1651b1ef669460db25bf"
+          },
+          "webhookUrl": "https://n8n.srv783320.hstgr.cloud/webhook/elevenlabs",
+          "executionMode": "production"
+        }
+      }
+    ]
+  }
+}

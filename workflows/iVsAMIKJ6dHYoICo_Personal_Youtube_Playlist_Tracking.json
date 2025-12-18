@@ -1,0 +1,43 @@
+{
+  "id": "iVsAMIKJ6dHYoICo",
+  "name": "Personal Youtube Playlist Tracking",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "playlist",
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -20
+      ],
+      "id": "d3a2fa1a-0ba8-460e-8e83-34a79b245712",
+      "name": "YouTube",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "00OPANNX1JKGGbc9",
+          "name": "YouTube account"
+        }
+      }
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-05-17T06:35:55.811Z",
+      "createdAt": "2025-05-17T06:35:55.811Z",
+      "id": "qjIYcQ6nk61Rcqm0",
+      "name": "youtube"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

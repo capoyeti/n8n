@@ -1,0 +1,57 @@
+{
+  "id": "Utbr9ZgmyeF7GuEI",
+  "name": "My workflow 6",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f2937dbc-431f-4fa0-ad86-df2c77a54e6d",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        700,
+        360
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "0723f4c4-2aba-44db-8fd2-71adb091330e",
+      "name": "Redis",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        920,
+        360
+      ],
+      "credentials": {
+        "redis": {
+          "id": "5QUYzD0UFgWBSjh0",
+          "name": "Redis account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

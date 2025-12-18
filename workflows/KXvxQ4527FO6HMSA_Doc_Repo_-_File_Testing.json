@@ -1,0 +1,199 @@
+{
+  "id": "KXvxQ4527FO6HMSA",
+  "name": "Doc Repo - File Testing",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -440,
+        0
+      ],
+      "id": "b50db130-1fca-4f25-93a0-d2cb1f97b33d",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "operation": "create",
+        "name": "New",
+        "options": {
+          "parentFolderId": "01QRYE6R56Y2GOVW7725BZO354PWSELRRZ"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -300
+      ],
+      "id": "5cc23e71-f975-49eb-bd49-39d527ab8eb1",
+      "name": "Microsoft OneDrive",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "ptGul5DDAAWpws11",
+          "name": "FrontPorch Agility OneDrive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1GwwX1QWEo0JylwsURK0C6CjKDUR-WbMa",
+            "mode": "list",
+            "cachedResultName": "Research",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1GwwX1QWEo0JylwsURK0C6CjKDUR-WbMa"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -60,
+        -80
+      ],
+      "id": "887c69c5-1597-4716-81d6-2325b3ea4ee1",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Ck9B8Sv8l6LttcsS",
+          "name": "CleverAssets Google Drive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -60,
+        100
+      ],
+      "id": "27ef461a-b883-4ca2-bda7-0ce2a1f83fa3",
+      "name": "Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "qxuOC4qedGWHKNNg",
+          "name": "CleverAssets GoogleDocs"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -60,
+        280
+      ],
+      "id": "ac8d61a9-219d-4527-b933-ae1c21237b65",
+      "name": "Gmail",
+      "webhookId": "35a8a587-e58e-47b9-8df6-31194795a630",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UHT3DR6OjiDawuYi",
+          "name": "CleverAssets Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        160,
+        -80
+      ],
+      "id": "96b2914d-f843-4a8a-8b34-42d6298d35cd",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WD2MdriwJgv3bBEV",
+          "name": "Sheets-shite"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Microsoft OneDrive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Docs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-05T17:05:04.175Z",
+      "createdAt": "2024-09-05T17:05:04.175Z",
+      "id": "0si0ZKOoLVVrpAu5",
+      "name": "FPA"
+    },
+    {
+      "updatedAt": "2025-01-31T15:55:03.602Z",
+      "createdAt": "2025-01-31T15:55:03.602Z",
+      "id": "3E3csiqxMa9wF1qp",
+      "name": "OneDrive"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

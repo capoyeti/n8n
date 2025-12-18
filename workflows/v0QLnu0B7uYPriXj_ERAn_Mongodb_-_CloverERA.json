@@ -1,0 +1,948 @@
+{
+  "id": "v0QLnu0B7uYPriXj",
+  "name": "ERAn Mongodb - CloverERA",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "collection": "Answers-detail-view",
+        "options": {},
+        "query": "={{ \n  $json['Company Name'] || $json.dateQuery \n    ? JSON.stringify({\n        ...( $json['Company Name'] ? { 'Company Name': $json['Company Name'] } : {} ),\n        ...( $json.dateQuery ? { 'Date': $json.dateQuery.Date } : {} )\n      }) \n    : '{}' \n}}"
+      },
+      "id": "33a912c1-d060-436d-80e4-ca988e2b8223",
+      "name": "MongoDB",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        320
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "8QwyGwLF27JfTWmN",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "ERA-query",
+        "formTitle": "Dashboard Details",
+        "formDescription": "Provide Dashboard parameters",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Company Name",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Affirmative Agile"
+                  },
+                  {
+                    "option": "Front Porch Agility"
+                  },
+                  {
+                    "option": "Gordonstoun"
+                  },
+                  {
+                    "option": "Icon Agility"
+                  },
+                  {
+                    "option": "Nymble"
+                  },
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Start Date",
+              "fieldType": "date"
+            },
+            {
+              "fieldLabel": "End Date",
+              "fieldType": "date"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "7da5676c-3f6d-45c1-b6e4-6d3a9de44711",
+      "name": "n8n Form Trigger",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        540,
+        320
+      ],
+      "webhookId": "0739cda7-6e16-44a3-9c02-a0459ba8c582"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1DwVVOxAcaruzwMf19oulXLJWpFLR4lSiLsWYBPe5hR8",
+          "mode": "list",
+          "cachedResultName": "ERA_data_Gordonstoun",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DwVVOxAcaruzwMf19oulXLJWpFLR4lSiLsWYBPe5hR8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DwVVOxAcaruzwMf19oulXLJWpFLR4lSiLsWYBPe5hR8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "_id"
+          ],
+          "schema": [
+            {
+              "id": "_id",
+              "displayName": "_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unit Name",
+              "displayName": "Unit Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Question",
+              "displayName": "Question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Answer",
+              "displayName": "Answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CLOVER_Element",
+              "displayName": "CLOVER_Element",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "min",
+              "displayName": "min",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "max",
+              "displayName": "max",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mean",
+              "displayName": "mean",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "median",
+              "displayName": "median",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reasons",
+              "displayName": "reasons",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "descriptions",
+              "displayName": "descriptions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a9e811fa-26c2-48f0-bd6b-7ea1ef002191",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2460,
+        880
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1mnoOKVtGBJUnWUcQOHXVD7AdBsSGuScVXZR1n8KRBlo",
+          "mode": "list",
+          "cachedResultName": "ERA_data_Icon_Agility",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mnoOKVtGBJUnWUcQOHXVD7AdBsSGuScVXZR1n8KRBlo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mnoOKVtGBJUnWUcQOHXVD7AdBsSGuScVXZR1n8KRBlo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "_id"
+          ],
+          "schema": [
+            {
+              "id": "_id",
+              "displayName": "_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unit Name",
+              "displayName": "Unit Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Question",
+              "displayName": "Question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Answer",
+              "displayName": "Answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CLOVER_Element",
+              "displayName": "CLOVER_Element",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d21e1898-35a8-45f6-a628-e11c1d75f2df",
+      "name": "Google Sheets1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2460,
+        1060
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['Company Name'] }}",
+                    "rightValue": "Gordonstoun",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Gordonstoun"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "d017a1b6-6aa9-4446-a91b-e7983d8e109a",
+                    "leftValue": "={{ $json['Company Name'] }}",
+                    "rightValue": "Icon Agility",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Icon Agility"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "748b0354-2d58-4d33-9b73-fab54536016b",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        2180,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Create the CLOVER lookup table as a dictionary (hashmap) for efficient O(1) lookup\nconst lookupTable = {\n  \"How respectful were your interactions today?\": \"Communication\",\n  \"Did today's challenges enhance your personal growth?\": \"Learning\",\n  \"Did you feel purpose in your work today?\": \"Opportunity\",\n  \"Were you supported by your team today?\": \"Vulnerability\",\n  \"How easy was it to collaborate with others outside of your team today?\": \"Enablement\",\n  \"Did you take time to reflect on your work today?\": \"Reflection\",\n  \"Did you time take time to reflect on your work today?\": \"Reflection\",\n  \"Did you find clarity in communications with management today?\": \"Communication\",\n  \"Is your daily work aligning with your career goals?\": \"Opportunity\",\n  \"Were you comfortable sharing your true thoughts and feedback today?\": \"Vulnerability\",\n  \"Did you receive constructive feedback that fueled your growth today?\": \"Learning\",\n  \"Did you receive constructive feedback today?\": \"Learning\",\n  \"How productive has your day been?\": \"Enablement\",\n  \"Did you feel understood by others today?\": \"Vulnerability\",\n  \"Did you collaborate successfully with colleagues today?\": \"Learning\",\n  \"Did you reflect on your strengths and areas for improvement today?\": \"Reflection\",\n  \"Were you able to find new learning opportunities today?\": \"Learning\",\n  \"Were you encouraged to explore beyond your comfort zone today?\": \"Opportunity\",\n  \"Did you feel understood by others today?\": \"Vulnerability\",\n  \"Did the tools you use enhance your efficiency today?\": \"Enablement\",\n  \"Do you feel your workload was healthy today?\": \"Reflection\",\n  \"Could you express your frustrations freely today?\": \"Vulnerability\",\n  \"Were you or others able to easily talk through your mistakes or failures today?\": \"Vulnerability\",\n  \"Have you discussed your next growth step with your manager recently?\": \"Opportunity\",\n  \"Were you able to invest time in your personal development today?\": \"Growth\"\n  // Add more questions as needed\n};\n\n// Process all incoming items in a batch\nreturn items.map(item => {\n  const question = item.json.Question;  // Extract the Question field from the JSON\n  // Map the question to the corresponding CLOVER Element or return \"Unknown\" if not found\n  item.json.CLOVER_Element = lookupTable[question] || \"Unknown\";\n  return item;\n});"
+      },
+      "id": "4cb95697-fdd1-47c5-85ca-8ff44a85e85e",
+      "name": "CLOVER Mapping",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items.map(item => item.json);\n\n// Group by CLOVER element\nconst groupedData = data.reduce((acc, item) => {\n  const cloverElement = item.CLOVER_Element || 'Unknown';\n  \n  // Initialize the group if it doesn't exist\n  if (!acc[cloverElement]) {\n    acc[cloverElement] = {\n      companyName: item['Company Name'] || 'Unknown',\n      unitName: item['Unit Name'] || 'Unknown',\n      values: [],\n      reasons: [],\n      descriptions: [],\n      date: item.Date || new Date().toISOString().split('T')[0] // Use current date if not provided\n    };\n  }\n\n  // Add non-empty values and ignore \"No Reason Found\" in the reasons\n  if (item.Reason && item.Reason.trim() !== \"\" && item.Reason !== \"No Reason Found\") {\n    acc[cloverElement].reasons.push(item.Reason);\n  }\n  if (item.Description && item.Description.trim() !== \"\") {\n    acc[cloverElement].descriptions.push(item.Description);\n  }\n\n  acc[cloverElement].values.push(item.Answer);\n  return acc;\n}, {});\n\n// Function to calculate mean, median, min, max\nconst calculateStats = (values) => {\n  values = values.map(Number).sort((a, b) => a - b);\n  const min = values[0];\n  const max = values[values.length - 1];\n  const mean = values.reduce((a, b) => a + b, 0) / values.length;\n  const median = values.length % 2 === 0 ? \n    (values[values.length / 2 - 1] + values[values.length / 2]) / 2 : \n    values[Math.floor(values.length / 2)];\n\n  return { min, max, mean, median };\n};\n\n// Apply the stats calculation for each CLOVER element and structure the output\nconst result = Object.entries(groupedData).map(([key, obj]) => {\n  const stats = calculateStats(obj.values);\n  return {\n    report_date: obj.date,\n    company_name: obj.companyName,\n    unit_name: obj.unitName,\n    CLOVER_Element: key,\n    count: obj.values.length,\n    ...stats,\n    reasons: obj.reasons.length > 0 ? obj.reasons.join(';; ') : \"None\",\n    descriptions: obj.descriptions.length > 0 ? obj.descriptions.join(';; ') : \"None\"\n  };\n});\n\n// Return the result as a list of items\nreturn result.map(res => ({ json: res }));"
+      },
+      "id": "3b5a8213-4464-44e8-a903-d2b2fc6a0ca7",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1580,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0",
+          "mode": "list",
+          "cachedResultName": "ERA_stats_sample_client",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1807644,
+          "mode": "list",
+          "cachedResultName": "mongo_feed",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XfngJEAjyLrZgA1NpLiIJBr2v7LBf6cucEJ0wI8Dtf0/edit#gid=1807644"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "report_date",
+              "displayName": "report_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "company_name",
+              "displayName": "company_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "unit_name",
+              "displayName": "unit_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CLOVER_Element",
+              "displayName": "CLOVER_Element",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "count",
+              "displayName": "count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "min",
+              "displayName": "min",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "max",
+              "displayName": "max",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "mean",
+              "displayName": "mean",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "median",
+              "displayName": "median",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reasons",
+              "displayName": "reasons",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "descriptions",
+              "displayName": "descriptions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Qualitative",
+              "displayName": "Qualitative",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Statistical",
+              "displayName": "Statistical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Improvement Options",
+              "displayName": "Improvement Options",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8e8e97c2-e727-47b8-acb7-86ca44d8c221",
+      "name": "Google Sheets2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2620,
+        220
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2KUF6rsVQCqaMWZs",
+          "name": "api sheet enabled"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "50a45b1d-04a7-47e9-b0ef-44a48e549682",
+              "name": "report_date",
+              "value": "={{ $json.submittedAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f82c0bb0-201c-46c8-acbf-03d6b78d85e7",
+      "name": "report_date_set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1420,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Refactoring\nWorking Left to Right",
+        "height": 294.88016617548885,
+        "width": 664.9531072314563
+      },
+      "id": "282d6e6b-b460-4b07-8398-e8868dc3e0dc",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        500,
+        229.77027027026975
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to generate unique report ID\nfunction generateReportID() {\n    const date = new Date();\n    const timestamp = date.toISOString()\n        .replace(/[-:]/g, '')\n        .replace(/\\..+/, '');\n    const random = Math.random().toString(36).substr(2, 4);\n    return `ERA_${timestamp}_${random}`;\n}\n\n// Function to get last month's date range\nfunction getLastMonthRange() {\n    const now = new Date();\n    const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);\n    const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);\n    return { firstDay, lastDay };\n}\n\n// Process each item\nfor (const item of items) {\n    // Generate and add report ID\n    const reportID = generateReportID();\n    \n    // Process date range\n    const startDate = item.json['Start Date'] ? new Date(item.json['Start Date']) : null;\n    const endDate = item.json['End Date'] ? new Date(item.json['End Date']) : null;\n    \n    // If no dates provided, use last month's range\n    let rangeStartDate, rangeEndDate;\n    if (!startDate || !endDate) {\n        const { firstDay, lastDay } = getLastMonthRange();\n        rangeStartDate = firstDay.toISOString();\n        rangeEndDate = lastDay.toISOString();\n    } else {\n        rangeStartDate = startDate.toISOString();\n        rangeEndDate = endDate.toISOString();\n    }\n\n    // Simplified output\n    item.json = {\n        reportID: reportID,\n        generationDate: new Date().toISOString(),\n        rangeStartDate: rangeStartDate,\n        rangeEndDate: rangeEndDate\n    };\n}\n\nreturn items;\n"
+      },
+      "id": "2c76df72-4e6d-4204-bb40-07167a507158",
+      "name": "Code1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        320
+      ],
+      "notes": "Set paramerters for report data extraction"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eee7493b-b62d-418a-86a5-b6b77ac765f5",
+              "name": "",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "8375d6e9-0cf0-411e-a94e-744682ed8f5e",
+              "name": "reportID",
+              "value": "={{ $json.reportID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d9e7242e-76a9-4d66-b00b-36b65178d5ff",
+      "name": "report_meta_data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1560,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {
+          "clashHandling": {
+            "values": {
+              "resolveClash": "preferLast"
+            }
+          }
+        }
+      },
+      "id": "9022fe1a-0690-4a08-bb77-dbca36a1d3e7",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2160,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "{\n    ReportID: $json[\"report_meta_data\"][\"reportID\"],\n    GeneratedAt: $json[\"report_meta_data\"][\"reportMetadata\"][\"generatedAt\"],\n    Start $json[\"report_meta_data\"][\"dateQuery\"][\"Date\"][\"$gte\"],\n    End $json[\"report_meta_data\"][\"dateQuery\"][\"Date\"][\"$lte\"]\n};"
+      },
+      "id": "4a3917c4-7d72-475f-bf16-a2d5f72ac9c2",
+      "name": "Code2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        700
+      ]
+    }
+  ],
+  "connections": {
+    "n8n Form Trigger": {
+      "main": [
+        [
+          {
+            "node": "report_date_set",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB": {
+      "main": [
+        [
+          {
+            "node": "CLOVER Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CLOVER Mapping": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "report_date_set": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "MongoDB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "report_meta_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "report_meta_data": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-29T09:12:53.855Z",
+      "createdAt": "2024-10-29T09:12:53.855Z",
+      "id": "NDCjqdxBOtMSQW5J",
+      "name": "clover-db"
+    },
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-10-01T16:05:37.137Z",
+      "createdAt": "2024-10-01T16:05:37.137Z",
+      "id": "fX7CRQmHtlSh3vMD",
+      "name": "mongodb"
+    },
+    {
+      "updatedAt": "2024-10-01T16:05:44.602Z",
+      "createdAt": "2024-10-01T16:05:44.602Z",
+      "id": "nk0hBqEs3L8BK6u2",
+      "name": "cloverera"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

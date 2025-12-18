@@ -1,0 +1,152 @@
+{
+  "id": "sI6dnEZSPqq1EdXH",
+  "name": "KM WA Manage Calendar",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -40
+      ],
+      "id": "7b422781-f47d-40bd-84ab-b0ea04f0aeb6",
+      "name": "Execute Workflow Trigger"
+    },
+    {
+      "parameters": {
+        "options": {},
+        "path": "88c6ccd6-1abc-4950-b540-b0be91612c06"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        20,
+        -240
+      ],
+      "id": "ba1bb42d-5eb5-4b30-91d8-e868d2d9bb42",
+      "name": "When chat message received",
+      "webhookId": "88c6ccd6-1abc-4950-b540-b0be91612c06",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json[\"chatInput\"]}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        280,
+        -40
+      ],
+      "id": "d82ca573-6956-4e18-a1aa-80db357ad003",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.2-11b-vision-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        260,
+        160
+      ],
+      "id": "3c4f94ee-bf57-40c5-a337-d858c13d168a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "TeMrq8iV1WCfXr5T",
+          "name": "Groq (n8n testing)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "151f8509-0fbf-46b3-8e5e-54a764230313",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        -40
+      ],
+      "id": "5bf6777e-2678-4dcc-9339-5889c2bde02f",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-30T18:41:02.818Z",
+      "createdAt": "2024-09-30T18:41:02.818Z",
+      "id": "6elfvtotSYBuIDjn",
+      "name": "whatsapp"
+    }
+  ],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

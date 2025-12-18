@@ -1,0 +1,494 @@
+{
+  "id": "A5amlEFZwCHyElIA",
+  "name": "Optimized YouTube N8N Scraper - Google Sheets",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        300
+      ],
+      "id": "schedule-trigger",
+      "name": "Schedule Every 4 Hours"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "search-queries",
+              "name": "searchQueries",
+              "type": "array",
+              "value": [
+                "n8n automation tutorial",
+                "n8n workflow automation",
+                "n8n integration tutorial",
+                "n8n api automation",
+                "n8n business automation",
+                "n8n no code automation",
+                "n8n zapier alternative",
+                "n8n workflow examples"
+              ]
+            },
+            {
+              "id": "max-results",
+              "name": "maxResults",
+              "type": "number",
+              "value": 20
+            },
+            {
+              "id": "youtube-api-key",
+              "name": "youtubeApiKey",
+              "type": "string",
+              "value": "YOUR_YOUTUBE_API_KEY_HERE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        300
+      ],
+      "id": "set-parameters",
+      "name": "Set Search Parameters"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "searchQueries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        600,
+        300
+      ],
+      "id": "split-search-queries",
+      "name": "Split Search Queries"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Rate limiting helper to prevent API quota exhaustion\nconst delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));\n\n// Add 1 second delay between API calls\nawait delay(1000);\n\nconst searchQuery = $json.searchQueries;\nconst apiKey = $('Set Search Parameters').item.json.youtubeApiKey;\nconst maxResults = $('Set Search Parameters').item.json.maxResults;\n\n// Return the search parameters for the HTTP request\nreturn {\n  searchQuery,\n  apiKey,\n  maxResults,\n  delayApplied: true\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        300
+      ],
+      "id": "rate-limit-helper",
+      "name": "Rate Limit & Prepare Search"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.searchQuery }}"
+            },
+            {
+              "name": "type",
+              "value": "video"
+            },
+            {
+              "name": "order",
+              "value": "relevance"
+            },
+            {
+              "name": "maxResults",
+              "value": "={{ $json.maxResults }}"
+            },
+            {
+              "name": "key",
+              "value": "={{ $json.apiKey }}"
+            },
+            {
+              "name": "regionCode",
+              "value": "US"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "retry": {
+            "enabled": true,
+            "maxRetries": 3,
+            "waitBetween": 1000
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        300
+      ],
+      "id": "search-youtube-videos",
+      "name": "Search YouTube Videos (with Retry)"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        300
+      ],
+      "id": "split-video-results",
+      "name": "Split Video Results"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/videos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet,statistics,contentDetails"
+            },
+            {
+              "name": "id",
+              "value": "={{ $json.id.videoId }}"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Set Search Parameters').item.json.youtubeApiKey }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "retry": {
+            "enabled": true,
+            "maxRetries": 3,
+            "waitBetween": 1000
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1400,
+        300
+      ],
+      "id": "get-video-details",
+      "name": "Get Video Details (with Retry)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced video data processing with error handling\ntry {\n  const videoData = $input.last().json.items?.[0];\n  const searchQuery = $('Split Search Queries').item.json;\n  \n  if (!videoData) {\n    console.log('No video data found, skipping...');\n    return null;\n  }\n\n  // Safe parsing with fallbacks\n  function parseDuration(duration) {\n    try {\n      const match = duration.match(/PT(\\d+H)?(\\d+M)?(\\d+S)?/);\n      const hours = (match[1] ? parseInt(match[1]) : 0);\n      const minutes = (match[2] ? parseInt(match[2]) : 0);\n      const seconds = (match[3] ? parseInt(match[3]) : 0);\n      return `${hours ? hours + 'h ' : ''}${minutes}m ${seconds}s`;\n    } catch (error) {\n      return 'Unknown duration';\n    }\n  }\n\n  // Safe number parsing\n  const safeParseInt = (value, fallback = 0) => {\n    const parsed = parseInt(value);\n    return isNaN(parsed) ? fallback : parsed;\n  };\n\n  // Calculate engagement metrics\n  const views = safeParseInt(videoData.statistics?.viewCount);\n  const likes = safeParseInt(videoData.statistics?.likeCount);\n  const comments = safeParseInt(videoData.statistics?.commentCount);\n  const engagementRate = views > 0 ? ((likes + comments) / views * 100).toFixed(2) : 0;\n\n  // Enhanced relevance scoring\n  let relevanceScore = 'low';\n  if (views > 10000 && parseFloat(engagementRate) > 2) relevanceScore = 'high';\n  else if (views > 1000 && parseFloat(engagementRate) > 1) relevanceScore = 'medium';\n\n  return {\n    video_id: videoData.id,\n    title: videoData.snippet?.title || 'Unknown Title',\n    channel_title: videoData.snippet?.channelTitle || 'Unknown Channel',\n    channel_id: videoData.snippet?.channelId || '',\n    description: (videoData.snippet?.description || '').substring(0, 500) + '...',\n    published_at: videoData.snippet?.publishedAt || '',\n    view_count: views,\n    like_count: likes,\n    comment_count: comments,\n    duration: parseDuration(videoData.contentDetails?.duration || 'PT0S'),\n    duration_raw: videoData.contentDetails?.duration || '',\n    tags: (videoData.snippet?.tags || []).join(', '),\n    thumbnail_url: videoData.snippet?.thumbnails?.medium?.url || videoData.snippet?.thumbnails?.default?.url || '',\n    video_url: `https://www.youtube.com/watch?v=${videoData.id}`,\n    channel_url: `https://www.youtube.com/channel/${videoData.snippet?.channelId || ''}`,\n    search_query: searchQuery?.searchQueries || '',\n    engagement_rate: parseFloat(engagementRate),\n    scraped_at: new Date().toISOString(),\n    category: 'n8n_automation',\n    relevance_score: relevanceScore,\n    processing_status: 'pending_review'\n  };\n} catch (error) {\n  console.error('Error processing video data:', error);\n  return {\n    error: 'Processing failed',\n    error_details: error.message,\n    scraped_at: new Date().toISOString()\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        300
+      ],
+      "id": "process-video-data",
+      "name": "Enhanced Video Data Processing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "view-count-filter",
+              "leftValue": "={{ $json.view_count }}",
+              "rightValue": 50,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "not-error",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isEmpty"
+              }
+            },
+            {
+              "id": "has-video-id",
+              "leftValue": "={{ $json.video_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1800,
+        300
+      ],
+      "id": "filter-quality-videos",
+      "name": "Filter Quality Videos (50+ Views, No Errors)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collect all valid videos for batch processing\nconst allVideos = $input.all();\n\nif (allVideos.length === 0) {\n  console.log('No videos to process');\n  return [{ json: { message: 'No new videos found', video_count: 0 } }];\n}\n\n// Sort videos by engagement and views for prioritization\nconst sortedVideos = allVideos\n  .map(item => item.json)\n  .filter(video => video && video.title && !video.error)\n  .sort((a, b) => {\n    const scoreA = (a.view_count * 0.7) + (a.engagement_rate * 0.3);\n    const scoreB = (b.view_count * 0.7) + (b.engagement_rate * 0.3);\n    return scoreB - scoreA;\n  });\n\nconsole.log(`Processing ${sortedVideos.length} quality videos`);\n\n// Prepare data for batch operations\nreturn {\n  videos: sortedVideos,\n  video_count: sortedVideos.length,\n  processing_timestamp: new Date().toISOString(),\n  batch_id: `batch_${Date.now()}`\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        200
+      ],
+      "id": "collect-videos-batch",
+      "name": "Collect Videos for Batch Processing"
+    },
+    {
+      "id": "prepare-ai-analysis",
+      "name": "Prepare AI Analysis Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Prepare comprehensive analysis data for AI\nconst videosData = $json.videos;\n\nif (!videosData || videosData.length === 0) {\n  return { message: 'No videos to analyze', analysis_skipped: true };\n}\n\n// Extract top performing videos (limit to top 15 for AI analysis)\nconst topVideos = videosData.slice(0, 15).map(video => ({\n  title: video.title,\n  channel: video.channel_title,\n  views: video.view_count,\n  likes: video.like_count,\n  comments: video.comment_count,\n  engagement_rate: video.engagement_rate,\n  duration: video.duration,\n  search_query: video.search_query,\n  tags: video.tags,\n  relevance_score: video.relevance_score\n}));\n\n// Extract trending keywords from titles\nconst allTitles = videosData\n  .map(v => v.title?.toLowerCase() || '')\n  .filter(title => title.length > 0)\n  .join(' ');\n\nconst words = allTitles.split(/\\W+/).filter(word => word.length > 3);\nconst wordCount = {};\nwords.forEach(word => {\n  wordCount[word] = (wordCount[word] || 0) + 1;\n});\n\nconst trendingKeywords = Object.entries(wordCount)\n  .sort(([,a], [,b]) => b - a)\n  .slice(0, 20)\n  .map(([word, count]) => ({ word, count }));\n\n// Channel performance analysis\nconst channelStats = {};\nvideosData.forEach(video => {\n  const channel = video.channel_title || 'Unknown Channel';\n  if (!channelStats[channel]) {\n    channelStats[channel] = {\n      videos: 0,\n      total_views: 0,\n      total_engagement: 0\n    };\n  }\n  channelStats[channel].videos++;\n  channelStats[channel].total_views += video.view_count || 0;\n  channelStats[channel].total_engagement += video.engagement_rate || 0;\n});\n\nconst topChannels = Object.entries(channelStats)\n  .map(([name, stats]) => ({\n    channel_name: name,\n    video_count: stats.videos,\n    avg_views: Math.round(stats.total_views / stats.videos),\n    avg_engagement: (stats.total_engagement / stats.videos).toFixed(2)\n  }))\n  .sort((a, b) => b.avg_views - a.avg_views)\n  .slice(0, 8);\n\nconst analysis = {\n  total_videos_found: videosData.length,\n  analysis_date: new Date().toISOString(),\n  top_performing_videos: topVideos,\n  trending_keywords: trendingKeywords,\n  top_channels: topChannels,\n  average_views: Math.round(videosData.reduce((sum, v) => sum + (v.view_count || 0), 0) / videosData.length),\n  average_engagement: (videosData.reduce((sum, v) => sum + (v.engagement_rate || 0), 0) / videosData.length).toFixed(2),\n  search_queries_used: [...new Set(videosData.map(v => v.search_query || '').filter(q => q.length > 0))],\n  batch_id: $('Collect Videos for Batch Processing').item.json.batch_id\n};\n\nreturn {\n  n8n_video_analysis: JSON.stringify(analysis, null, 2),\n  video_count: videosData.length,\n  analysis_ready: true\n};"
+      }
+    },
+    {
+      "id": "ai-content-analyst",
+      "name": "AI Content Strategy Analyst",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        2400,
+        200
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "# N8N Automation Content Strategy Analyst\n\nYou are an expert content strategist focused on n8n automation and workflow optimization. Analyze the provided YouTube data to generate actionable insights for content creators in the automation space.\n\n## Your Task:\nAnalyze this n8n automation video data: {{ $json.n8n_video_analysis }}\n\n## Generate these specific outputs:\n\n### 1. TRENDING N8N TOPICS (Top 5):\n- List the hottest n8n automation themes right now\n- Focus on what's getting views and engagement\n\n### 2. VIRAL CONTENT PATTERNS:\n- What makes n8n videos successful?\n- Common title patterns that work\n- Optimal video length and complexity\n\n### 3. CONTENT GAPS & OPPORTUNITIES:\n- Underexplored n8n use cases with high potential\n- Integration combinations that need more coverage\n- Business automation angles to explore\n\n### 4. VIRAL HEADLINES (Generate 12):\nCreate 12 compelling headlines for n8n automation content:\n1. [Headline with automation focus]\n2. [Headline with business benefits]\n...\n12. [Headline with practical outcome]\n\n### 5. WORKFLOW TOPIC RECOMMENDATIONS (Generate 15):\nSuggest specific n8n workflows to create content about:\n1. **Workflow**: [Specific automation] | **Why it works**: [Data reason] | **Keywords**: [SEO terms]\n2. **Workflow**: [Specific automation] | **Why it works**: [Data reason] | **Keywords**: [SEO terms]\n...\n15. **Workflow**: [Specific automation] | **Why it works**: [Data reason] | **Keywords**: [SEO terms]\n\n### 6. TOP PERFORMING CREATORS:\n- Which channels are winning and why\n- What can we learn from their approach\n\n### 7. ACTIONABLE NEXT STEPS:\n- Immediate content ideas to implement\n- Search terms to target\n- Content calendar suggestions\n\nFocus on practical, implementable insights that will help create viral n8n automation content.",
+        "options": {
+          "systemMessage": "You are an expert n8n automation content strategist with deep knowledge of:\n- N8N workflow patterns and capabilities\n- YouTube algorithm optimization\n- Business automation use cases\n- Content marketing for technical audiences\n- Automation tool comparisons\n- No-code/low-code trends\n\nYour analysis should be:\n- Data-driven and specific\n- Actionable and implementable\n- Focused on ROI and performance\n- Tailored to n8n automation creators\n- Current with automation trends"
+        }
+      }
+    },
+    {
+      "id": "parse-ai-results",
+      "name": "Parse & Structure AI Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Parse and structure AI analysis results for Google Sheets\nconst aiResponse = $input.first().json.output;\nconst videosData = $('Collect Videos for Batch Processing').first().json.videos;\nconst batchId = $('Collect Videos for Batch Processing').first().json.batch_id;\n\ntry {\n  // Extract headlines from AI response\n  const headlineMatches = aiResponse.match(/### 4\\. VIRAL HEADLINES[\\s\\S]*?(?=###|$)/i) || \n                         aiResponse.match(/VIRAL HEADLINES[\\s\\S]*?(?=###|$)/i);\n  const headlines = [];\n  if (headlineMatches) {\n    const headlineSection = headlineMatches[0];\n    const headlinePattern = /\\d+\\. (.+)/g;\n    let match;\n    while ((match = headlinePattern.exec(headlineSection)) !== null) {\n      headlines.push({\n        headline: match[1].trim(),\n        created_at: new Date().toISOString(),\n        batch_id: batchId\n      });\n    }\n  }\n\n  // Extract workflow recommendations\n  const workflowMatches = aiResponse.match(/### 5\\. WORKFLOW TOPIC RECOMMENDATIONS[\\s\\S]*?(?=###|$)/i) ||\n                         aiResponse.match(/WORKFLOW TOPIC RECOMMENDATIONS[\\s\\S]*?(?=###|$)/i);\n  const workflows = [];\n  if (workflowMatches) {\n    const workflowSection = workflowMatches[0];\n    const workflowPattern = /\\d+\\. \\*\\*Workflow\\*\\*: (.+?) \\| \\*\\*Why it works\\*\\*: (.+?) \\| \\*\\*Keywords\\*\\*: (.+)/g;\n    let match;\n    while ((match = workflowPattern.exec(workflowSection)) !== null) {\n      workflows.push({\n        workflow: match[1].trim(),\n        reasoning: match[2].trim(),\n        keywords: match[3].trim(),\n        created_at: new Date().toISOString(),\n        batch_id: batchId\n      });\n    }\n  }\n\n  // Prepare structured data for Google Sheets\n  const sheets_data = {\n    // Raw video data for main videos sheet\n    videos: videosData.map(video => ({\n      'Video ID': video.video_id,\n      'Title': video.title,\n      'Channel': video.channel_title,\n      'View Count': video.view_count,\n      'Like Count': video.like_count,\n      'Comment Count': video.comment_count,\n      'Engagement Rate': video.engagement_rate,\n      'Duration': video.duration,\n      'Video URL': video.video_url,\n      'Channel URL': video.channel_url,\n      'Search Query': video.search_query,\n      'Relevance Score': video.relevance_score,\n      'Scraped At': video.scraped_at,\n      'Batch ID': batchId,\n      'Processing Status': 'analyzed'\n    })),\n    \n    // AI-generated headlines\n    headlines: headlines.map(h => ({\n      'Headline': h.headline,\n      'Created At': h.created_at,\n      'Batch ID': h.batch_id,\n      'Category': 'n8n_automation'\n    })),\n    \n    // AI-generated workflow topics\n    workflows: workflows.map(w => ({\n      'Workflow': w.workflow,\n      'Reasoning': w.reasoning,\n      'Keywords': w.keywords,\n      'Created At': w.created_at,\n      'Batch ID': w.batch_id,\n      'Category': 'content_idea'\n    })),\n    \n    // Summary analysis\n    summary: [{\n      'AI Analysis': aiResponse,\n      'Videos Processed': videosData.length,\n      'Headlines Generated': headlines.length,\n      'Workflows Generated': workflows.length,\n      'Analysis Date': new Date().toISOString(),\n      'Batch ID': batchId,\n      'Status': 'completed'\n    }]\n  };\n\n  console.log(`✅ Parsed AI results: ${headlines.length} headlines, ${workflows.length} workflows`);\n  \n  return {\n    ai_analysis_complete: aiResponse,\n    sheets_data: sheets_data,\n    batch_id: batchId,\n    parsing_successful: true,\n    ready_for_sheets: true\n  };\n  \n} catch (error) {\n  console.error('Error parsing AI response:', error);\n  return {\n    ai_analysis_complete: aiResponse,\n    error: 'Parsing failed',\n    error_details: error.message,\n    batch_id: batchId,\n    parsing_successful: false\n  };\n}"
+      }
+    },
+    {
+      "id": "workflow-completion",
+      "name": "Workflow Completion Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2800,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Final workflow completion summary\nconst parsedResults = $('Parse & Structure AI Results').first().json;\nconst batchId = parsedResults.batch_id;\nconst sheetsData = parsedResults.sheets_data;\n\nconst summary = {\n  workflow_status: 'completed',\n  batch_id: batchId,\n  execution_time: new Date().toISOString(),\n  \n  // Data processing results\n  videos_processed: sheetsData?.videos?.length || 0,\n  headlines_generated: sheetsData?.headlines?.length || 0,\n  workflows_generated: sheetsData?.workflows?.length || 0,\n  \n  // Next scheduled run\n  next_run: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),\n  \n  // Operation summary\n  operations_completed: [\n    'YouTube data collection',\n    'Video quality filtering',\n    'AI content analysis',\n    'Results parsing',\n    'Data preparation for Google Sheets'\n  ],\n  \n  // Ready for manual Google Sheets upload\n  ready_for_sheets_upload: true,\n  sheets_data_available: !!sheetsData\n};\n\n// Console logging for monitoring\nconsole.log('🎉 N8N YouTube Scraper Workflow Completed Successfully!');\nconsole.log(`📊 Batch ID: ${batchId}`);\nconsole.log(`🎥 Videos Processed: ${summary.videos_processed}`);\nconsole.log(`💡 Headlines Generated: ${summary.headlines_generated}`);\nconsole.log(`⚙️ Workflows Generated: ${summary.workflows_generated}`);\nconsole.log(`🔄 Next Run: ${summary.next_run}`);\nconsole.log('📝 Data ready for Google Sheets upload!');\n\nreturn summary;"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Every 4 Hours": {
+      "main": [
+        [
+          {
+            "node": "Set Search Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Search Parameters": {
+      "main": [
+        [
+          {
+            "node": "Split Search Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Search Queries": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit & Prepare Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit & Prepare Search": {
+      "main": [
+        [
+          {
+            "node": "Search YouTube Videos (with Retry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search YouTube Videos (with Retry)": {
+      "main": [
+        [
+          {
+            "node": "Split Video Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Video Results": {
+      "main": [
+        [
+          {
+            "node": "Get Video Details (with Retry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Details (with Retry)": {
+      "main": [
+        [
+          {
+            "node": "Enhanced Video Data Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enhanced Video Data Processing": {
+      "main": [
+        [
+          {
+            "node": "Filter Quality Videos (50+ Views, No Errors)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Quality Videos (50+ Views, No Errors)": {
+      "main": [
+        [
+          {
+            "node": "Collect Videos for Batch Processing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Collect Videos for Batch Processing": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Analysis Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Analysis Data": {
+      "main": [
+        [
+          {
+            "node": "AI Content Strategy Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Content Strategy Analyst": {
+      "main": [
+        [
+          {
+            "node": "Parse & Structure AI Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Structure AI Results": {
+      "main": [
+        [
+          {
+            "node": "Workflow Completion Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

@@ -1,0 +1,438 @@
+{
+  "id": "XkykmTCRK2sFsC8L",
+  "name": "RealEstate CRM update",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b20413e5-7d25-42d2-a24d-940bbcf4b00f",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const lastContact = item.json[\"Last Contact\"];\n  let newDate;\n\n  if (lastContact) {\n    const original = new Date(lastContact);\n    original.setDate(original.getDate() + 1);\n    newDate = original.toISOString(); // Full ISO string\n  } else {\n    const today = new Date();\n    today.setDate(today.getDate() + 1);\n    newDate = today.toISOString().split(\"T\")[0];\n  }\n\n  return {\n    json: {\n      id: item.json.id, // assuming you include record ID in the initial fetch\n      \"Last Contact\": newDate\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "35e75db1-7d85-466c-8506-164995d03840",
+      "name": "Add one day"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appuOrpuSwH8YMhfc",
+          "mode": "list",
+          "cachedResultName": "Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblipCC5LQ3y1vmyT",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc/tblipCC5LQ3y1vmyT"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "a7f013b2-1c23-4423-9b08-8d29f8e92518",
+      "name": "get all leads",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "qFi8DBtz5BeYVJnS",
+          "name": "CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appuOrpuSwH8YMhfc",
+          "mode": "list",
+          "cachedResultName": "Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblipCC5LQ3y1vmyT",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc/tblipCC5LQ3y1vmyT"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Last Contact": "={{ $json['Last Contact'] }}",
+            "Notes": "=This is a new date  {{ $json['Last Contact'] }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Stage",
+              "displayName": "Stage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Prospect",
+                  "value": "Prospect"
+                },
+                {
+                  "name": "Lead",
+                  "value": "Lead"
+                },
+                {
+                  "name": "Client",
+                  "value": "Client"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Agent",
+              "displayName": "Agent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property",
+              "displayName": "Property",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "4x4 Step",
+              "displayName": "4x4 Step",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Step 1",
+                  "value": "Step 1"
+                },
+                {
+                  "name": "Step 2",
+                  "value": "Step 2"
+                },
+                {
+                  "name": "Step 3",
+                  "value": "Step 3"
+                },
+                {
+                  "name": "Step 4",
+                  "value": "Step 4"
+                },
+                {
+                  "name": "Completed",
+                  "value": "Completed"
+                },
+                {
+                  "name": "Paused",
+                  "value": "Paused"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Referred Name",
+              "displayName": "Referred Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contact",
+              "displayName": "Last Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Advance Step Button",
+              "displayName": "Advance Step Button",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "agent name (from Agent)",
+              "displayName": "agent name (from Agent)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        0
+      ],
+      "id": "ba12ce11-53a5-4ca9-8afb-2483361c85b7",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "qFi8DBtz5BeYVJnS",
+          "name": "CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "choice-outreach",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        340
+      ],
+      "id": "6ff35f5f-8b1b-4b2b-8248-d893560bb80b",
+      "name": "Webhook",
+      "webhookId": "821fcdd6-4db6-4bf3-a5c9-13350d677101"
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appuOrpuSwH8YMhfc",
+          "mode": "list",
+          "cachedResultName": "Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblipCC5LQ3y1vmyT",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appuOrpuSwH8YMhfc/tblipCC5LQ3y1vmyT"
+        },
+        "id": "={{ $json.query.recordId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        500,
+        340
+      ],
+      "id": "94c3cf43-5899-434c-abce-d66be5a047e9",
+      "name": "Airtable1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "qFi8DBtz5BeYVJnS",
+          "name": "CleverAssets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Your new home at {{ $json['Property Name (from Properties)'][0] }}",
+        "message": "=Hi {{ $json['Full Name'] }}\n\nWe're excited that you're looking at {{ $json['Property Name (from Properties)'][0] }} and have many other properties that you could consider.\n\nLook our for our next message that will give you more insight.\n\n</br>\n</br>\nPS - here's an overview of our last chat:\n---\n{{ $json.Notes }}\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        820,
+        340
+      ],
+      "id": "451d1d22-821b-42fe-af23-cc4277e8be50",
+      "name": "Gmail",
+      "webhookId": "81b6b15a-9e1b-4bc0-8780-9e8739d3a9b1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UHT3DR6OjiDawuYi",
+          "name": "CleverAssets Gmail"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "get all leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get all leads": {
+      "main": [
+        [
+          {
+            "node": "Add one day",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add one day": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Airtable1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

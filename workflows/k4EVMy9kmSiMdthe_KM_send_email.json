@@ -1,0 +1,197 @@
+{
+  "id": "k4EVMy9kmSiMdthe",
+  "name": "KM_send_email",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c805ee9c-4668-438a-b2c5-0166efc1f5e3",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        660,
+        360
+      ],
+      "notes": "{\n    \"query\": [\n        \"sendTo=={{ $json.message.content.toList }}\",\n        \"subject=={{ $json.message.content.subject }}\",\n        \"emailType=text\",\n        \"message=={{ $json.message.content.body }}\",\n        \"appendAttribution=False\",\n        \"bccList=={{ $json.message.content.bccList }}\",\n        \"ccList=={{ $json.message.content.ccList }}\",\n        \"senderName=Knysna Montessori\"\n    ]\n}\n"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2833b256-d38c-4f93-a368-e70c7ff3477d",
+              "name": "response",
+              "value": "Sent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a036d301-9d0a-4ae0-bd8c-0052b36f14a4",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Source\nCreated this from Devin Kearns great guide. \n\nFrom about 5:30 until 17:00 in [(1755) n8n AI Agent Tutorial | Step by Step Guide to Building Your First AI Agent | Low code - YouTube](https://www.youtube.com/watch?v=dq9CtjloFAs&t=277s)",
+        "height": 176,
+        "width": 355
+      },
+      "id": "4f52448d-db4d-4ba5-8c3d-f16d71daa8be",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        740,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "content": "set sample data"
+      },
+      "id": "73a1a763-d4e5-47cd-9f1f-2084780fe9fd",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "capoyeti@gmail.com",
+        "subject": "Output from query",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {
+          "senderName": ""
+        }
+      },
+      "id": "baa8127b-0785-471a-a09e-5479d37e268e",
+      "name": "Gmail1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1240,
+        360
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QF7l9tuBbTaWOH86",
+          "name": "gmail api (n8n and related project)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Parse the 'query' and output the parameters separately",
+              "role": "system"
+            },
+            {
+              "content": "={{ JSON.stringify($json.query) }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "5fc5346d-09dc-4541-bb08-cb8c3b6f68ee",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        880,
+        360
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-09T16:01:57.106Z",
+      "createdAt": "2024-10-09T16:01:57.106Z",
+      "id": "SNa1Vw3aUYYz8QRe",
+      "name": "working"
+    },
+    {
+      "updatedAt": "2024-10-09T16:43:18.976Z",
+      "createdAt": "2024-10-09T16:43:18.976Z",
+      "id": "f7EmhD96a1FaZ3H9",
+      "name": "knysna-montessori"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "query": "sendTo='=', subject='=', message='=', bccList='=', ccList='=', senderName='='"
+        }
+      }
+    ]
+  }
+}

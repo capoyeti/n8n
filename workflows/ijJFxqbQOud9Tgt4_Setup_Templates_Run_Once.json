@@ -1,0 +1,156 @@
+{
+  "id": "ijJFxqbQOud9Tgt4",
+  "name": "Setup Templates (Run Once)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Run Once",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Message templates for the Clever Connections loyalty campaign\n// These can be customized by Dom later\n\nreturn [\n  {\n    json: {\n      step: 1,\n      name: \"Initial Outreach\",\n      message: \"Hi {{first_name}} 👋\\n\\nI'm reaching out from Clever Connections - we help businesses like {{business_name}} build stronger customer loyalty programs.\\n\\nI'd love to share how we can help you retain more customers and increase repeat business.\\n\\nWould you be open to a quick chat?\\n\\nReply YES to learn more, or STOP if you'd prefer not to hear from us.\",\n      days_after_previous: 0,\n      is_active: \"TRUE\"\n    }\n  },\n  {\n    json: {\n      step: 2,\n      name: \"Follow-up 1\",\n      message: \"Hi {{first_name}},\\n\\nJust following up on my earlier message about loyalty programs for {{business_name}}.\\n\\nMany businesses in {{city}} are seeing 20-30% more repeat customers with the right loyalty system.\\n\\nWould you like to hear how it works?\\n\\nReply YES or let me know if you have any questions!\",\n      days_after_previous: 3,\n      is_active: \"TRUE\"\n    }\n  },\n  {\n    json: {\n      step: 3,\n      name: \"Follow-up 2 (Final)\",\n      message: \"Hi {{first_name}},\\n\\nThis is my last follow-up - I don't want to bother you if it's not the right time.\\n\\nIf you're ever interested in exploring loyalty solutions for {{business_name}}, feel free to reach out.\\n\\nWishing you all the best! 🙏\",\n      days_after_previous: 5,\n      is_active: \"TRUE\"\n    }\n  }\n];"
+      },
+      "id": "template-data",
+      "name": "Template Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 621366410,
+          "mode": "list",
+          "cachedResultName": "Templates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18HZr_V9LE8R2klHee00K3T96GfvfQcI8puOZHY2SWUg/edit#gid=621366410"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "step": "={{ $json.step }}",
+            "name": "={{ $json.name }}",
+            "message": "={{ $json.message }}",
+            "days_after_previous": "={{ $json.days_after_previous }}",
+            "is_active": "={{ $json.is_active }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "step",
+              "displayName": "step",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "days_after_previous",
+              "displayName": "days_after_previous",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_active",
+              "displayName": "is_active",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "add-templates",
+      "name": "Add to Templates Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run Once": {
+      "main": [
+        [
+          {
+            "node": "Template Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Template Data": {
+      "main": [
+        [
+          {
+            "node": "Add to Templates Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

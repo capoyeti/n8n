@@ -1,0 +1,76 @@
+{
+  "id": "f5ORYUSJkRdUAq20",
+  "name": "Xero_Invoice_extract",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "596f2f8d-4977-4ad1-b977-4ed992e21b0a",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        920,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "organizationId": "125688a5-405a-49f8-a07b-a892c2af176d",
+        "returnAll": "={{ false }}",
+        "limit": 10,
+        "options": {}
+      },
+      "id": "ecbb087e-b02c-4d9b-9983-0fd1a107e8a6",
+      "name": "Xero",
+      "type": "n8n-nodes-base.xero",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        520
+      ],
+      "credentials": {
+        "xeroOAuth2Api": {
+          "id": "Jfv4Ro07odRT3TeH",
+          "name": "Visible_projects"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Xero",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-10-27T04:16:47.618Z",
+      "createdAt": "2024-10-27T04:16:47.618Z",
+      "id": "KgiQ0epXGHTlNDvl",
+      "name": "xero"
+    },
+    {
+      "updatedAt": "2024-10-27T13:16:02.348Z",
+      "createdAt": "2024-10-27T04:17:08.147Z",
+      "id": "O2vPKnW7BVbKHqM4",
+      "name": "accounting"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

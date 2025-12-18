@@ -1,0 +1,104 @@
+{
+  "id": "Eb4pDONVoJURRzlv",
+  "name": "HubSpot Integration",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## To Do \n1. Create a form to capture name and email from VPC website\n2. Send details to Hubspot to create new subscriber\n3. Have a newsletter set up that will send newsletters to people\n",
+        "height": 218,
+        "width": 335
+      },
+      "id": "bb01a7dd-04fe-4e7f-b575-f04d76d09e2c",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        220,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "operation": "get",
+        "contactId": {
+          "__rl": true,
+          "value": 118934922276,
+          "mode": "list",
+          "cachedResultName": "extra0@example.co.za"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [
+        360,
+        -60
+      ],
+      "id": "98dcae46-4274-4933-9ce3-baf88c68aa47",
+      "name": "HubSpot",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "3Am0VVCmQKDerBpJ",
+          "name": "CleverAssets n8n App"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "eventsUi": {
+          "eventValues": [
+            {},
+            {}
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspotTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        120
+      ],
+      "id": "1830c1c6-f196-40b1-bfb6-fb6c14f06e90",
+      "name": "HubSpot Trigger",
+      "webhookId": "b7dd82f9-010d-4368-a8de-003dac9e1c01",
+      "credentials": {
+        "hubspotDeveloperApi": {
+          "id": "xzJ75KWtZL0kgZkC",
+          "name": "CleverAssets n8n internal app"
+        }
+      }
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2024-09-22T09:22:10.301Z",
+      "createdAt": "2024-09-22T09:22:10.301Z",
+      "id": "SavswhRoanPg9GEn",
+      "name": "hubspot"
+    },
+    {
+      "updatedAt": "2024-09-22T09:22:06.260Z",
+      "createdAt": "2024-09-22T09:22:06.260Z",
+      "id": "pH5gPyJAqv8IwfPP",
+      "name": "vpc"
+    },
+    {
+      "updatedAt": "2024-09-22T09:22:16.227Z",
+      "createdAt": "2024-09-22T09:22:16.227Z",
+      "id": "zCNXykr6R58WQcpy",
+      "name": "webhook"
+    }
+  ],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

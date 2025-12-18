@@ -1,0 +1,115 @@
+{
+  "id": "5Bsn95vPGdQWY2ii",
+  "name": "🔄 Sync: Export Workflow to GitHub",
+  "active": false,
+  "nodes": [
+    {
+      "id": "trigger-1",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "export-to-github",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "code-1",
+      "name": "Prepare Workflow JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Extract workflow from request body\nconst workflow = $input.first().json.body;\n\n// Strip sensitive data\nconst sanitized = {\n  name: workflow.name,\n  nodes: workflow.nodes?.map(node => {\n    const { credentials, ...rest } = node;\n    return rest;\n  }) || [],\n  connections: workflow.connections || {},\n  settings: workflow.settings || {},\n  // Add metadata\n  _metadata: {\n    exportedAt: new Date().toISOString(),\n    exportedFrom: 'n8n-self-hosted',\n    originalId: workflow.id\n  }\n};\n\n// Generate filename from workflow name\nconst filename = workflow.name\n  .toLowerCase()\n  .replace(/[^a-z0-9]+/g, '-')\n  .replace(/^-|-$/g, '') + '.json';\n\nreturn {\n  json: {\n    filename,\n    content: JSON.stringify(sanitized, null, 2),\n    workflowName: workflow.name,\n    message: `Export workflow: ${workflow.name}`\n  }\n};"
+      }
+    },
+    {
+      "id": "github-1",
+      "name": "Commit to GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "create",
+        "owner": "={{ $env.GITHUB_OWNER || 'your-username' }}",
+        "repository": "={{ $env.GITHUB_REPO || 'n8n-templates' }}",
+        "filePath": "=workflows/{{ $json.filename }}",
+        "fileContent": "={{ $json.content }}",
+        "commitMessage": "={{ $json.message }}",
+        "additionalParameters": {}
+      }
+    },
+    {
+      "id": "respond-1",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Workflow exported to GitHub\",\n  \"filename\": \"{{ $('Prepare Workflow JSON').item.json.filename }}\",\n  \"workflow\": \"{{ $('Prepare Workflow JSON').item.json.workflowName }}\"\n}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Workflow JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Workflow JSON": {
+      "main": [
+        [
+          {
+            "node": "Commit to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Commit to GitHub": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

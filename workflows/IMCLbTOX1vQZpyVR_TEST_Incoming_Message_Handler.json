@@ -1,0 +1,467 @@
+{
+  "id": "IMCLbTOX1vQZpyVR",
+  "name": "[TEST] Incoming Message Handler",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-incoming-test",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "WhatsApp Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        256,
+        304
+      ],
+      "webhookId": "whatsapp-incoming-test"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract data from Evolution API webhook payload\nconst input = $input.first().json;\nconst payload = input.body || input; // Handle both wrapped and unwrapped\n\nlet messageText = '';\nlet senderPhone = '';\nlet messageId = '';\nlet timestamp = '';\nlet isFromMe = false;\n\nif (payload.event === 'messages.upsert' && payload.data) {\n  const data = payload.data;\n  const key = data.key || {};\n  const message = data.message || {};\n  \n  const remoteJid = key.remoteJid || '';\n  senderPhone = remoteJid.replace('@s.whatsapp.net', '').replace('@g.us', '');\n  isFromMe = key.fromMe || false;\n  messageId = key.id || '';\n  timestamp = data.messageTimestamp ? new Date(data.messageTimestamp * 1000).toISOString() : new Date().toISOString();\n  \n  if (message.conversation) {\n    messageText = message.conversation;\n  } else if (message.extendedTextMessage?.text) {\n    messageText = message.extendedTextMessage.text;\n  } else if (message.imageMessage?.caption) {\n    messageText = '[Image] ' + (message.imageMessage.caption || '');\n  } else if (message.videoMessage?.caption) {\n    messageText = '[Video] ' + (message.videoMessage.caption || '');\n  } else if (message.documentMessage?.caption) {\n    messageText = '[Document] ' + (message.documentMessage.caption || '');\n  } else if (message.audioMessage) {\n    messageText = '[Audio Message]';\n  } else {\n    messageText = '[Unknown message type]';\n  }\n}\n\nif (isFromMe || !senderPhone || !messageText) {\n  return [];\n}\n\nreturn [{\n  json: {\n    phone: senderPhone,\n    message: messageText,\n    message_id: messageId,\n    timestamp: timestamp,\n    raw_event: payload.event\n  }\n}];"
+      },
+      "id": "extract_data",
+      "name": "Extract Message Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "16Ys4nkLyfJapuy_hS-mzOZP5Srw65NqnmJ6UzCD9bk0"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "leads"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "phone_normalized",
+              "lookupValue": "={{ $json.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "lookup_lead",
+      "name": "Find Lead by Phone",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        656,
+        304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "condition1",
+              "leftValue": "={{ $json.email }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "check_lead_found",
+      "name": "Lead Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        864,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const extractData = $('Extract Message Data').first().json;\nconst leadData = $input.first().json;\nconst message = extractData.message.toLowerCase();\n\nconst notInterestedKeywords = ['stop', 'no', 'not interested', 'unsubscribe', 'remove', 'dont contact', \"don't contact\", 'leave me alone', 'no thanks', 'no thank you'];\nconst interestedKeywords = ['yes', 'interested', 'tell me more', 'please contact', 'call me', 'more info', 'sounds good', 'sign me up', 'i want', \"i'd like\", 'im interested', \"i'm interested\"];\nconst confusedKeywords = ['?', 'what', 'who is this', 'wrong number', 'who are you', 'what is this', 'huh', 'confused'];\n\nlet sentiment = 'neutral';\nlet newStatus = leadData.campaign_status || 'sent';\nlet needsHuman = leadData.needs_human === 'TRUE';\n\nfor (const keyword of notInterestedKeywords) {\n  if (message.includes(keyword)) {\n    sentiment = 'not_interested';\n    newStatus = 'not_interested';\n    break;\n  }\n}\n\nif (sentiment === 'neutral') {\n  for (const keyword of interestedKeywords) {\n    if (message.includes(keyword)) {\n      sentiment = 'interested';\n      newStatus = 'interested';\n      needsHuman = true;\n      break;\n    }\n  }\n}\n\nif (sentiment === 'neutral') {\n  for (const keyword of confusedKeywords) {\n    if (message.includes(keyword)) {\n      sentiment = 'confused';\n      needsHuman = true;\n      break;\n    }\n  }\n}\n\nreturn [{\n  json: {\n    phone: extractData.phone,\n    message: extractData.message,\n    message_id: extractData.message_id,\n    timestamp: extractData.timestamp,\n    lead_id: leadData.id,\n    lead_email: leadData.email,\n    first_name: leadData.first_name,\n    last_name: leadData.last_name,\n    business_name: leadData.business_name,\n    sentiment: sentiment,\n    new_status: newStatus,\n    needs_human: needsHuman ? 'TRUE' : 'FALSE',\n    should_alert_dom: sentiment === 'interested' || sentiment === 'confused'\n  }\n}];"
+      },
+      "id": "analyze_sentiment",
+      "name": "Analyze Sentiment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "16Ys4nkLyfJapuy_hS-mzOZP5Srw65NqnmJ6UzCD9bk0",
+          "mode": "list",
+          "cachedResultName": "Clever Connections - Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Ys4nkLyfJapuy_hS-mzOZP5Srw65NqnmJ6UzCD9bk0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.message_id }}",
+            "lead_id": "={{ $json.lead_id }}",
+            "phone": "={{ $json.phone }}",
+            "direction": "inbound",
+            "content": "={{ $json.message }}",
+            "sentiment": "={{ $json.sentiment }}",
+            "is_automated": "FALSE",
+            "timestamp": "={{ $json.timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "direction",
+              "displayName": "direction",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_automated",
+              "displayName": "is_automated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sent_by",
+              "displayName": "sent_by",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "log_message",
+      "name": "Log to Messages Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1264,
+        208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "16Ys4nkLyfJapuy_hS-mzOZP5Srw65NqnmJ6UzCD9bk0"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "campaign_status": "={{ $json.new_status }}",
+            "last_response": "={{ $json.timestamp }}",
+            "needs_human": "={{ $json.needs_human }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "update_lead",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1456,
+        208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EMycuXif3kCAGGin",
+          "name": "Clever Assets Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "alert_condition",
+              "leftValue": "={{ $json.should_alert_dom }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "check_alert",
+      "name": "Alert Admin?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://159.223.23.22:8080/message/sendText/n8n-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "EVO_ae4f6e1250e3330e5e6bca56532bfa2a"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"27767186271\",\n  \"text\": \"[TEST] {{ $json.sentiment === 'interested' ? 'INTERESTED' : 'NEEDS ATTENTION' }} lead!\\n\\n{{ $json.first_name }} {{ $json.last_name }}\\n{{ $json.business_name }}\\n{{ $json.phone }}\\n\\nTheir message:\\n{{ $json.message }}\"\n}",
+        "options": {}
+      },
+      "id": "send_dom_alert",
+      "name": "Alert Admin via WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1856,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const extractData = $('Extract Message Data').first().json;\n\nconsole.log('[TEST] Message from unknown sender:', extractData.phone);\nconsole.log('Message:', extractData.message);\n\nreturn [{\n  json: {\n    status: 'unknown_sender',\n    phone: extractData.phone,\n    message: extractData.message,\n    note: 'Sender not found in TEST leads database'\n  }\n}];"
+      },
+      "id": "unknown_sender",
+      "name": "Log Unknown Sender",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "WhatsApp Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Message Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Message Data": {
+      "main": [
+        [
+          {
+            "node": "Find Lead by Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Lead by Phone": {
+      "main": [
+        [
+          {
+            "node": "Lead Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Found?": {
+      "main": [
+        [
+          {
+            "node": "Analyze Sentiment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Unknown Sender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Sentiment": {
+      "main": [
+        [
+          {
+            "node": "Log to Messages Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Messages Sheet": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Alert Admin?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Admin?": {
+      "main": [
+        [
+          {
+            "node": "Alert Admin via WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {}
+}

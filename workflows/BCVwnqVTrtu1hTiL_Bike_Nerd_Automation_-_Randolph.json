@@ -1,0 +1,754 @@
+{
+  "id": "BCVwnqVTrtu1hTiL",
+  "name": "Bike Nerd Automation - Randolph",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Bikes Info",
+        "formDescription": "Bike, Cost, Repairs, Spent, Sale Price, Wheel Size, New",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Bike",
+              "placeholder": "\"Malvern Star Oppy 1\" - Bike Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Cost",
+              "fieldType": "number",
+              "placeholder": "\"200\"",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Repairs",
+              "placeholder": "\"Spoke, Frame Protector\" - Repair Parts ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Spent",
+              "fieldType": "number",
+              "placeholder": "\"2.5\" - Cost of repair part like spoke, frame protector"
+            },
+            {
+              "fieldLabel": "Sale Price",
+              "fieldType": "number",
+              "placeholder": "\"270\" Price Bike sold for"
+            },
+            {
+              "fieldLabel": "Wheel Size",
+              "fieldType": "number",
+              "placeholder": "\"24\" \"26\" \"27.5\" \"29\" - Number only. "
+            },
+            {
+              "fieldLabel": "New",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "New"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Sold",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Sold"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -528,
+        -160
+      ],
+      "id": "5f83ff87-0d2e-4d3c-8fe8-2a2952cd5171",
+      "name": "Bike Info",
+      "webhookId": "212713e1-2325-4a4c-8503-969adbf8b79d",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c",
+          "mode": "list",
+          "cachedResultName": "Bikes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "BikesInfo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Bike": "={{ $json.Bike }}",
+            "Cost": "={{ $json.Cost }}",
+            "Repairs": "={{ $json.Repairs }}",
+            "Spent": "={{ $json.Spent }}",
+            "Sale Price": "={{ $json['Sale Price'] }}",
+            "Wheel Size": "={{ $json['Wheel Size'] }}",
+            "New ": "={{ $json.New }}",
+            "Sold": "={{ $json.Sold }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Bike",
+              "displayName": "Bike",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cost",
+              "displayName": "Cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Repairs",
+              "displayName": "Repairs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Spent",
+              "displayName": "Spent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sale Price",
+              "displayName": "Sale Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Profit",
+              "displayName": "Profit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Wheel Size",
+              "displayName": "Wheel Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "New ",
+              "displayName": "New ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sold",
+              "displayName": "Sold",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -304,
+        -160
+      ],
+      "id": "d044f73d-fdcc-4623-b2be-69fb763c67f9",
+      "name": "Update Bikes data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oF2sYdkDKoO6BQLD",
+          "name": "Bikes Sheets"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are a helpful assistantYou are a data extraction assistant for bicycle trading.\n\nFrom the user's message, extract the following information and output a JSON object with these keys:\n- Bike: (Name of the bike only, e.g., \"Trek Marlin 5\")\n- Wheel Size: (In inches, e.g., 29)\n- Cost: (Purchase price in dollars)\n- Repairs: (Items used for repairs, e.g., \"Spokes, frame protectors\")\n- Spent: (Total spent on repairs, in dollars)\n- Sale Price: (Amount bike sold for, in dollars)\n- Profit: (Sale Price - Cost - Spent)\n- Sold: (True or False, based on if bike was sold)\n\nRespond ONLY in valid JSON format.\nExample:\n{\n  \"Bike\": \"Trek Marlin 5\",\n  \"Wheel Size\": \"29\",\n  \"Cost\": \"400\",\n  \"Repairs\": \"Spokes, frame protectors\",\n  \"Spent\": \"50\",\n  \"Sale Price\": \"550\",\n  \"Profit\": \"100\",\n  \"New\": \"False\",\n  \"Sold\": \"True\"\n}\n\nIf some fields are not mentioned, leave them blank or null instead of guessing."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -176,
+        176
+      ],
+      "id": "a52656be-2830-47a8-9c0e-17fd747af311",
+      "name": "Bike Nerd"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        400
+      ],
+      "id": "356fe159-0a52-42a7-9015-d2940c2f83f1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Yrjkyq4p5Tu0repT",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        400
+      ],
+      "id": "94a8c08b-eb6b-4a86-b725-e9c75ffa72cf",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c",
+          "mode": "list",
+          "cachedResultName": "Bikes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "BikesInfo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Bike",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', `Bike name only`, 'string') }}"
+            },
+            {
+              "lookupColumn": "Wheel Size",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values1_Value', `Wheel Size in inches`, 'string') }}"
+            },
+            {
+              "lookupColumn": "Cost",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values2_Value', `Purchase Cost of Bike`, 'string') }}"
+            },
+            {
+              "lookupColumn": "Repairs",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values3_Value', `Spare parts used to repair`, 'string') }}"
+            },
+            {
+              "lookupColumn": "Spent",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values4_Value', `Cost spent on Spare Parts`, 'string') }}"
+            },
+            {
+              "lookupColumn": "Sale Price",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values5_Value', `Bike Sold For amount`, 'string') }}"
+            },
+            {
+              "lookupColumn": "Sold",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values6_Value', `Is the bike sold, True or false.`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        16,
+        480
+      ],
+      "id": "caf25178-b9a9-4abf-addc-49d4143b264f",
+      "name": "Get Bikes Data Sheet Info",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oF2sYdkDKoO6BQLD",
+          "name": "Bikes Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c",
+          "mode": "list",
+          "cachedResultName": "Bikes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "BikesInfo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Bike": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Bike__using_to_match_', `Name of bike only`, 'string') }}",
+            "Wheel Size": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Wheel_Size', `Size of wheel in inches`, 'string') }}",
+            "Cost": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cost', `Purchase price of bike`, 'string') }}",
+            "Repairs": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Repairs', `Spare items used to repair`, 'string') }}",
+            "Spent": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Spent', `Cost of Repair Item`, 'string') }}",
+            "Sale Price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sale_Price', `Price bike sold for`, 'string') }}",
+            "Profit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Profit', `Profit=Cost-spent-Sale Price`, 'string') }}",
+            "Sold": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sold', `If bike is sold, True.`, 'string') }}"
+          },
+          "matchingColumns": [
+            "Bike"
+          ],
+          "schema": [
+            {
+              "id": "Bike",
+              "displayName": "Bike",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Wheel Size",
+              "displayName": "Wheel Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cost",
+              "displayName": "Cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Repairs",
+              "displayName": "Repairs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Spent",
+              "displayName": "Spent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sale Price",
+              "displayName": "Sale Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Profit",
+              "displayName": "Profit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sold",
+              "displayName": "Sold",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        400
+      ],
+      "id": "997c784f-1b3f-4784-bc1a-a9c6315c8fb7",
+      "name": "Add or change data in bikes info sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oF2sYdkDKoO6BQLD",
+          "name": "Bikes Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c",
+          "mode": "list",
+          "cachedResultName": "Bikes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "BikesInfo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LoTJPjz7L8HiSw3uywNPmS25SCVFJodQ5UUWmrg9c3c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Bike": "\"Merida Big Seven 20\"",
+            "Cost": "\"45\"",
+            "Repairs": "\"4.85\" + \"11.85\"",
+            "Sale Price": "\"270\"",
+            "Sold": "\"True\"",
+            "Profit": "\"104.5\"",
+            "New": "\"False\"",
+            "Spent": "\"2.5\"",
+            "output": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "Bike"
+          ],
+          "schema": [
+            {
+              "id": "Bike",
+              "displayName": "Bike",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Wheel Size",
+              "displayName": "Wheel Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Cost",
+              "displayName": "Cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Repairs",
+              "displayName": "Repairs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Spent",
+              "displayName": "Spent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sale Price",
+              "displayName": "Sale Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Profit",
+              "displayName": "Profit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "New",
+              "displayName": "New",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sold",
+              "displayName": "Sold",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -80,
+        -160
+      ],
+      "id": "11bfc794-9d30-44b8-9cd4-2a234a48c52c",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oF2sYdkDKoO6BQLD",
+          "name": "Bikes Sheets"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -528,
+        176
+      ],
+      "id": "6b8a45f1-1d61-4954-ad79-0500e50a08d6",
+      "name": "Telegram Message Received",
+      "webhookId": "b175c895-a487-492e-b8ff-5f75d8ab8be8",
+      "credentials": {
+        "telegramApi": {
+          "id": "LSPRVxvRuASyqEan",
+          "name": "RAIN8NBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Message Received').item.json.message.chat.id }}",
+        "text": "=Hey! I have completed the task which you requested with the following details ( Added  {{ $json.output }} to Bike Info Sheet.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        176
+      ],
+      "id": "2335a693-40ef-4420-a747-6b9328847e50",
+      "name": "Response to Telegram user",
+      "webhookId": "5453df2d-fc71-4d52-89d2-bab4cabf684a",
+      "credentials": {
+        "telegramApi": {
+          "id": "LSPRVxvRuASyqEan",
+          "name": "RAIN8NBot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Bike Info": {
+      "main": [
+        [
+          {
+            "node": "Update Bikes data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Bikes data": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Bike Nerd",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bike Nerd": {
+      "main": [
+        [
+          {
+            "node": "Response to Telegram user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Bike Nerd",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Bikes Data Sheet Info": {
+      "ai_tool": [
+        [
+          {
+            "node": "Bike Nerd",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add or change data in bikes info sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "Bike Nerd",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Message Received": {
+      "main": [
+        [
+          {
+            "node": "Bike Nerd",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

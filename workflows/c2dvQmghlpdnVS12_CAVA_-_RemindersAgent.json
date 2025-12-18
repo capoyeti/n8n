@@ -1,0 +1,212 @@
+{
+  "id": "c2dvQmghlpdnVS12",
+  "name": "CAVA - RemindersAgent",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When Executed by Another Workflow').first().json.noteDetails }}",
+        "options": {
+          "systemMessage": "=Current date/time: {{ $now }}\n\n## Core Function\nYou manage time-based reminders with precision and reliability.\n\n## Tools available\n- Create new reminders\n- List upcoming reminders\n- Update existing reminders\n- Delete/cancel reminders\n\nMake sure to pass Title, Notes and ScheduledTime to the tool while creating a new reminder. If all the tool calls succeed, tell the user that you successfully performed the given task. If any tool call fails, say you failed to perform the task along with some details.\n\n## Operation Guidelines\n1. **Reminder Creation Requirements**:\n   - Title: Brief description of reminder (required)\n   - Notes: Additional details or context (optional)\n   - ScheduledTime: When to trigger the reminder (required)\n\n2. **Time Handling**:\n   - Accept natural language time references (\"tomorrow at 3pm\")\n   - Convert all times to ISO format for storage\n   - Present times in user-friendly format in responses\n   - Default to user's timezone unless specified\n\n3. **Dynamic Schema Adaptation**:\n   - Work with the Airtable schema as provided\n   - Adapt to available fields without assuming structure\n   - Use only fields that exist in the current schema\n\n4. **Record Deletion**:\n   - To delete an entry, we need to first fetch the records, find the matching record and use that record's id to delete it.\n\n## Response Format\n1. **Action Confirmation**: What was done with the reminder\n2. **Key Details**: Essential information about the reminder\n3. **Timing**: When the reminder will trigger\n4. **Record ID**: Reference ID if available\n\n## Error Handling\n- For timing issues, request clarification\n- For schema mismatches, explain the limitation\n- For invalid inputs, specify what needs correction\n\n## Example Responses\n\"I've created a reminder 'Team meeting preparation' scheduled for May 22nd at 9:00 AM.\"\n\n\"Here are your upcoming reminders: 1) 'Call client' today at 2PM, 2) 'Submit report' tomorrow at 10AM.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        80,
+        360
+      ],
+      "id": "34dfa8f8-a0b1-43d0-b934-9f2dc22fc11d",
+      "name": "Reminders Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://n8n.visagility.co.za/mcp-test/airtable/sse"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        320,
+        680
+      ],
+      "id": "92206270-275d-4e45-83c8-b40e072bf232",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "noteDetails"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -220,
+        360
+      ],
+      "id": "f21766b7-07a4-47b0-b8b0-fc34d55e23c5",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4f360190-a717-4a93-8336-d03ea65975d5",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        580,
+        200
+      ],
+      "id": "1bbfcb9e-d3a7-4d7b-81e9-290d5f67f740",
+      "name": "Response1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4f360190-a717-4a93-8336-d03ea65975d5",
+              "name": "response",
+              "value": "An error occurred. Please try again.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        580,
+        440
+      ],
+      "id": "bb6937e9-65a4-4966-9550-67c320f87d31",
+      "name": "Try Again"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        40,
+        680
+      ],
+      "id": "5177f8a7-4f12-4fe7-8ce4-655f56b77621",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "nqrhFGUWwy6HdEUN",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Reminders Agent",
+        "height": 280,
+        "width": 460,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        260
+      ],
+      "id": "4b4483bc-561b-4038-8470-8dd5ffa8f2ce",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Reminders Agent": {
+      "main": [
+        [
+          {
+            "node": "Response1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Try Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Reminders Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Reminders Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Reminders Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "staticData": null,
+  "meta": {},
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "noteDetails": "Set up a meeting with Alex. Date: Tomorrow. Time: 11 AM. no other details required."
+        }
+      }
+    ]
+  }
+}
